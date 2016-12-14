@@ -176,7 +176,6 @@ public class WorkRemote extends BaseRemote {
 	public ReturnBody getListWork(HttpServletRequest request) {
 		String status = (String) request.getParameter("status");
 		String page = request.getParameter("page")==null?"0":(String)request.getParameter("page");
-		
 		String userId = getCurrentUser(request).getUserId();
 		String date = request.getParameter("date");
 		if (StringUtil.checkParams(status, userId)) {

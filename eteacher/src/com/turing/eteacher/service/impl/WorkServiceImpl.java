@@ -139,6 +139,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	 * 教师相关接口   获取作业列表（已过期、未过期、待发布、指定截止日期）
 	 * @author zjx
 	 *  返回结果： 作业ID，作业所属课程名称[],作业内容，作业发布时间，作业到期时间，作业状态
+	 *  
 	 */
 	@Override
 	public List<Map> getListWork(String userId,String status,String date,int page) {
@@ -166,7 +167,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 				 "and c.userId=? "+
 	             "and w.publishTime<now() and w.endTime>now() "+
 				 "order by w.publishTime desc";
-			list= workDAO.findMapByPage(hql, page*20, 20, userId);	
+			list= workDAO.findMapByPage(hql, page*20, 20, userId);
 		}
 		if("2".equals(status)){//获取待发布作业（草稿和待发布）
 			hql+="w.publishTime as publishTime," +
@@ -192,31 +193,31 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		 * 修改：macong 
 		 * 一个作业可能对应多门课程，一门课程可能包含多个班级信息。对这些信息进行拼接 
 		 */
-//		for(int a = 0; a < list.size(); a++){
-//			//1.课程名称与授课班级的拼接--->软件工程（13软工A班）
-//			String hq = "select cl.className as className from "
-//					+ "Classes cl, CourseClasses cc where "
-//					+ "cc.classId = cl.classId and cc.courseId = ?";
-//			List<Map> cnlist = workDAO.findMap(hq, (String)list.get(a).get("courseId"));
-//			if (null != cnlist && cnlist.size() > 0) {
-//				String courseName = list.get(a).get("courseName")+"(";
-//				for (int j = 0; j < cnlist.size(); j++) {
-//					courseName += cnlist.get(j).get("className") + ",";
-//				}
-//				courseName = courseName.substring(0, courseName.length() - 1);
-//				courseName += ")";
-//				list.get(a).put("courseName", courseName);
-//			}	
-//			//2. 一个作业对应多门课程
-//			Object wid = list.get(a).get("workId");
-//			for(int b = 0; b < list.size(); b++){
-//				if(a != b && wid.equals(list.get(b).get("workId"))){
-//					String ncn = (String) list.get(a).get("courseName")+"||"+(String) list.get(b).get("courseName");
-//					list.remove(b);//去掉重复项
-//					list.get(a).put("courseName", ncn);//覆盖原有的course为拼接后的值
-//				}
-//			}
-//		}
+		for(int a = 0; a < list.size(); a++){
+			//1.课程名称与授课班级的拼接--->软件工程（13软工A班）
+			String hq = "select cl.className as className from "
+					+ "Classes cl, CourseClasses cc where "
+					+ "cc.classId = cl.classId and cc.courseId = ?";
+			List<Map> cnlist = workDAO.findMap(hq, (String)list.get(a).get("courseId"));
+			if (null != cnlist && cnlist.size() > 0) {
+				String courseName = list.get(a).get("courseName")+"(";
+				for (int j = 0; j < cnlist.size(); j++) {
+					courseName += cnlist.get(j).get("className") + ",";
+				}
+				courseName = courseName.substring(0, courseName.length() - 1);
+				courseName += ")";
+				list.get(a).put("courseName", courseName);
+			}	
+			//2. 一个作业对应多门课程
+			Object wid = list.get(a).get("workId");
+			for(int b = 0; b < list.size(); b++){
+				if(a != b && wid.equals(list.get(b).get("workId"))){
+					String ncn = (String) list.get(a).get("courseName")+"||"+(String) list.get(b).get("courseName");
+					list.remove(b);//去掉重复项
+					list.get(a).put("courseName", ncn);//覆盖原有的course为拼接后的值
+				}
+			}
+		}
 		if(null != list && list.size()>0){
 			//判断作业是否存在附件
 			for (int i = 0; i < list.size(); i++) {

@@ -97,7 +97,7 @@ public class TeacherRemote extends BaseRemote {
 	 * @param request
 	 * @return
 	 */
-	@RequestMapping(value = "teacher/activity/getStuList", method = RequestMethod.GET)
+	/*@RequestMapping(value = "teacher/activity/getStuList", method = RequestMethod.GET)
 	public ReturnBody getStuList(HttpServletRequest request) {
 		String status = request.getParameter("status");
 		String courseId = request.getParameter("course_id");
@@ -116,7 +116,7 @@ public class TeacherRemote extends BaseRemote {
 			}
 		}
 		return null;
-	}
+	}*/
 
 	/**
 	 * 获取（教师）用户的个人信息
@@ -128,7 +128,7 @@ public class TeacherRemote extends BaseRemote {
 	public ReturnBody getPersonInfo(HttpServletRequest request) {
 		try {
 			String userId = null;
-			userId = request.getParameter("teacherId") != null?request.getParameter("teacherId"):request.getParameter("userId");
+			userId = request.getParameter("teacherId") != null?request.getParameter("teacherId"):getCurrentUserId(request);
 			Map teacherInfo = teacherServiceImpl.getUserInfo(userId,FileUtil.getUploadPath(),FileUtil.getRequestUrl(request));
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, teacherInfo);
 		} catch (Exception e) {

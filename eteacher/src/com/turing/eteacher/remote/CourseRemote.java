@@ -339,7 +339,8 @@ public class CourseRemote extends BaseRemote {
 	public ReturnBody getCourseList(HttpServletRequest request) {
 		try {
 			String userId = getCurrentUserId(request);
-			String termId = request.getParameter("termId");// 获取前端参数：termId
+//			String termId = request.getParameter("termId");// 获取前端参数：termId
+			String termId = (String) getCurrentTerm(request).get("termId");
 			String date = request.getParameter("date");
 			List<Map> list = courseServiceImpl.getCourseList(termId, date, userId);
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
