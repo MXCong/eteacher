@@ -3,13 +3,18 @@ package com.turing.eteacher.service.impl;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import javax.crypto.spec.IvParameterSpec;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.druid.support.json.JSONParser;
+import com.alibaba.druid.support.json.JSONWriter;
+import com.fasterxml.jackson.core.JsonParser;
+import com.google.gson.JsonObject;
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
-import com.turing.eteacher.dao.CustomFileDAO;
+import com.turing.eteacher.dao.FileDAO;
 import com.turing.eteacher.model.CustomFile;
 import com.turing.eteacher.service.IFileService;
 
@@ -17,7 +22,7 @@ import com.turing.eteacher.service.IFileService;
 public class FileServiceImpl extends BaseService<CustomFile> implements IFileService {
 
 	@Autowired
-	private CustomFileDAO fileDAO;
+	private FileDAO fileDAO;
 	
 	@Override
 	public BaseDAO<CustomFile> getDAO() {
@@ -28,7 +33,7 @@ public class FileServiceImpl extends BaseService<CustomFile> implements IFileSer
 	public List<Map> getFileList(String noteId,String url) {
 		String sql = "SELECT tf.File_ID AS fileId, "+
 					"tf.FILE_NAME AS fileName, "+
-					"CONCAT( ? ,tf.SERVER_NAME) AS serverName, "+ 
+					"CONCAT( ? ,tf.SERVER_NAME) AS filePath, "+ 
 					"tf.`DATA_ID` AS dataId, "+ 
 					"tf.`IS_COURSE_FILE` AS isCourseFile, "+
 					"tf.`VOCABULARY_ID` AS vocabularyId, "+
@@ -52,6 +57,22 @@ public class FileServiceImpl extends BaseService<CustomFile> implements IFileSer
 				fileDAO.delete(list.get(i));
 			}
 		}
+	}
+	
+	@Override
+	public List<Map> getListByCourse(String courseId, int page,String url) {
+		String sql = "SELECT tf.File_ID AS fileId, "+
+				"tf.DATA_ID AS dataId, "+
+				"tf.FILE_NAME AS fileName, "+
+				"CONCAT( ? ,tf.SERVER_NAME) AS filePath, "+ 
+				"tf.VOCABULARY_ID AS vocabularyId "+
+				"FROM t_file tf WHERE tf.IS_COURSE_FILE = 1 "+
+				"AND tf.FILE_AUTH = '01' AND tf.DATA_ID = ? ";
+		List<Map> list = fileDAO.findBySqlAndPage(sql, page*20, 20,url, courseId);
+		if (null != list && list.size()> 0) {
+			return list;
+		}
+		return null;
 	}
 
 }

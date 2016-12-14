@@ -122,10 +122,16 @@ public class WorkRemote extends BaseRemote {
 	public ReturnBody workDetail(HttpServletRequest request) {
 		try {
 			String workId = request.getParameter("workId");
-			System.out.println("    workId:"+workId);
-			Map work = workServiceImpl.getSWorkDetail(workId);
-			System.out.println("---:"+work.toString());
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, work);
+			if (StringUtil.checkParams(workId)) {
+				Map work = workServiceImpl.getSWorkDetail(workId,FileUtil.getRequestUrl(request));
+				if (null != work) {
+					return new ReturnBody(ReturnBody.RESULT_SUCCESS, work);
+				}else{
+					return ReturnBody.getParamError();
+				}
+			}else{
+				return ReturnBody.getParamError();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);

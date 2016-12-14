@@ -118,32 +118,21 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	 * 返回结果：作业所属课程名称[],作业内容，作业发布时间（开始时间），作业到期时间（结束时间）
 	 */
 	@Override
-	public Map getSWorkDetail(String workId) {
-		Map data=null;
+	public Map getSWorkDetail(String workId,String url) {
 		String hql = "select w.workId as workId, c.courseName as courseName, " +
 				"w.publishTime as publishTime, w.endTime as endTime, w.content as content " +
 				"from Work w ,WorkCourse wc,Course c " +
 				"where w.workId = wc.workId and wc.courseId = c.courseId and w.workId = ?";
 		List<Map> list = workDAO.findMap(hql, workId);
 		if(null != list && list.size() > 0){
-			String courseName="";
-			String publishTime="";
-			String endTime="";
-			String content="";
-			data = list.get(0);
-			 for (int i = 0; i <list.size(); i++) {
-				 courseName=(String) list.get(i).get("courseName");
-				 publishTime=(String) list.get(i).get("publishTime");
-				 endTime=(String) list.get(i).get("endTime");
-				 content=(String) list.get(i).get("content");
+			Map detail = list.get(0);
+			List fileList = fileServiceImpl.getFileList(workId, url);
+			if (null != fileList && fileList.size() > 0) {
+				detail.put("files", fileList);
 			}
-			data.put("courseName", courseName);
-			data.put("publishTime", publishTime);
-			data.put("endTime",endTime);
-			data.put("content", content);
+			return detail;
 		}	
-		
-		return data;
+		return null;
 	}
 	
 	/**

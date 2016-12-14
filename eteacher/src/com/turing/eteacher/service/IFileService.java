@@ -21,4 +21,12 @@ public interface IFileService extends IService<CustomFile> {
 	 * @param noteId
 	 */
 	public void deletebyDataId(String noteId,String path);
+	/**
+	 * 通过课程ID获取文件列表
+	 * @author lifei
+	 * @param courseId
+	 * @param page
+	 * @return
+	 */
+	public List<Map> getListByCourse(String courseId, int page,String url);
 }

@@ -6,6 +6,6 @@ import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.model.CustomFile;
 
 @Repository
-public class CustomFileDAO extends BaseDAO<CustomFile> {
+public class FileDAO extends BaseDAO<CustomFile> {
 
 }

@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.CustomFile;
-import com.turing.eteacher.service.ICustomFileService;
 import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.util.FileUtil;
 import com.turing.eteacher.util.StringUtil;
@@ -32,9 +31,6 @@ public class FileRemote extends BaseRemote {
 
 	@Autowired
 	private IFileService fileServiceImpl;
-	
-	@Autowired
-	private ICustomFileService customFileServiceImpl;
 	/**
 	 * 根据数据ID获取文件列表
 	 * 
@@ -78,7 +74,7 @@ public class FileRemote extends BaseRemote {
 		String courseId = request.getParameter("courseId");
 		String page = request.getParameter("page");
 		if (StringUtil.checkParams(courseId, page)) {
-			List list = customFileServiceImpl.getListByCourse(courseId, Integer.parseInt(page),FileUtil.getUploadPath());
+			List list = fileServiceImpl.getListByCourse(courseId, Integer.parseInt(page),FileUtil.getRequestUrl(request));
 			return new ReturnBody(list);
 		}else{
 			return ReturnBody.getParamError();

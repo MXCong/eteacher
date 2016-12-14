@@ -42,7 +42,7 @@ import com.turing.eteacher.service.ICourseClassService;
 import com.turing.eteacher.service.ICourseItemService;
 import com.turing.eteacher.service.ICourseScoreService;
 import com.turing.eteacher.service.ICourseService;
-import com.turing.eteacher.service.ICustomFileService;
+import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.IMajorService;
 import com.turing.eteacher.service.ISignInService;
 import com.turing.eteacher.service.ITextbookService;
@@ -80,7 +80,7 @@ public class CourseRemote extends BaseRemote {
 	private ISignInService singInServiceImpl;
 
 	@Autowired
-	private ICustomFileService customFileServiceImpl;
+	private IFileService fileServiceImpl;
 
 
 	/**
@@ -508,7 +508,7 @@ public class CourseRemote extends BaseRemote {
 								file.setVocabularyId(fileList.get(i).get(
 										"typeId"));
 								file.setServerName(serverName);
-								customFileServiceImpl.save(file);
+								fileServiceImpl.save(file);
 							} catch (IOException e) {
 								e.printStackTrace();
 							}

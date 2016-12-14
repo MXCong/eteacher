@@ -23,7 +23,6 @@ import com.turing.eteacher.model.Student;
 import com.turing.eteacher.model.Teacher;
 import com.turing.eteacher.model.User;
 import com.turing.eteacher.model.VerifyCode;
-import com.turing.eteacher.remote.model.LoginReturn;
 import com.turing.eteacher.service.IAppService;
 import com.turing.eteacher.service.IUserService;
 import com.turing.eteacher.service.IVerifyCodeService;
@@ -83,16 +82,16 @@ public class UserRemote extends BaseRemote {
 								return new ReturnBody(ReturnBody.RESULT_FAILURE,"请用正确的身份账号登录");
 							}
 							if (sign.equals(Encryption.encryption(appKey+account+timestamp+user.getPassword()+imei))) {
-								LoginReturn loginReturn = new LoginReturn();
+								Map map = new HashMap<>();
 								String token = Encryption.encryption(System.currentTimeMillis()+user.getUserId()+user.getPassword());
-								loginReturn.setToken(token);
-								loginReturn.setUserId(user.getUserId());
+								map.put("token", token);
+								map.put("userId", user.getUserId());
 								user.setImei(imei);
 								user.setToken(token);
 								user.setLastLoginTime(String.valueOf(System.currentTimeMillis()));
 								user.setLastAccessTime(String.valueOf(System.currentTimeMillis()));
 								userServiceImpl.update(user);
-								return new ReturnBody(ReturnBody.RESULT_SUCCESS,loginReturn);
+								return new ReturnBody(ReturnBody.RESULT_SUCCESS,map);
 							}else{
 								return new ReturnBody(ReturnBody.RESULT_FAILURE,"用户名或密码错误！");
 							}
