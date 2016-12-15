@@ -229,18 +229,6 @@ public class CourseRemote extends BaseRemote {
 	 * @param courseId
 	 * @return
 	 */
-	// {
-	// result : 'success',//成功success，失败failure
-	// data : [
-	// {
-	// cfId : '课程资源ID',
-	// fileName : '资源名称',
-	// serverName : '资源服务器名称', t6fd
-	// fileType : '资源类型'//（01大纲 02日历 03教案 04课件）
-	// }
-	// ],
-	// msg : '提示信息XXX'
-	// }
 	@RequestMapping(value = "course/{courseId}/files", method = RequestMethod.GET)
 	public ReturnBody courseFiles(HttpServletRequest request,
 			@PathVariable String courseId) {
@@ -459,7 +447,7 @@ public class CourseRemote extends BaseRemote {
 				Map<String, String> bookObj = (Map<String, String>) JSONUtils
 						.parse(book);
 				Textbook item = new Textbook();
-				item.setTextbookName(bookObj.get("bookName"));
+				item.setTextbookName(bookObj.get("name"));
 				item.setAuthor(bookObj.get("author"));
 				item.setCourseId(courseId);
 				item.setPublisher(bookObj.get("publisher"));
