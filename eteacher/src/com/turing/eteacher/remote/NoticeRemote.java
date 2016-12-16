@@ -23,18 +23,21 @@ import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.CustomFile;
 import com.turing.eteacher.model.Notice;
+import com.turing.eteacher.model.TaskModel;
 import com.turing.eteacher.model.User;
 import com.turing.eteacher.model.WorkCourse;
 import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.INoticeService;
 import com.turing.eteacher.service.IWorkCourseService;
+import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.FileUtil;
+import com.turing.eteacher.util.SpringTimerTest;
 import com.turing.eteacher.util.StringUtil;
 
 @RestController
 @RequestMapping("remote")
 public class NoticeRemote extends BaseRemote {
-
+	
 	@Autowired
 	private INoticeService noticeServiceImpl;
 	
@@ -43,6 +46,9 @@ public class NoticeRemote extends BaseRemote {
 	
 	@Autowired
 	private IFileService fileServiceImpl;
+	
+	@Autowired
+	private SpringTimerTest springTimerTest;
 	/**
 	 * 教师端通知展示列表
 	 * 
@@ -102,8 +108,32 @@ public class NoticeRemote extends BaseRemote {
 		try {
 			String noticeId = request.getParameter("noticeId");
 			String status = request.getParameter("status");
-			noticeServiceImpl.ChangeNoticeState(noticeId, status);
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, new HashMap());
+			if (StringUtil.checkParams(noticeId,status)) {
+				Notice notice = noticeServiceImpl.get(noticeId);
+				if (null != notice) {
+					String before = notice.getPublishTime();
+					if("1".equals(status)){//待发布通知->立即通知
+						if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+							springTimerTest.updateTask(noticeId,TaskModel.TYPE_NOTICE,DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM));
+						}else {
+							TaskModel model = new TaskModel();
+							model.setId(noticeId);
+							model.setDate(notice.getPublishTime());
+							model.setType(TaskModel.UTYPE_STUDENT);
+							model.setType(TaskModel.TYPE_NOTICE);
+							springTimerTest.addTask(model);
+						}
+					}else if("0".equals(status)){//删除通知，不可见
+						if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+							springTimerTest.deleteTask(noticeId, TaskModel.TYPE_NOTICE);
+						}
+					}
+				}
+				noticeServiceImpl.ChangeNoticeState(noticeId, status);
+				return new ReturnBody(ReturnBody.RESULT_SUCCESS, "修改成功！");
+			}else{
+				return ReturnBody.getParamError();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE,
@@ -182,25 +212,44 @@ public class NoticeRemote extends BaseRemote {
 		        publishTime = simpleDateFormat.format(new Date(Long.parseLong(publishTime)*1000));
 		        List<Map> list = (List<Map>) JSONUtils.parse(course);
 				if (StringUtil.isNotEmpty(noticeId)) {
-					// TODO 更新通知内容
+					String before = null;
+					// 更新通知内容
 					Notice notice = noticeServiceImpl.get(noticeId);
 					if (null != notice) {
 						notice.setTitle(title);
+						before = notice.getPublishTime();
 						notice.setContent(content);
 						notice.setPublishTime(publishTime);
 						notice.setUserId(getCurrentUserId(request));
 						notice.setStatus(1);
 						noticeServiceImpl.update(notice);
 					}
-					// TODO 删除关联表中的数据
+					// 删除关联表中的数据
 					workCourseServiceImpl.deleteData(noticeId);
-					// TODO 重新加入关联表
+					// 重新加入关联表
 					for (int i = 0; i < list.size(); i++) {
 						String courseId = (String) list.get(i).get("id");
 						WorkCourse workCourse =new WorkCourse();
 						workCourse.setWorkId(noticeId);
 						workCourse.setCourseId(courseId);
 						workCourseServiceImpl.add(workCourse);
+					}
+					//FIXME 如果发布时间在24小时前，更新 否则删除通知
+					if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+						if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+							springTimerTest.updateTask(noticeId,TaskModel.TYPE_NOTICE, publishTime);
+						}else {
+							springTimerTest.deleteTask(noticeId,TaskModel.TYPE_NOTICE);
+						}
+					}else {
+						if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+							TaskModel model = new TaskModel();
+							model.setId(noticeId);
+							model.setDate(notice.getPublishTime());
+							model.setType(TaskModel.UTYPE_STUDENT);
+							model.setType(TaskModel.TYPE_NOTICE);
+							springTimerTest.addTask(model);
+						}
 					}
 				} else {
 					// TODO 增加通知
@@ -221,7 +270,7 @@ public class NoticeRemote extends BaseRemote {
 						workCourse.setCourseId(courseId);
 						workCourseServiceImpl.add(workCourse);
 					}
-					//对作业附件的处理
+					//对附件的处理
 					if (request instanceof MultipartRequest) {
 						try {
 							List<MultipartFile> files = null;
@@ -253,6 +302,15 @@ public class NoticeRemote extends BaseRemote {
 							e.printStackTrace();
 							return new ReturnBody(ReturnBody.RESULT_FAILURE,ReturnBody.ERROR_MSG);
 						}
+					}
+					//FIXME 如果发布时间小于24点，将任务添加
+					if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+						TaskModel model = new TaskModel();
+						model.setId(noticeId);
+						model.setDate(notice.getPublishTime());
+						model.setType(TaskModel.UTYPE_STUDENT);
+						model.setType(TaskModel.TYPE_NOTICE);
+						springTimerTest.addTask(model);
 					}
 				}
 			}

@@ -166,7 +166,9 @@ public class TeacherServiceImpl extends BaseService<Teacher> implements
 		List list = teacherDAO.findMap(hql, userId);
 		if (null != list && list.size() > 0) {
 			Map<String, String> map = (Map<String, String>) list.get(0);
-			map.put("picture", url+map.get("picture"));
+			if(null != map.get("picture")){
+				map.put("picture", url+map.get("picture"));
+			}
 			// 获取用户的职称、职务信息
 			String titlelId = (String) map.get("titleId");
 			// 职称

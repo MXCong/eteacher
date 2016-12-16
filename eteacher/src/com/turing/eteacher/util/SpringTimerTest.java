@@ -30,7 +30,6 @@ import com.turing.eteacher.service.ISignInService;
 import com.turing.eteacher.service.ITermPrivateService;
 import com.turing.eteacher.service.ITimeTableService;
 import com.turing.eteacher.service.IWorkService;
-import com.turing.eteacher.service.impl.SignInServiceImpl;
 
 /**
  * Spring定时器
@@ -63,17 +62,23 @@ public class SpringTimerTest {
 	@Autowired
 	private ISignInService signInServiceImpl;
 	
-	private List<TaskModel> allList = new ArrayList<>();
-
+	private static List<TaskModel> allList = new ArrayList<>();
+	
+	private static Timer timer;
+	
+	private static SpringTimerTest instance;
+	
 	/**
 	 * Spring定时器测试方法
 	 * 
 	 * @author lifei
 	 */
-	@Scheduled(cron = "0 0/20 22,23 * * ?")
+	@Scheduled(cron = "0 0/10 15,16 * * ?")
 	// 每天凌晨触发//0 0 0 * * ?
 	public void test() {
 		System.out.println(new SimpleDateFormat("yyyy 年 MM 月 dd 日 HH 时 mm 分 ss 秒").format(new Date()));
+		getTimer().cancel();
+		timer = null;
 		allList.clear();
 		allList.addAll(getCurrentDayCourseStartTime());
 		allList.addAll(getNoticeList());
@@ -82,25 +87,16 @@ public class SpringTimerTest {
 	    for (int i = 0; i < allList.size(); i++) {
 			System.out.println("第"+i+"个通知："+allList.get(i).toString());
 		}
-		timer();
+	    startTimer();
+	}
+
+	public static Timer getTimer() {
+		if (null == timer) {
+			timer = new Timer();
+		}
+		return timer;
 	}
 	
-	/**
-	 * 通知排序
-	 * @author lifei
-	 *
-	 */
-    class MyComparator implements Comparator<TaskModel>
-    {
-        public int compare(TaskModel m1, TaskModel m2)
-        {
-        	if (DateUtil.isBefore(m1.getDate(), m2.getDate(), DateUtil.YYYYMMDDHHMM)) {
-				return -1;
-			}else{
-				return 1;
-			}
-        }
-    }
 
 	/**
 	 * 获取当天待通知的列表
@@ -312,33 +308,101 @@ public class SpringTimerTest {
 		System.out.println("上课提醒有："+result.size()+"条");
 		return result;
 	}
-
-	private void timer() {
+	
+	/**
+	 * 添加一条推送任务
+	 * @param model
+	 */
+	public void addTask(TaskModel model){
+		if (null == model) {
+			return;
+		}
+		getTimer().cancel();
+		timer = null;
+		allList.add(model);
+		System.out.println("allList.size()"+allList.size());
+		Collections.sort(allList, new MyComparator());
+		startTimer();
+	}
+	/**
+	 * 更新一条推送任务
+	 * @param taskId
+	 * @param date
+	 */
+	public void updateTask(String taskId,int type,String date){
+		if (StringUtil.checkParams(taskId,date)) {
+			getTimer().cancel();
+			timer = null;
+			for (int i = 0; i < allList.size(); i++) {
+				if (taskId.equals(allList.get(i).getId()) && allList.get(i).getType() == type) {
+					allList.get(i).setDate(date);
+					break;
+				}
+			}
+			Collections.sort(allList, new MyComparator());
+			startTimer();
+		}
+	}
+	/**
+	 * 删除一条推送任务
+	 * @param taskId
+	 */
+	public void deleteTask(String taskId,int type){
+		if (StringUtil.checkParams(taskId)) {
+			getTimer().cancel();
+			timer = null;
+			for (int i = 0; i < allList.size(); i++) {
+				if (taskId.equals(allList.get(i).getId()) && allList.get(i).getType() == type) {
+					allList.remove(i);
+					break;
+				}
+			}
+			startTimer();
+		}
+	}
+	
+	 class MyComparator implements Comparator<TaskModel>
+	 {
+	     public int compare(TaskModel m1, TaskModel m2)
+	     {
+	     	if (DateUtil.isBefore(m1.getDate(), m2.getDate(), DateUtil.YYYYMMDDHHMM)) {
+	 			return -1;
+	 		}else{
+	 			return 1;
+	 		}
+	     }
+	 }
+	
+	/**
+	 * 开启推送定时器
+	 */
+	private void startTimer() {
 		if (allList.size() == 0) {
 			return;
 		}
 		final TaskModel model = allList.get(0);
-		allList.remove(0);
+		//如果当前时间晚于任务时间  do:立即推送
 		if (DateUtil.isBefore(model.getDate(),
 				DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM),
 				DateUtil.YYYYMMDDHHMM)) {
-				doPush(model);
+				doPush();
 		} else {
-			long i = DateUtil.getTimeBetween(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM), model.getDate());
-			System.out.println("i:"+i);
-			Timer timer = new Timer();
-			timer.schedule(new TimerTask() {
+			long during = DateUtil.getTimeBetween(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM), model.getDate());
+			System.out.println("during:"+during);
+			getTimer().schedule(new TimerTask() {
 				public void run() {
-					doPush(model);
-					timer();
+					doPush();
+					startTimer();
 				}
-			}, i);
+			}, during);
 		}
 	}
 	/**
 	 * 发起推送
 	 */
-	private void doPush(TaskModel model){
+	private void doPush(){
+		TaskModel model = allList.get(0);
+		allList.remove(0);
 		switch (model.getType()) {
 		case TaskModel.TYPE_NOTICE:
 			pushNotice(model);

@@ -20,6 +20,7 @@ import com.alibaba.druid.support.json.JSONUtils;
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.CustomFile;
+import com.turing.eteacher.model.TaskModel;
 import com.turing.eteacher.model.Work;
 import com.turing.eteacher.model.WorkCourse;
 import com.turing.eteacher.model.WorkStatus;
@@ -27,7 +28,9 @@ import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.IWorkCourseService;
 import com.turing.eteacher.service.IWorkService;
 import com.turing.eteacher.util.CustomIdGenerator;
+import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.FileUtil;
+import com.turing.eteacher.util.SpringTimerTest;
 import com.turing.eteacher.util.StringUtil;
 
 /**
@@ -60,6 +63,9 @@ public class WorkRemote extends BaseRemote {
 	
 	@Autowired
 	private IFileService fileServiceImpl;
+	
+	@Autowired
+	private SpringTimerTest springTimerTest;
 //  学生端操作
 	/**
 	 * 获取作业列表
@@ -229,64 +235,81 @@ public class WorkRemote extends BaseRemote {
 	 */	
 	@RequestMapping(value = "teacher/work/addWork", method = RequestMethod.POST)
 	public ReturnBody addWork(HttpServletRequest request){
-		try {	
-			Work work = new Work();
-			work.setContent(request.getParameter("content"));
-			work.setEndTime(request.getParameter("endTime"));
-			work.setPublishTime(request.getParameter("publishTime"));
-			work.setRemindTime(request.getParameter("remindTime"));
-			work.setStatus(Integer.parseInt(request.getParameter("status")));
-			//作业（除附件之外）的操作
-			workServiceImpl.add(work);
-			String wId = work.getWorkId();
-			//获取该作业作用的班级列表
-			String course = request.getParameter("course");
-			List<Map> list = (List<Map>) JSONUtils.parse(course);
-			for(int n=0;n<list.size();n++){
-				WorkCourse workCourse = new WorkCourse();
-				workCourse.setWorkId(wId);
-				workCourse.setCourseId((String)list.get(n).get("id"));
-				workCourseServiceImpl.add(workCourse);
-			}
-			//对作业附件的处理
-			if (request instanceof MultipartRequest) {
-				try {
-					List<MultipartFile> files = null;
-					MultipartRequest multipartRequest = (MultipartRequest) request;
-					files = multipartRequest.getFiles("file");
-					System.out.println("文件的个数："+files.size());
-					if (files != null) {
-						for (MultipartFile file : files) {
-							if (!file.isEmpty()) {
-								String serverName = FileUtil.makeFileName(file
-										.getOriginalFilename());
-								try {
-									FileUtils.copyInputStreamToFile(file.getInputStream(),
-											new File(FileUtil.getUploadPath(), serverName));
-								} catch (IOException e) {
-									e.printStackTrace();
+		String content = request.getParameter("content");
+		String endTime = request.getParameter("endTime");
+		String publishTime = request.getParameter("publishTime");
+		String remindTime = request.getParameter("remindTime");
+		String status = request.getParameter("status");
+		if (StringUtil.checkParams(content,endTime,publishTime,remindTime,status)) {
+			try {	
+				Work work = new Work();
+				work.setContent(request.getParameter("content"));
+				work.setEndTime(request.getParameter("endTime"));
+				work.setPublishTime(request.getParameter("publishTime"));
+				work.setRemindTime(request.getParameter("remindTime"));
+				work.setStatus(Integer.parseInt(request.getParameter("status")));
+				//作业（除附件之外）的操作
+				workServiceImpl.add(work);
+				String wId = work.getWorkId();
+				//获取该作业作用的班级列表
+				String course = request.getParameter("course");
+				List<Map> list = (List<Map>) JSONUtils.parse(course);
+				for(int n=0;n<list.size();n++){
+					WorkCourse workCourse = new WorkCourse();
+					workCourse.setWorkId(wId);
+					workCourse.setCourseId((String)list.get(n).get("id"));
+					workCourseServiceImpl.add(workCourse);
+				}
+				//对作业附件的处理
+				if (request instanceof MultipartRequest) {
+					try {
+						List<MultipartFile> files = null;
+						MultipartRequest multipartRequest = (MultipartRequest) request;
+						files = multipartRequest.getFiles("file");
+						System.out.println("文件的个数："+files.size());
+						if (files != null) {
+							for (MultipartFile file : files) {
+								if (!file.isEmpty()) {
+									String serverName = FileUtil.makeFileName(file
+											.getOriginalFilename());
+									try {
+										FileUtils.copyInputStreamToFile(file.getInputStream(),
+												new File(FileUtil.getUploadPath(), serverName));
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+									CustomFile customFile = new CustomFile();
+									customFile.setDataId(work.getWorkId());
+									customFile.setFileName(file.getOriginalFilename());
+									customFile.setServerName(serverName);
+									customFile.setIsCourseFile(2);
+									customFile.setFileAuth("02");
+									fileServiceImpl.save(customFile);
 								}
-								CustomFile customFile = new CustomFile();
-								customFile.setDataId(work.getWorkId());
-								customFile.setFileName(file.getOriginalFilename());
-								customFile.setServerName(serverName);
-								customFile.setIsCourseFile(2);
-								customFile.setFileAuth("02");
-								fileServiceImpl.save(customFile);
 							}
 						}
+					} catch (Exception e) {
+						e.printStackTrace();
+						return new ReturnBody(ReturnBody.RESULT_FAILURE,ReturnBody.ERROR_MSG);
 					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					return new ReturnBody(ReturnBody.RESULT_FAILURE,ReturnBody.ERROR_MSG);
+				}else{
+					System.out.println("不是文件请求");;
 				}
-			}else{
-				System.out.println("不是文件请求");;
+				if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+					TaskModel model = new TaskModel();
+					model.setId(work.getWorkId());
+					model.setDate(publishTime);
+					model.setType(TaskModel.UTYPE_STUDENT);
+					model.setType(TaskModel.TYPE_NOTICE);
+					springTimerTest.addTask(model);
+				}
+				return new ReturnBody("保存成功！");
+			}catch (Exception e) {
+				e.printStackTrace();
+				return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 			}
-			return new ReturnBody("保存成功！");
-		}catch (Exception e) {
-			e.printStackTrace();
-			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
+		}else{
+			return ReturnBody.getParamError();
 		}
 	}
 
