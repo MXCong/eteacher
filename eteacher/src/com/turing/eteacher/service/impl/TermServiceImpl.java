@@ -97,7 +97,7 @@ public class TermServiceImpl extends BaseService<Term> implements ITermService {
 	 * 获取学期公有数据列表
 	 */
 	@Override
-	public List<Map> getListTerms(String userId) {
+	public List<Map> getListTerms(String userId,String schoolId) {
 		String sql="select t_term.TERM_ID as termId," +
 				" t_term.TERM_NAME as termName , " +
 				"t_term.START_DATE as startDate , " +
@@ -105,8 +105,9 @@ public class TermServiceImpl extends BaseService<Term> implements ITermService {
 				"t_term.WEEK_COUNT as weekCount FROM t_term " +
 				"WHERE t_term.TERM_ID NOT IN " +
 				"(select t_term_private.TREM_ID FROM t_term_private " +
-				"WHERE t_term_private.USER_ID = ? and t_term_private.status = 1)";
-		List<Map> list=termDAO.findBySql(sql,userId);
+				"WHERE t_term_private.USER_ID = ? and t_term_private.status = 1) " +
+				"and t_term.SCHOOL_ID = ?";
+		List<Map> list=termDAO.findBySql(sql,userId,schoolId);
 		if(null != list && list.size() > 0){
 			return list;
 		}

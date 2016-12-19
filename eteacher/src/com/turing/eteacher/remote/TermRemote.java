@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.Student;
+import com.turing.eteacher.model.Teacher;
 import com.turing.eteacher.model.Term;
 import com.turing.eteacher.model.TermPrivate;
 import com.turing.eteacher.service.IClassService;
 import com.turing.eteacher.service.ITermPrivateService;
 import com.turing.eteacher.service.ITermService;
+import com.turing.eteacher.util.StringUtil;
 
 @RestController
 @RequestMapping("remote")
@@ -71,7 +73,11 @@ public class TermRemote extends BaseRemote {
 		try {
 			String userId = getCurrentUser(request).getUserId();
 			List<Map> list = termServiceImpl.getListTermPrivates(userId);
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
+			if (null != list) {
+				return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
+			}else {
+				return ReturnBody.getSystemError();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
@@ -87,8 +93,17 @@ public class TermRemote extends BaseRemote {
 	public ReturnBody getListTermName(HttpServletRequest request) {
 		try {
 			String userId = getCurrentUser(request).getUserId();
-			List<Map> list = termServiceImpl.getListTerms(userId);
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
+			Teacher teacher = getCurrentTeacher(request);
+			if (null != teacher || StringUtil.isNotEmpty(teacher.getSchoolId())) {
+				List<Map> list = termServiceImpl.getListTerms(userId,teacher.getSchoolId());
+				if (null != list) {
+					return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
+				}else {
+					return ReturnBody.getSystemError();
+				}
+			}else {
+				return ReturnBody.getUserInfoError();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
@@ -106,7 +121,7 @@ public class TermRemote extends BaseRemote {
 		try {
 			String userId = getCurrentUser(request).getUserId();
 			Map map = termServiceImpl.getCurrentTerm(userId);
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, map);
+			return new ReturnBody(map);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);

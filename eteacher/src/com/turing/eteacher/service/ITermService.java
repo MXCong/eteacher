@@ -18,7 +18,7 @@ public interface ITermService extends IService<Term> {
 	
 	public void deleteById(String tpId);
 	//教师端  获取学期公有数据列表
-	public List<Map> getListTerms(String userId);
+	public List<Map> getListTerms(String userId,String schoolId);
 	/**
 	 * 获取所有共有表学期
 	 * @author lifei
