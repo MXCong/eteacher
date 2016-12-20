@@ -118,7 +118,7 @@ public class TermServiceImpl extends BaseService<Term> implements ITermService {
 	 */
 	@Override
 	public List<Map> getListTermPrivates(String userId) {
-		String hql="select tp.tpId as tpId,t.termName as termName,tp.startDate as startTime,"+
+		String hql="select tp.tpId as tpId,t.termName as termName,tp.startDate as startTime,tp.weekCount as weekCount,"+
 	               "tp.endDate as endTime from TermPrivate tp,Term t where tp.termId=t.termId "+
 				   "and tp.userId=? and tp.status = 1";
 		List<Map> list = termDAO.findMap(hql, userId);
@@ -132,6 +132,7 @@ public class TermServiceImpl extends BaseService<Term> implements ITermService {
 		String now = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD);
 		String hql = "select tp.tpId as termId, "
 				+ "t.termName as termName, "
+				+ "tp.weekCount as weekCount, "
 				+ "tp.startDate as startDate, "
 				+ "tp.endDate as endDate "
 				+ "from TermPrivate tp ,Term t "
@@ -159,6 +160,7 @@ public class TermServiceImpl extends BaseService<Term> implements ITermService {
 		String hql = "select tp.tpId as termId,"
 				+ "t.termName as termName,"
 				+ "tp.startDate as startDate,"
+				+ "tp.weekCount as weekCount,"
 				+ "tp.endDate as endDate "
 				+ "from TermPrivate tp,Term t "
 				+ "where tp.termId = t.termId and tp.status = 1 "

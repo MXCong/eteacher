@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.turing.eteacher.base.BaseController;
+import com.turing.eteacher.model.Teacher;
 import com.turing.eteacher.model.Term;
 import com.turing.eteacher.model.TermPrivate;
 import com.turing.eteacher.model.User;
@@ -41,7 +42,8 @@ public class TermController extends BaseController {
 	@RequestMapping("viewAddTerm")
 	public String viewAddTerm(HttpServletRequest request){
 		//TODO 查询可用学期
-		List<Map> list = termServiceImpl.getListTerms(getCurrentUser(request).getUserId());
+		Teacher teacher = getCurrentTeacher(request);
+		List<Map> list = termServiceImpl.getListTerms(getCurrentUser(request).getUserId(),teacher.getSchoolId());
 		request.setAttribute("termlist", list);
 		/*return "term/addTerm";*/
 		return "term/addTerm";

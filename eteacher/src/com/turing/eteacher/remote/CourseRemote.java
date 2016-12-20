@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -327,11 +328,20 @@ public class CourseRemote extends BaseRemote {
 	public ReturnBody getCourseList(HttpServletRequest request) {
 		try {
 			String userId = getCurrentUserId(request);
-//			String termId = request.getParameter("termId");// 获取前端参数：termId
-			String termId = (String) getCurrentTerm(request).get("termId");
-			String date = request.getParameter("date");
-			List<Map> list = courseServiceImpl.getCourseList(termId, date, userId);
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
+			Map map  = getCurrentTerm(request);
+			if (null != map) {
+				String termId = (String) map.get("termId");
+				if (StringUtil.isNotEmpty(termId)) {
+					String date = request.getParameter("date");
+					//FIXME
+					List<Map> list = courseServiceImpl.getCourseList(termId, date, userId);
+					return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
+				}else{
+					return new ReturnBody(new ArrayList<>());
+				}
+			}else{
+				return new ReturnBody(new ArrayList<>());
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE,
