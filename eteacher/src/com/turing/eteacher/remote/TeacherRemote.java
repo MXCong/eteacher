@@ -348,15 +348,9 @@ public class TeacherRemote extends BaseRemote {
 									}
 								}else{
 									//获取周重复课程的开始时间
-									String start = DateUtil.addSpecialWeeks(item.getStartDate(), (int)map.get("startWeek")-1);
+									String start = (String)map.get("startDay");
 									//获取周重复课程结束周的周一
-									String end = DateUtil.addSpecialWeeks(item.getStartDate(), ((int)map.get("endWeek"))-1);
-									//获取周重复课程结束周的周日
-									end = DateUtil.addDays(end, 6);
-									//是否如果学期在周日前结束 则课程结束日期为学期最后一天
-									if (DateUtil.isBefore(item.getEndDate(), end,DateUtil.YYYYMMDD)) {
-										end = item.getEndDate();
-									}
+									String end = (String)map.get("endDay");
 									//查看课程是否与指定的月份有交集
 									if (DateUtil.isOverlap(cFirstDay, cLastDay, start, end)) {
 										//获取课程的重复规律
@@ -371,7 +365,7 @@ public class TeacherRemote extends BaseRemote {
 														//课程的间隔周期
 														int repeatNumber = (int)map.get("repeatNumber");
 														//课程一共上几周
-														int repeatCount = ((int)map.get("endWeek") - (int)map.get("startWeek"))/repeatNumber;
+														int repeatCount = (DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay")))/(repeatNumber*7);
 														for (int m = 0; m <= repeatCount; m++) {
 															//获取课程具体在指定星期的上课时间
 															String dateStr = DateUtil.getWeek(start, m*repeatNumber, Integer.parseInt(week[l]));
