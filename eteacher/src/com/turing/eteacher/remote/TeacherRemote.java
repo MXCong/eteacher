@@ -19,9 +19,7 @@ import org.springframework.web.multipart.MultipartRequest;
 
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
-import com.turing.eteacher.dao.TeacherDAO;
 import com.turing.eteacher.model.CourseCell;
-import com.turing.eteacher.model.CustomFile;
 import com.turing.eteacher.model.Teacher;
 import com.turing.eteacher.model.TermPrivate;
 import com.turing.eteacher.model.UserCommunication;

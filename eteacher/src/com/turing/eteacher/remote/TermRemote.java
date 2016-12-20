@@ -121,7 +121,6 @@ public class TermRemote extends BaseRemote {
 		try {
 			String userId = getCurrentUser(request).getUserId();
 			Map map = termServiceImpl.getCurrentTerm(userId);
-			System.out.println("weekCount:"+map.toString());
 			return new ReturnBody(map);
 		} catch (Exception e) {
 			e.printStackTrace();

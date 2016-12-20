@@ -588,13 +588,15 @@ public class CourseRemote extends BaseRemote {
 			item.setCourseId(courseId);
 			item.setRepeatType(repeatType);
 			item.setRepeatNumber(Integer.parseInt(repeatNumber));
-			if (repeatType.equals("01")) {
-				item.setStartDay(start);
-				item.setEndDay(end);
-			} else {
-				item.setStartWeek(Integer.parseInt(start));
-				item.setEndWeek(Integer.parseInt(end));
-			}
+			item.setStartDay(start);
+			item.setEndDay(end);
+//			if (repeatType.equals("01")) {
+//				item.setStartDay(start);
+//				item.setEndDay(end);
+//			} else {
+//				item.setStartWeek(Integer.parseInt(start));
+//				item.setEndWeek(Integer.parseInt(end));
+//			}
 			courseItemService.save(item);
 			Map<String, String> map = new HashMap<>();
 			map.put("courseItemId", item.getCiId());
