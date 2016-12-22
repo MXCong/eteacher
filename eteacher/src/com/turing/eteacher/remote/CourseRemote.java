@@ -48,6 +48,7 @@ import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.IMajorService;
 import com.turing.eteacher.service.ISignInService;
 import com.turing.eteacher.service.ITextbookService;
+import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.FileUtil;
 import com.turing.eteacher.util.SpringTimerTest;
 import com.turing.eteacher.util.StringUtil;
@@ -151,9 +152,10 @@ public class CourseRemote extends BaseRemote {
 	public ReturnBody getSignCourse(HttpServletRequest request) {
 		String userId = getCurrentUserId(request);
 		String schoolId = (String) getCurrentSchool(request).get("schoolId");
-		if (StringUtil.checkParams(userId, schoolId)) {
+		String courseIds = request.getParameter("courseIds");
+		if (StringUtil.checkParams(userId, schoolId, courseIds)) {
 			try {
-				Map course = courseServiceImpl.getSignCourse(userId, schoolId);
+				Map course = courseServiceImpl.getSignCourse(userId, schoolId, courseIds);
 				if (null != course) {
 					return new ReturnBody(ReturnBody.RESULT_SUCCESS, course);
 				} else {
@@ -322,31 +324,29 @@ public class CourseRemote extends BaseRemote {
 	 * 分割符。以下内容为教师端相关接口
 	 */
 	/**
-	 * 获取指定日期的课程列表
+	 * 根据课程Id，获取课程的简略信息
 	 * @author macong
 	 * @param request
-	 * @param termId
-	 * @param date
 	 * @return
+	 * {
+		  "courseId":"dsznUBKa2",
+		  "courseName":"软件工程",
+		  "location":"尚学楼",
+		  "classRoom":"316",
+		  "lessonNumber":"1,2",
+		  "teacherId":"zhjBY21",
+		  "teacherName":"张三"
+		}
 	 */
-	@RequestMapping(value = "teacher/course/courseList", method = RequestMethod.POST)
-	public ReturnBody getCourseList(HttpServletRequest request) {
+	@RequestMapping(value = "teacher/course/getCourseInfo", method = RequestMethod.POST)
+	public ReturnBody getCourseInfo(HttpServletRequest request) {
 		try {
-			String userId = getCurrentUserId(request);
-			Map map  = getCurrentTerm(request);
-			if (null != map) {
-				String termId = (String) map.get("termId");
-				if (StringUtil.isNotEmpty(termId)) {
-					String date = request.getParameter("date");
-					//FIXME
-					List<Map> list = courseServiceImpl.getCourseList(termId, date, userId);
-					return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
-				}else{
-					return new ReturnBody(new ArrayList<>());
-				}
-			}else{
-				return new ReturnBody(new ArrayList<>());
+			String courseIds = request.getParameter("courseIds");
+			if(StringUtil.checkParams(courseIds)){
+				List<Map> list = courseServiceImpl.getCourseInfo(courseIds);
+				return new ReturnBody(ReturnBody.RESULT_SUCCESS,list);
 			}
+			return new ReturnBody(null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE,
@@ -686,52 +686,17 @@ public class CourseRemote extends BaseRemote {
 	@RequestMapping(value = "course/currentCourse", method = RequestMethod.POST)
 	public ReturnBody getCurrentCourse(HttpServletRequest request) {
 		try {
-			String userId = getCurrentUserId(request);
-			String time = request.getParameter("time");
-			Map school = getCurrentSchool(request);
-			if (StringUtil.checkParams(userId, time)) {
-				Map currentCourse = courseServiceImpl.getCurrentCourse(userId,
-						time, school);
+			String time = DateUtil.getCurrentDateStr("yyyy-MM-dd HH:mm");
+			String courseIds = request.getParameter("courseIds");
+			String schoolId = (String) getCurrentSchool(request).get("schoolId");
+			if (StringUtil.checkParams(time, schoolId, courseIds)) {
+				Map currentCourse = courseServiceImpl.getCurrentCourse(time, schoolId, courseIds);
 				if (currentCourse != null) {
-					System.out.println("currentCourse:" + currentCourse);
-					return new ReturnBody(ReturnBody.RESULT_SUCCESS,
-							currentCourse);
+					return new ReturnBody(ReturnBody.RESULT_SUCCESS,currentCourse);
 				} else {
 					System.out.println("没课");
 					return new ReturnBody(ReturnBody.RESULT_SUCCESS, null);
 				}
-			}
-			return null;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ReturnBody(ReturnBody.RESULT_FAILURE,
-					ReturnBody.ERROR_MSG);
-		}
-	}
-
-	/**
-	 * 获取本堂课程学生的签到情况
-	 * 
-	 * @author macong
-	 * @param request
-	 * @return
-	 */
-	@RequestMapping(value = "course/registSituation", method = RequestMethod.POST)
-	public ReturnBody getRegistSituation(HttpServletRequest request) {
-		try {
-			String courseId = request.getParameter("courseId");
-			String currentWeek = request.getParameter("currentWeek");
-			String lessonNum = request.getParameter("lessonNum");
-			String status = request.getParameter("status");
-
-			List<Map> student = null;
-			if (StringUtil
-					.checkParams(courseId, currentWeek, lessonNum, status)) {
-				student = singInServiceImpl.getRegistSituation(courseId,
-						currentWeek, lessonNum, Integer.parseInt(status));
-			}
-			if (null != student && student.size() > 0) {
-				return new ReturnBody(ReturnBody.RESULT_SUCCESS, student);
 			}
 			return null;
 		} catch (Exception e) {

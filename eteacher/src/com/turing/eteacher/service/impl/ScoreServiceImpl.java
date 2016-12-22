@@ -208,7 +208,7 @@ public class ScoreServiceImpl extends BaseService<Score> implements IScoreServic
 				break;
 			}
 		}else{
-			return "该课程无平时成绩";
+			return "该课程无类型为均值的成绩项";
 		}
 		
 		return null;

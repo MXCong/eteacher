@@ -430,7 +430,6 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	 * @param date
 	 * @return
 	 */
-	@SuppressWarnings("rawtypes")
 	@Override
 	public List<Map> getCourseByDate(String userId, String date) {
 		/*
@@ -477,7 +476,7 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	 * @param userId
 	 * 
 	 */
-	public Map getSignCourse(String userId,String schoolId) {
+	public Map getSignCourse(String userId,String schoolId, String courseIds) {
 		// 1.时间数据的处理 {times："2016-11-13 10:21"-->date:2016-11-13,time:10:21}
 		Date d = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -487,8 +486,8 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 		String time = t[1];
 		//查询出给学生的今日课表。根据今日课表，及课程的教师信息。根据教师信息，查询出该教师设定的课程的签到时间。对当前时间进行处理，
 		//获取签到时间。签到时间与上课时间进行对比，得出是否为签到时间。
-		List<Map> courseList = getCourseByDate(userId,date);
-		//根据课程集合，查询出教师信息(teacherId)，及该教师设定的签到时间信息
+		Map currentCourse = getCurrentCourse(times, schoolId, courseIds);
+		//根据正在进行的课程，查询出教师信息(teacherId)，及该教师设定的签到时间信息
 		String hql = "select r.before as before, r.after as after, r.distance as distance "
 				+ "from RegistConfig r where r.userId = ? and r.status = 1";
 		String hql2 = "select r.before as before, r.after as after, r.distance as distance "
@@ -499,10 +498,8 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 				+ "from TimeTable tt where tt.schoolId = ? ";
 		List<Map> timeTable = courseDAO.findMap(ql, schoolId);
 
-		if(null != courseList && courseList.size()>0){
-			
-			for(int i = 0;i < courseList.size(); i++){
-				String teacherId = (String) courseList.get(i).get("teacherId");
+		if(null != currentCourse && currentCourse.size()>0){
+				String teacherId = (String) currentCourse.get("teacherId");
 				//查询用户的签到设置
 				List<Map> c = null;
 				c = courseDAO.findMap(hql, teacherId);
@@ -510,29 +507,25 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 					c = courseDAO.findMap(hql2);
 				}
 				//时间处理： （当前时间-after）< 课程开始时间  < （当前时间+before）,符合签到条件
-				@SuppressWarnings("unused")
 				String time1 = DateUtil.timeSubtraction(time, "-", (Integer)c.get(0).get("before"));
 				String time2 = DateUtil.timeSubtraction(time, "+", (Integer)c.get(0).get("after"));
 				
 				//查询lesson对应的开始时间
-				String lessons = (String) courseList.get(i).get("lessonNumber");
-				String [] ls = lessons.split(",");
-//				String  ln = null;
+				System.out.println("*****:"+currentCourse.toString());
+				String lessons = (String) currentCourse.get("lessonNumber");
 				for (int k = 0; k < timeTable.size(); k++) {
-//					ln = timeTable.get(k).get("lessonNumber").toString();
-					for (int j = 0; j < ls.length; j++) {
-						if(lessons.contains(ls[j])){
+					String ln = (String) timeTable.get(k).get("lessonNumber");
+						if(ln.equals(lessons)){
 							String st = (String) timeTable.get(k).get("startTime");
 							if (time1.compareTo(st) <= 0 && time2.compareTo(st) >= 0) {
 								//签到开始时间和签到结束时间
 								String startTime = DateUtil.timeSubtraction((String)timeTable.get(k).get("startTime"),"-",(Integer)c.get(0).get("before"));
 								String endTime = DateUtil.timeSubtraction((String)timeTable.get(k).get("startTime"),"+",(Integer)c.get(0).get("after"));
-								
 								Map re = new HashMap<>();
-								re.put("courseId", courseList.get(i).get("courseId"));
-								re.put("courseName", courseList.get(i).get("courseName"));
+								re.put("courseId", currentCourse.get("courseId"));
+								re.put("courseName", currentCourse.get("courseName"));
 								re.put("teacherId", teacherId);
-								re.put("teacherName", courseList.get(i).get("teacherName"));
+								re.put("teacherName", currentCourse.get("teacherName"));
 								re.put("beforeTime", startTime);
 								re.put("afterTime", endTime);
 								re.put("distance", c.get(0).get("distance"));
@@ -541,8 +534,6 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 						}
 					}
 				}	
-			}
-		}
 		return null;
 	}
 	
@@ -597,8 +588,10 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 					+ "and cc.ciId = ci.ciId and c.userId = t.teacherId ";
 			for(int i=0; i<cIdList.length; i++){
 				String courseId = cIdList[i].substring(1, cIdList[i].length()-1);
-				Map m = courseDAO.findMap(hql, courseId).get(0);
-				list.add(m);
+				List<Map> m = courseDAO.findMap(hql, courseId);
+				if(null != m && m.size() > 0){
+					list.add(m.get(0));
+				}
 			}
 			if(null != list && list.size() > 0){
 				return list;
@@ -934,10 +927,10 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	 * 
 	 * @author macong
 	 * @param userId
-	 * @param time
-	 *            "2016-11-13 10:21:51"
+	 * @param time  "2016-11-13 10:21"
+	 * @param courseIds  今日课程ID的集合        
 	 */
-	public Map getCurrentCourse(String userId, String times, Map school, String courseIds) {
+	public Map getCurrentCourse(String times, String schoolId, String courseIds) {
 		// 1.时间数据的处理 {times："2016-11-13
 		// 10:21"-->date:2016-11-13,time:10:21}
 		String[] t = times.split(" ");
@@ -946,7 +939,7 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 		// 2.查询当前time对应的是第几节课
 		String hql = "select tt.timetableId as timetableId, tt.lessonNumber as lessonNumber "
 				+ "from TimeTable tt where tt.endTime >= ? and tt.startTime <= ? and tt.schoolId=?";
-		List<Map> timeTable = courseScoreDAO.findMap(hql, time, time, school.get("schoolId"));
+		List<Map> timeTable = courseScoreDAO.findMap(hql, time, time, schoolId);
 		if (timeTable.size() > 0 && timeTable.get(0) != null) {
 			String cids = courseIds.substring(1, courseIds.length()-1);
 			String [] courseId = cids.split(",");
@@ -960,7 +953,7 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 				String cid = courseId[i].substring(1, courseId[i].length()-1);
 				List<Map> m = courseDAO.findMap(hql2,cid);
 				if(null != m && m.size() > 0){
-					m.get(0).put("lessonNumber", timeTable.get(0));
+					m.get(0).put("lessonNumber", timeTable.get(0).get("lessonNumber"));
 					return m.get(0);
 				}
 			}

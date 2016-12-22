@@ -328,8 +328,6 @@ public class DateUtil {
 	public static boolean isOverlap(String startdate1, String enddate1,
 			String startdate2, String enddate2) {
 		SimpleDateFormat format = new SimpleDateFormat(YYYYMMDD);
-		System.out.println("startdate1"+startdate1+"enddate1"
-		+enddate1+"startdate2"+startdate2+"enddate2"+enddate2);
 		Date start1 = null;
 		Date end1 = null;
 		Date start2 = null;
@@ -340,8 +338,6 @@ public class DateUtil {
 			start2 = format.parse(startdate2);
 			end2 = format.parse(enddate2);
 		} catch (ParseException e) {
-			System.out.println("assss");
-			
 			return false;
 		}
 		if (end1.getTime() <= start2.getTime()) {

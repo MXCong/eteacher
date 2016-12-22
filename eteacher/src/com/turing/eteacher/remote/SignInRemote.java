@@ -179,7 +179,7 @@ public class SignInRemote extends BaseRemote {
 			if (null != student && student.size() > 0) {
 				return new ReturnBody(ReturnBody.RESULT_SUCCESS, student);
 			}
-			return null;
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS,null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);

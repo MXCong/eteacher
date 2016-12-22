@@ -91,10 +91,9 @@ public interface ICourseService extends IService<Course> {
 	/**
 	 * 获取当前时间正在进行的课程（判断当前时间是否为教师的授课时间）
 	 * @author macong
-	 * @param userId
 	 * @param time  "2016-11-13 10:21:51"
 	 */
-	public Map getCurrentCourse(String userId, String time,Map school,String courseIds);
+	public Map getCurrentCourse(String time,String schoolId,String courseIds);
 	
 	/**
 	 * 获取课程课表
@@ -146,7 +145,7 @@ public interface ICourseService extends IService<Course> {
 	 * @author macong
 	 * @param userId
 	 */
-	public Map getSignCourse(String userId,String schoolId);
+	public Map getSignCourse(String userId,String schoolId, String courseIds);
 	/**
 	 * 通过学生的Id和学期Id获取本学期内所有的课程时间信息（课程所对应的学期开始结束日期，课程的重复规则）
 	 * @author lifei
