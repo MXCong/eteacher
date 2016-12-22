@@ -35,27 +35,28 @@ public class SignInServiceImpl extends BaseService<SignIn> implements ISignInSer
 	 * @return
 	 */
 	@Override
-	public List<Map> getRegistSituation(String courseId, String currentWeek, String lessonNum, int status) {
+	public List<Map> getRegistSituation(String courseId, String lessonNum, int status) {
 		// 1.获取当前正在进行的课程信息(course_Id)，并查询出该课程对应的班级列表（t_course_class）。
 		// 2.在t_student表中，根据class_Id,查询出学生列表。
-		// 3.t_sign_in表中，根据本次课程信息（courseId,第几周，第几节课），查询出状态为“1”的学生列表
+		// 3.t_sign_in表中，根据本次课程信息（courseId,createtime,第几节课），查询出状态为“1”的学生列表
 		// 4.返回学生列表的studentNo,studentName，以及出勤人数和课程人数。
 		String hql = "select s.stuId as studentId, s.stuNo as studentNo, s.stuName as studentName "
 				+ "from Student s, SignIn  si, CourseClasses cc where "
 				+ "cc.classId = s.classId and s.stuId = si.studentId and si.courseId = cc.courseId "
-				+ "and cc.courseId = ? and si.currentWeek = ? and si.currentLessons = ? and si.status = ?";
+				+ "and cc.courseId = ? and si.signTime = ? and si.currentLessons = ? and si.status = ?";
 
 		String hql1 = "SELECT s.STU_ID as stusentId, s.STU_NO as studentNo, s.STU_NAME as studentName FROM t_student s "
 				+ "WHERE s.STU_ID NOT IN(SELECT si1.STUDENT_ID FROM t_sign_in si1 WHERE "
-				+ "si1.COURSE_ID = ? and si1.CURRENT_WEEK = ? and si1.CURRENT_CELL = ?)";
+				+ "si1.COURSE_ID = ? and si1.SIGN_TIME = ? and si1.CURRENT_CELL = ?)";
+		String cd = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD);
 		if (status == 1) {// 签到人员列表
 			System.out.println("-----:" + hql);
-			List<Map> regist = signInDAO.findMap(hql, courseId, currentWeek, lessonNum, status);
+			List<Map> regist = signInDAO.findMap(hql, courseId,cd,lessonNum, status);
 			if (null != regist && regist.size() > 0) {
 				return regist;
 			}
 		} else if (status == 0) {// 未签到人员列表
-			List<Map> unregist = signInDAO.findBySql(hql1, courseId, currentWeek, lessonNum);
+			List<Map> unregist = signInDAO.findBySql(hql1, courseId,cd, lessonNum);
 			if (null != unregist && unregist.size() > 0) {
 				return unregist;
 			}
@@ -125,7 +126,7 @@ public class SignInServiceImpl extends BaseService<SignIn> implements ISignInSer
 		if(StringUtil.checkParams(lessonNum,weekNum)){
 			sign.setCourseId(courseId);
 			sign.setCurrentLessons(lessonNum);
-			sign.setCurrentWeek(weekNum);
+//			sign.setCurrentWeek(weekNum);
 			sign.setStudentId(studentId);
 			sign.setLat(lat);
 			sign.setLon(lon);

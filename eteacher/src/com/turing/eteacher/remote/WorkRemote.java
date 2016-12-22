@@ -186,7 +186,7 @@ public class WorkRemote extends BaseRemote {
 		String date = request.getParameter("date");
 		if (StringUtil.checkParams(status, userId)) {
 			try {
-				List list = workServiceImpl.getListWork(userId, status, date, Integer.parseInt(page));
+				List<Map> list = workServiceImpl.getListWork(userId, status, date, Integer.parseInt(page));
 				return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
 			} catch (Exception e) {
 				e.printStackTrace();

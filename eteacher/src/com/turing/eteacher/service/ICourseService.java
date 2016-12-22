@@ -57,8 +57,8 @@ public interface ICourseService extends IService<Course> {
 	public List getListByTermAndStuId(String year, String term, String stuId);
 	
 	//教师接口
-	//获取课程列表（1.根据学期 2.根据指定日期）
-	public List<Map> getCourseList(String termId,String data,String userId);
+	//根据课程Id，获取课程的简略信息
+	public List<Map> getCourseInfo(String courseIds);
 	//获取课程详细信息
 	public List<Map> getCourseDetail(String courseId, String status);
 	//修改教材教辅信息
@@ -94,7 +94,7 @@ public interface ICourseService extends IService<Course> {
 	 * @param userId
 	 * @param time  "2016-11-13 10:21:51"
 	 */
-	public Map getCurrentCourse(String userId, String time,Map school);
+	public Map getCurrentCourse(String userId, String time,Map school,String courseIds);
 	
 	/**
 	 * 获取课程课表

@@ -181,7 +181,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 			list=workDAO.findMapByPage(hql, page*20, 20, userId);
 		}
 		if("3".equals(status)){//获取指定截止日期的作业
-			hql+="w.content as content, wc.wcId "+
+			hql+="w.content as content, wc.wcId as wcId "+
 			    "from Work w, Course c, WorkCourse wc " +
 			    "where w.workId = wc.workId and wc.courseId = c.courseId "+
 		        "and c.userId = ? and  w.endTime like CONCAT(?,'%') "+

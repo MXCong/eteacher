@@ -14,7 +14,7 @@ public class DateUtil {
 
 	public static final String YYYYMMDD = "yyyy-MM-dd";
 	public static final String YYYYMMDDHHMM = "yyyy-MM-dd HH:mm";
-
+	public static final String YYYYMMDDHHMMSS = "yyyy-MM-dd HH:mm:SS";
 	public static final long CONST_WEEK = 3600 * 1000 * 24 * 7;
 
 	/**

@@ -18,7 +18,7 @@ public class SignIn extends CreateTimeModel implements Serializable{
 	
 	private String signId;
 	private String courseId;
-	private String currentWeek;
+	private String signTime;
 	private String currentLessons;
 	private String studentId;
 	private int status;
@@ -43,12 +43,12 @@ public class SignIn extends CreateTimeModel implements Serializable{
 	public void setCourseId(String courseId) {
 		this.courseId = courseId;
 	}
-	@Column(name = "CURRENT_WEEK")
-	public String getCurrentWeek() {
-		return currentWeek;
+	@Column(name = "SIGN_TIME")
+	public String getSignTime() {
+		return signTime;
 	}
-	public void setCurrentWeek(String currentWeek) {
-		this.currentWeek = currentWeek;
+	public void setSignTime(String signTime) {
+		this.signTime = signTime;
 	}
 	@Column(name = "CURRENT_CELL")
 	public String getCurrentLessons() {
