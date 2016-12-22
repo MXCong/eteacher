@@ -961,7 +961,7 @@ public class CourseRemote extends BaseRemote {
 	@RequestMapping(value = "teacher/course/addTeachTime", method = RequestMethod.POST)
 	public ReturnBody addTeachTime(HttpServletRequest request) {
 		String data = request.getParameter("data");
-		String courseItemId = request.getParameter("courseItemId");
+		String courseItemId = request.getParameter("courseCellId");
 		if (StringUtil.checkParams(data,courseItemId)) {
 			List<Map<String, String>> jsonList = (List<Map<String, String>>) JSONUtils
 					.parse(data);
