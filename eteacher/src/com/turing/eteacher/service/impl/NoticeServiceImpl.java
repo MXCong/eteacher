@@ -137,6 +137,8 @@ public class NoticeServiceImpl extends BaseService<Notice> implements INoticeSer
 				notice.setPublishTime(df.format(new Date(new Date().getTime() - 1000*10*60)));
 			}else if("0".equals(status)){//删除通知，不可见
 				notice.setStatus(0);
+			}else if("2".equals(status)){//撤回编辑状态
+				notice.setStatus(2);
 			}
 			noticeDAO.update(notice);
 		}

@@ -113,6 +113,9 @@ public class NoticeRemote extends BaseRemote {
 				if (null != notice) {
 					String before = notice.getPublishTime();
 					if("1".equals(status)){//待发布通知->立即通知
+						if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM), DateUtil.YYYYMMDDHHMM)) {
+							return ReturnBody.getErrorBody("本通知已发布！");
+						}
 						if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
 							springTimerTest.updateTask(noticeId,TaskModel.TYPE_NOTICE,DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM));
 						}else {
@@ -126,6 +129,13 @@ public class NoticeRemote extends BaseRemote {
 					}else if("0".equals(status)){//删除通知，不可见
 						if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
 							springTimerTest.deleteTask(noticeId, TaskModel.TYPE_NOTICE);
+						}
+					}else if("2".equals(status)){//编辑状态
+						if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM), DateUtil.YYYYMMDDHHMM)) {
+							return ReturnBody.getErrorBody("本通知已发布不可编辑！");
+						}
+						if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+							springTimerTest.deleteTask(noticeId,TaskModel.TYPE_NOTICE);
 						}
 					}
 				}
@@ -207,6 +217,7 @@ public class NoticeRemote extends BaseRemote {
 			String noticeId = request.getParameter("noticeId");
 			String publishTime = request.getParameter("publishTime");
 			String course = request.getParameter("course");
+			String deleted = request.getParameter("deleted");
 			if (StringUtil.checkParams(title, content, publishTime, course)) {
 		        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		        publishTime = simpleDateFormat.format(new Date(Long.parseLong(publishTime)*1000));
@@ -234,7 +245,15 @@ public class NoticeRemote extends BaseRemote {
 						workCourse.setCourseId(courseId);
 						workCourseServiceImpl.add(workCourse);
 					}
-					//FIXME 如果发布时间在24小时前，更新 否则删除通知
+					if (StringUtil.isNotEmpty(deleted)) {
+						List<Map<String, String>> delList = (List<Map<String, String>>)JSONUtils.parse(deleted);
+						if (null != delList && delList.size() > 0) {
+							for (int i = 0; i < delList.size(); i++) {
+								fileServiceImpl.deletebyFileId(delList.get(i).get("fileId"), FileUtil.getUploadPath());
+							}
+						}
+					}
+					
 					if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
 						if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
 							springTimerTest.updateTask(noticeId,TaskModel.TYPE_NOTICE, publishTime);
@@ -252,7 +271,7 @@ public class NoticeRemote extends BaseRemote {
 						}
 					}
 				} else {
-					// TODO 增加通知
+					// 增加通知
 					Notice notice = new Notice();
 					notice.setTitle(title);
 					notice.setContent(content);
@@ -262,7 +281,6 @@ public class NoticeRemote extends BaseRemote {
 					notice.setStatus(1);
 					noticeServiceImpl.save(notice);
 					noticeId = notice.getNoticeId();
-					// TODO 增加关联表数据
 					for (int i = 0; i < list.size(); i++) {
 						String courseId = (String) list.get(i).get("id");
 						WorkCourse workCourse =new WorkCourse();
@@ -270,40 +288,6 @@ public class NoticeRemote extends BaseRemote {
 						workCourse.setCourseId(courseId);
 						workCourseServiceImpl.add(workCourse);
 					}
-					//对附件的处理
-					if (request instanceof MultipartRequest) {
-						try {
-							List<MultipartFile> files = null;
-							MultipartRequest multipartRequest = (MultipartRequest) request;
-							files = multipartRequest.getFiles("file");
-							System.out.println("文件的个数："+files.size());
-							if (files != null) {
-								for (MultipartFile file : files) {
-									if (!file.isEmpty()) {
-										String serverName = FileUtil.makeFileName(file
-												.getOriginalFilename());
-										try {
-											FileUtils.copyInputStreamToFile(file.getInputStream(),
-													new File(FileUtil.getUploadPath(), serverName));
-										} catch (IOException e) {
-											e.printStackTrace();
-										}
-										CustomFile customFile = new CustomFile();
-										customFile.setDataId(noticeId);
-										customFile.setFileName(file.getOriginalFilename());
-										customFile.setServerName(serverName);
-										customFile.setIsCourseFile(2);
-										customFile.setFileAuth("02");
-										fileServiceImpl.save(customFile);
-									}
-								}
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-							return new ReturnBody(ReturnBody.RESULT_FAILURE,ReturnBody.ERROR_MSG);
-						}
-					}
-					//FIXME 如果发布时间小于24点，将任务添加
 					if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
 						TaskModel model = new TaskModel();
 						model.setId(noticeId);
@@ -313,8 +297,43 @@ public class NoticeRemote extends BaseRemote {
 						springTimerTest.addTask(model);
 					}
 				}
+				//对附件的处理
+				if (request instanceof MultipartRequest) {
+					try {
+						List<MultipartFile> files = null;
+						MultipartRequest multipartRequest = (MultipartRequest) request;
+						files = multipartRequest.getFiles("file");
+						System.out.println("文件的个数："+files.size());
+						if (files != null) {
+							for (MultipartFile file : files) {
+								if (!file.isEmpty()) {
+									String serverName = FileUtil.makeFileName(file
+											.getOriginalFilename());
+									try {
+										FileUtils.copyInputStreamToFile(file.getInputStream(),
+												new File(FileUtil.getUploadPath(), serverName));
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+									CustomFile customFile = new CustomFile();
+									customFile.setDataId(noticeId);
+									customFile.setFileName(file.getOriginalFilename());
+									customFile.setServerName(serverName);
+									customFile.setIsCourseFile(2);
+									customFile.setFileAuth("02");
+									fileServiceImpl.save(customFile);
+								}
+							}
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+						return new ReturnBody(ReturnBody.RESULT_FAILURE,ReturnBody.ERROR_MSG);
+					}
+				}
+				return new ReturnBody(ReturnBody.RESULT_SUCCESS, "保存成功！");
+			}else{
+				return ReturnBody.getParamError();
 			}
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, "保存成功！");
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE,

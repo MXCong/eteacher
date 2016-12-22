@@ -1,7 +1,12 @@
 package com.turing.eteacher.remote;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,11 +14,13 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,9 +36,9 @@ import com.turing.eteacher.model.CourseClasses;
 import com.turing.eteacher.model.CourseItem;
 import com.turing.eteacher.model.CourseScorePrivate;
 import com.turing.eteacher.model.CustomFile;
-import com.turing.eteacher.model.TermPrivate;
 import com.turing.eteacher.model.Teacher;
 import com.turing.eteacher.model.Textbook;
+import com.turing.eteacher.model.User;
 import com.turing.eteacher.service.ICourseCellService;
 import com.turing.eteacher.service.ICourseClassService;
 import com.turing.eteacher.service.ICourseItemService;
@@ -40,10 +47,7 @@ import com.turing.eteacher.service.ICourseService;
 import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.IMajorService;
 import com.turing.eteacher.service.ISignInService;
-import com.turing.eteacher.service.ITermPrivateService;
-import com.turing.eteacher.service.ITermService;
 import com.turing.eteacher.service.ITextbookService;
-import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.FileUtil;
 import com.turing.eteacher.util.SpringTimerTest;
 import com.turing.eteacher.util.StringUtil;
@@ -72,20 +76,18 @@ public class CourseRemote extends BaseRemote {
 	@Autowired
 	private ICourseItemService courseItemServiceImpl;
 
+	@Autowired
+	private ICourseCellService courseCellService;
 
 	@Autowired
-	private ITermPrivateService termPrivateServiceImpl;
-	
-	@Autowired
-	private ICourseCellService courseCellServiceImpl;
-	
-	@Autowired
-	private ITermService termServiceImpl;
+	private ISignInService singInServiceImpl;
 
+	@Autowired
 	private IFileService fileServiceImpl;
 	
 	@Autowired
 	private SpringTimerTest springTimerTest;
+
 
 	/**
 	 * 学生端功能：获取用户特定日期的课程列表
@@ -124,22 +126,7 @@ public class CourseRemote extends BaseRemote {
 		}
 		return new ReturnBody(ReturnBody.RESULT_FAILURE, null);
 	}
-	/**
-	 *
-	 *学生端功能：获取指定学期下的课程列表
-	 * 
-	 */
-	@RequestMapping(value = "student/Course/getCourseByTerm", method = RequestMethod.POST)
-	public ReturnBody getCourseByTerm(HttpServletRequest request) {
-		String termId = request.getParameter("termId");
-		if (StringUtil.checkParams(termId)) {
-			List list = courseServiceImpl.getCourseNameBbyTerm(
-					getCurrentUserId(request), termId);
-			return new ReturnBody(list);
-		} else {
-			return ReturnBody.getParamError();
-		}
-	}
+
 	/**
 	 * 学生端功能：判断当前时间是否为签到时间（获取当前处于签到时间的课程信息）/ 获取某课程的签到信息（学校，教学楼，签到有效范围）
 	 * 
@@ -226,7 +213,7 @@ public class CourseRemote extends BaseRemote {
 	 * @param request
 	 * @return
 	 */
-	/*@RequestMapping(value = "student/{year}/{term}/courses", method = RequestMethod.GET)
+	@RequestMapping(value = "student/{year}/{term}/courses", method = RequestMethod.GET)
 	public ReturnBody studentCourses(HttpServletRequest request,
 			@PathVariable String year, @PathVariable String term) {
 		try {
@@ -239,16 +226,16 @@ public class CourseRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE,
 					ReturnBody.ERROR_MSG);
 		}
-	}*/
+	}
 
 	/**
-	 * 获取资料库内容列表  	Abandon
+	 * 获取资料库内容列表
 	 * 
 	 * @param request
 	 * @param courseId
 	 * @return
 	 */
-	/*@RequestMapping(value = "course/{courseId}/files", method = RequestMethod.GET)
+	@RequestMapping(value = "course/{courseId}/files", method = RequestMethod.GET)
 	public ReturnBody courseFiles(HttpServletRequest request,
 			@PathVariable String courseId) {
 		try {
@@ -260,17 +247,17 @@ public class CourseRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE,
 					ReturnBody.ERROR_MSG);
 		}
-	}*/
+	}
 
 	/**
-	 * 课程资源下载  abandon
+	 * 课程资源下载
 	 * 
 	 * @param request
 	 * @param response
 	 * @param cfId
 	 * @return
 	 */
-	/*@RequestMapping(value = "course-files/{cfId}", method = RequestMethod.GET)
+	@RequestMapping(value = "course-files/{cfId}", method = RequestMethod.GET)
 	public ReturnBody downloadFile(HttpServletRequest request,
 			HttpServletResponse response, @PathVariable String cfId) {
 		InputStream is = null;
@@ -314,105 +301,7 @@ public class CourseRemote extends BaseRemote {
 				e.printStackTrace();
 			}
 		}
-	}*/
-	/**
-	 * 1.2.16 获取指定月份有课程的日期(学生端)
-	 * 
-	 * @author lifei
-	 */
-	@RequestMapping(value = "student/Course/getWorkday", method = RequestMethod.POST)
-	public ReturnBody getWorkday_student(HttpServletRequest request) {
-		String ym = request.getParameter("month");
-		if (StringUtil.checkParams(ym)) {
-			List<Map> result = new ArrayList<>(); 
-			String cLastDay = DateUtil.getLastDayOfMonth(ym);
-			String cFirstDay = ym + "-01";
-			List<Map> list = termServiceImpl.getTermsList(getCurrentUserId(request));
-			
-			for (int i = 0; i < list.size(); i++) {
-				if (DateUtil.isOverlap(cFirstDay, cLastDay, ""+list.get(i).get("startDate"), ""+list.get(i).get("endDate"))) {
-					System.out.println("userId:"+getCurrentUserId(request)+"   termId:"+(String)list.get(i).get("termId"));
-					List<Map> list2 = courseServiceImpl.getCourseTimebyStuId(getCurrentUserId(request),(String)list.get(i).get("termId"));
-					if (null != list2) {
-						System.out.println("list2.size():"+list2.size());
-						for (int j = 0; j < list2.size(); j++) {
-							Map map = list2.get(j);
-							//天循环的课程
-							if (map.get("repeatType").equals("01")) {
-								//判断课程的开始结束时间是否与本月有交集
-								if (DateUtil.isOverlap(cFirstDay, cLastDay, (String)map.get("startDay"), (String)map.get("endDay"))) {
-									//课程重复天数
-									int repeatNumber = (int)map.get("repeatNumber");
-									//该课程一共有多少天
-									int distance = DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay"));
-									//一共上几次课
-									int repeat = distance / repeatNumber;
-									for (int k = 0; k <= repeat; k++) {
-										//每次上课的具体日期
-										String date = DateUtil.addDays((String)map.get("startDay"), k*repeatNumber);
-										//判断是否上课时间在指定月份里
-										if (DateUtil.isInRange(date, cFirstDay, cLastDay)) {
-											Map<String, String> m = new HashMap<>(); 
-											m.put("date", date);
-											if (!result.contains(m)) {
-												result.add(m);
-											}
-									   }
-									}
-								}
-							}else{
-								//获取周重复课程的开始时间
-								String start =  (String)map.get("startDay");
-								//获取周重复课程结束周的周一
-								String end =  (String)map.get("endDay");
-								//查看课程是否与指定的月份有交集
-								if (DateUtil.isOverlap(cFirstDay, cLastDay, start, end)) {
-									//获取课程的重复规律
-									List<CourseCell> list3 = courseCellServiceImpl.getCells((String)map.get("ciId"));
-									if (null != list3) {
-										for (int k = 0; k < list3.size(); k++) {
-											CourseCell cell = list3.get(k);
-											if (null != cell.getWeekDay()) {
-												//查看具体课程在周几上课
-												String[] week = cell.getWeekDay().split(",");
-												for (int l = 0; l < week.length; l++) {
-													//课程的间隔周期
-													int repeatNumber = (int)map.get("repeatNumber");
-													//课程一共上几周
-													int repeatCount = (DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay")))/(repeatNumber*7);
-													for (int m = 0; m <= repeatCount; m++) {
-														//获取课程具体在指定星期的上课时间
-														String dateStr = DateUtil.getWeek(start, m*repeatNumber, Integer.parseInt(week[l]));
-														if (null != dateStr) {
-															//如果上课时间在学期内&&在所指定的月份内
-															if (DateUtil.isBefore(dateStr,(String)map.get("termEndDay"),DateUtil.YYYYMMDD) && DateUtil.isInRange(dateStr, cFirstDay, cLastDay)) {
-																Map<String, String> n = new HashMap<>(); 
-																n.put("date", dateStr);
-																if (!result.contains(n)) {
-																	result.add(n);
-																}
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}else {
-						//没有相关课程
-						System.out.println("未查到相关课程！");
-					}
-				}
-			}
-			return new ReturnBody(result);
-		} else {
-			return ReturnBody.getParamError();
-		}
 	}
-	
 
 	/**
 	 * 获取课程的成绩组成信息
@@ -433,139 +322,35 @@ public class CourseRemote extends BaseRemote {
 	 * 分割符。以下内容为教师端相关接口
 	 */
 	/**
-	 * 根据课程Id，获取课程的简略信息
+	 * 获取指定日期的课程列表
 	 * @author macong
 	 * @param request
+	 * @param termId
+	 * @param date
 	 * @return
-	 * {
-		  "courseId":"dsznUBKa2",
-		  "courseName":"软件工程",
-		  "location":"尚学楼",
-		  "classRoom":"316",
-		  "lessonNumber":"1,2",
-		  "teacherId":"zhjBY21",
-		  "teacherName":"张三"
-		}
 	 */
-	@RequestMapping(value = "teacher/course/getCourseInfo", method = RequestMethod.POST)
-	public ReturnBody getCourseInfo(HttpServletRequest request) {
+	@RequestMapping(value = "teacher/course/courseList", method = RequestMethod.POST)
+	public ReturnBody getCourseList(HttpServletRequest request) {
 		try {
-			String courseIds = request.getParameter("courseIds");
-			if(StringUtil.checkParams(courseIds)){
-				List<Map> list = courseServiceImpl.getCourseInfo(courseIds);
-				return new ReturnBody(ReturnBody.RESULT_SUCCESS,list);
+			String userId = getCurrentUserId(request);
+			Map map  = getCurrentTerm(request);
+			if (null != map) {
+				String termId = (String) map.get("termId");
+				if (StringUtil.isNotEmpty(termId)) {
+					String date = request.getParameter("date");
+					//FIXME
+					List<Map> list = courseServiceImpl.getCourseList(termId, date, userId);
+					return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
+				}else{
+					return new ReturnBody(new ArrayList<>());
+				}
+			}else{
+				return new ReturnBody(new ArrayList<>());
 			}
-			return new ReturnBody(null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE,
 					ReturnBody.ERROR_MSG);
-		}
-	}
-	/**
-	 * 1.2.16 获取指定月份有课程的日期（教师端）
-	 * 
-	 * @author lifei
-	 */
-	@RequestMapping(value = "teacher/Course/getWorkday", method = RequestMethod.POST)
-	public ReturnBody getWorkday(HttpServletRequest request) {
-		String ym = request.getParameter("month");
-		if (StringUtil.checkParams(ym)) {
-			//最后的结果
-			List<Map> result = new ArrayList<>(); 
-			//获取要查月的第一天和最后一天
-			String cLastDay = DateUtil.getLastDayOfMonth(ym);
-			String cFirstDay = ym + "-01";
-			//获取我所创建的学期
-			List<TermPrivate> list = termPrivateServiceImpl.getListByUserId(getCurrentUserId(request));
-			if (null != list) {
-				for (int i = 0; i < list.size(); i++) {
-					TermPrivate item = list.get(i);
-					// 查看指定月是否与所创建的学期有交集
-					if (DateUtil.isOverlap(cFirstDay, cLastDay, item.getStartDate(), item.getEndDate())) {
-						// 如果有则查找本学学期内的课程
-						List<Map> list2 = courseServiceImpl.getCourseByTermId(item.getTpId());
-						if (null != list2) {
-							for (int j = 0; j < list2.size(); j++) {
-								Map map = list2.get(j);
-								//天循环的课程
-								if (map.get("repeatType").equals("01")) {
-									//判断课程的开始结束时间是否与本月有交集
-									if (DateUtil.isOverlap(cFirstDay, cLastDay, (String)map.get("startDay"), (String)map.get("endDay"))) {
-										//课程重复天数
-										int repeatNumber = (int)map.get("repeatNumber");
-										//该课程一共有多少天
-										int distance = DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay"));
-										//一共上几次课
-										int repeat = distance / repeatNumber;
-										for (int k = 0; k <= repeat; k++) {
-											//每次上课的具体日期
-											String date = DateUtil.addDays((String)map.get("startDay"), k*repeatNumber);
-											//判断是否上课时间在指定月份里
-											if (DateUtil.isInRange(date, cFirstDay, cLastDay)) {
-												Map<String, String> m = new HashMap<>(); 
-												m.put("date", date);
-												m.put("courseId", (String)map.get("courseId"));
-												if (!result.contains(m)) {
-													result.add(m);
-												}
-										   }
-										}
-									}
-								}else{
-									//获取周重复课程的开始时间
-									String start = (String)map.get("startDay");
-									//获取周重复课程结束周的周一
-									String end = (String)map.get("endDay");
-									//查看课程是否与指定的月份有交集
-									if (DateUtil.isOverlap(cFirstDay, cLastDay, start, end)) {
-										//获取课程的重复规律
-										List<CourseCell> list3 = courseCellServiceImpl.getCells((String)map.get("ciId"));
-										if (null != list3) {
-											for (int k = 0; k < list3.size(); k++) {
-												CourseCell cell = list3.get(k);
-												if (null != cell.getWeekDay()) {
-													//查看具体课程在周几上课
-													String[] week = cell.getWeekDay().split(",");
-													for (int l = 0; l < week.length; l++) {
-														//课程的间隔周期
-														int repeatNumber = (int)map.get("repeatNumber");
-														//课程一共上几周
-														int repeatCount = (DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay")))/(repeatNumber*7);
-														for (int m = 0; m <= repeatCount; m++) {
-															//获取课程具体在指定星期的上课时间
-															String dateStr = DateUtil.getWeek(start, m*repeatNumber, Integer.parseInt(week[l]));
-															if (null != dateStr) {
-																//如果上课时间在学期内&&在所指定的月份内
-																if (DateUtil.isBefore(dateStr,item.getEndDate(),DateUtil.YYYYMMDD) && DateUtil.isInRange(dateStr, cFirstDay, cLastDay)) {
-																	Map<String, String> n = new HashMap<>(); 
-																	n.put("date", dateStr);
-																	n.put("courseId", (String)map.get("courseId"));
-																	if (!result.contains(n)) {
-																		result.add(n);
-																	}
-																}
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}else {
-							//没有相关课程
-						}
-					}
-				}
-			}else {
-				//没有创建学期
-				return ReturnBody.getErrorBody("请先创建学期！");
-			}
-			return new ReturnBody(result);
-		} else {
-			return ReturnBody.getParamError();
 		}
 	}
 
@@ -770,13 +555,13 @@ public class CourseRemote extends BaseRemote {
 	}
 
 	/**
-	 * 删除特定的成绩组成项  abandon 
+	 * 删除特定的成绩组成项
 	 * 
 	 * @param request
 	 * @param course_scoreid
 	 * @return
 	 */
-/*	@RequestMapping(value = "teacher/course/delType/{course_scoreid}", method = RequestMethod.GET)
+	@RequestMapping(value = "teacher/course/delType/{course_scoreid}", method = RequestMethod.GET)
 	public ReturnBody deleteType(HttpServletRequest request,
 			@PathVariable String course_scoreid) {
 		try {
@@ -787,7 +572,7 @@ public class CourseRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE,
 					ReturnBody.ERROR_MSG);
 		}
-	}*/
+	}
 
 	/**
 	 * 1.2.15 为课程添加重复周期和起止时间
@@ -902,14 +687,15 @@ public class CourseRemote extends BaseRemote {
 	public ReturnBody getCurrentCourse(HttpServletRequest request) {
 		try {
 			String userId = getCurrentUserId(request);
-			String time = DateUtil.getCurrentDateStr("yyyy-MM-dd HH:mm");
-			String courseIds = request.getParameter("courseIds");
+			String time = request.getParameter("time");
 			Map school = getCurrentSchool(request);
-			if (StringUtil.checkParams(userId, time, courseIds)) {
-				Map currentCourse = courseServiceImpl.getCurrentCourse(userId, time, school, courseIds);
+			if (StringUtil.checkParams(userId, time)) {
+				Map currentCourse = courseServiceImpl.getCurrentCourse(userId,
+						time, school);
 				if (currentCourse != null) {
 					System.out.println("currentCourse:" + currentCourse);
-					return new ReturnBody(ReturnBody.RESULT_SUCCESS,currentCourse);
+					return new ReturnBody(ReturnBody.RESULT_SUCCESS,
+							currentCourse);
 				} else {
 					System.out.println("没课");
 					return new ReturnBody(ReturnBody.RESULT_SUCCESS, null);
@@ -923,7 +709,37 @@ public class CourseRemote extends BaseRemote {
 		}
 	}
 
-	
+	/**
+	 * 获取本堂课程学生的签到情况
+	 * 
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "course/registSituation", method = RequestMethod.POST)
+	public ReturnBody getRegistSituation(HttpServletRequest request) {
+		try {
+			String courseId = request.getParameter("courseId");
+			String currentWeek = request.getParameter("currentWeek");
+			String lessonNum = request.getParameter("lessonNum");
+			String status = request.getParameter("status");
+
+			List<Map> student = null;
+			if (StringUtil
+					.checkParams(courseId, currentWeek, lessonNum, status)) {
+				student = singInServiceImpl.getRegistSituation(courseId,
+						currentWeek, lessonNum, Integer.parseInt(status));
+			}
+			if (null != student && student.size() > 0) {
+				return new ReturnBody(ReturnBody.RESULT_SUCCESS, student);
+			}
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE,
+					ReturnBody.ERROR_MSG);
+		}
+	}
 
 	/**
 	 * 获取教材或教辅详情
@@ -961,7 +777,7 @@ public class CourseRemote extends BaseRemote {
 	@RequestMapping(value = "teacher/course/addTeachTime", method = RequestMethod.POST)
 	public ReturnBody addTeachTime(HttpServletRequest request) {
 		String data = request.getParameter("data");
-		String courseItemId = request.getParameter("courseCellId");
+		String courseItemId = request.getParameter("courseItemId");
 		if (StringUtil.checkParams(data,courseItemId)) {
 			List<Map<String, String>> jsonList = (List<Map<String, String>>) JSONUtils
 					.parse(data);
@@ -972,7 +788,7 @@ public class CourseRemote extends BaseRemote {
 				cell.setLessonNumber(jsonList.get(i).get("lessonNumber"));
 				cell.setLocation(jsonList.get(i).get("location"));
 				cell.setClassRoom(jsonList.get(i).get("classroom"));
-				courseCellServiceImpl.save(cell);
+				courseCellService.save(cell);
 			}
 			CourseItem courseItem = courseItemServiceImpl.get(courseItemId);
 			Teacher teacher = getCurrentTeacher(request);
@@ -1160,5 +976,20 @@ public class CourseRemote extends BaseRemote {
 		}
 	}
 
-	
+	/**
+	 *
+	 *学生端功能：获取指定学期下的课程列表
+	 * 
+	 */
+	@RequestMapping(value = "student/Course/getCourseByTerm", method = RequestMethod.POST)
+	public ReturnBody getCourseByTerm(HttpServletRequest request) {
+		String termId = request.getParameter("termId");
+		if (StringUtil.checkParams(termId)) {
+			List list = courseServiceImpl.getCourseNameBbyTerm(
+					getCurrentUserId(request), termId);
+			return new ReturnBody(list);
+		} else {
+			return ReturnBody.getParamError();
+		}
+	}
 }
