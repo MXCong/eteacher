@@ -16,11 +16,17 @@ public interface IFileService extends IService<CustomFile> {
 	 */
 	public List<Map> getFileList(String  noteId,String url);
 	/**
-	 * 删除笔记
+	 * 通过DataId删除附件
 	 * @author lifei
 	 * @param noteId
 	 */
 	public void deletebyDataId(String noteId,String path);
+	/**
+	 * 通过FileId删除附件
+	 * @author lifei
+	 * @param fileId
+	 */
+	public void deletebyFileId(String fileId,String path);
 	/**
 	 * 通过课程ID获取文件列表
 	 * @author lifei

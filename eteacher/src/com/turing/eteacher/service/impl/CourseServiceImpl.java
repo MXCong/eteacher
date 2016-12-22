@@ -1223,4 +1223,23 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 		return null;
 	}
 
+	@Override
+	public List<Map> getContainDateList(String start, String end) {
+		String sql = "SELECT tc.'COURSE_ID' AS courseId, "+
+					"tc.'REMIND_TIME' AS remindTime, "+
+					"tci.'CI_ID' AS ciId, "+
+					"tci.'REPEAT_TYPE' AS repeatType, "+
+					"tci.'REPEAT_NUMBER' AS repeatNumber, "+
+					"tci.'START_DAY' AS startDay, "+
+					"tci.'END_DAY' AS endDay "+
+					"tt.SCHOOL_ID AS schoolId "+
+					"FROM t_course tc ,t_course_item tci ,t_teacher tt "+
+					"WHERE tc.'COURSE_ID' = tci.'COURSE_ID'  "+
+					"AND tc.USER_ID = tt.TEACHER_ID "+
+					"AND tci.'START_DAY' < ?  "+
+					"AND DATE_ADD(tci.'END_DAY',INTERVAL 1 DAY) > ? ";
+		List list = courseDAO.findBySql(sql, start,end);
+		return list;
+	}
+
 }

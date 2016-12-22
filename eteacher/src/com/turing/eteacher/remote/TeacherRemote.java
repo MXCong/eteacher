@@ -401,42 +401,4 @@ public class TeacherRemote extends BaseRemote {
 			return ReturnBody.getParamError();
 		}
 	}
-	/**
-	 * 学生端获取（教师）用户的个人信息
-	 * 
-	 * @author zjx
-	 * @return
-	 * 
-	 * 废弃。该方法已存在   macong
-	 */
-	// {
-	// result : 'success',//成功success，失败failure
-	// data : {
-	// name : '姓名',
-	// teacherNO : '教工号',
-	// sex : '性别',
-	// titleName : '职称',
-	// postName : '职务',
-	// schoolName : '学校名称',
-	// department : '院系',
-	// email : '邮箱',
-	// phone : '联系电话',
-	// IM : 'IM',
-	// introduction : '教师简介'
-	// },
-	// msg : '提示信息XXX'
-	// }
-	/*@RequestMapping(value = "teacher/teacherInfo", method = RequestMethod.POST)
-	public ReturnBody getTeacherInfo(HttpServletRequest request) {
-		try {
-			String teacherId = request.getParameter("teacherId");
-			Map teacherInfo = teacherServiceImpl.getTeacherInfo(teacherId);
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, teacherInfo);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ReturnBody(ReturnBody.RESULT_FAILURE,
-					ReturnBody.ERROR_MSG);
-		}
-	}*/
 }

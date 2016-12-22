@@ -105,7 +105,9 @@ public class NoteServiceImpl extends BaseService<Note> implements INoteService {
 
 	@Override
 	public Map getNoteDetail(String noteId, String path,String url) {
-		String sql = "SELECT t.NOTE_ID AS noteId, " + "t.TITLE AS noteTitle, "
+		String sql = "SELECT t.NOTE_ID AS noteId, " 
+				+ "t.TITLE AS noteTitle, "
+				+ "t.COURSE_ID AS courseId, "
 				+ "t.CONTENT AS noteContent, "
 				+ "t.CREATE_TIME AS createTime, " + "t.IS_KEY AS isKey, "
 				+ "tc.COURSE_NAME AS courseName "

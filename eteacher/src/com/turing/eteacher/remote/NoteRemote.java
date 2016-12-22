@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartRequest;
 
+import com.alibaba.druid.support.json.JSONUtils;
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.Note;
+import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.INoteService;
 import com.turing.eteacher.util.FileUtil;
 import com.turing.eteacher.util.StringUtil;
@@ -27,6 +29,9 @@ public class NoteRemote extends BaseRemote {
 
 	@Autowired
 	private INoteService noteServiceImpl;
+	
+	@Autowired
+	private IFileService fileServiceImpl;
 
 	/**
 	 * 用户新增笔记
@@ -225,6 +230,52 @@ public class NoteRemote extends BaseRemote {
 		if (StringUtil.checkParams(noteId)) {
 			noteServiceImpl.deleteNote(noteId, FileUtil.getUploadPath());
 			return new ReturnBody("删除成功！");
+		} else {
+			return ReturnBody.getParamError();
+		}
+	}
+	@RequestMapping(value = "student/note/edit", method = RequestMethod.POST)
+	public ReturnBody edit(HttpServletRequest request) {
+		String title = request.getParameter("title");
+		String noteId = request.getParameter("noteId");
+		String content = request.getParameter("content");
+		String createTime = request.getParameter("createTime");
+		String isKey = request.getParameter("isKey");
+		String courseId = request.getParameter("courseId");
+		String deleted = request.getParameter("deleted");
+		if (StringUtil.checkParams(noteId, isKey, createTime, courseId)) {
+			Note note = noteServiceImpl.get(noteId);
+			if (null == note) {
+				return ReturnBody.getParamError();
+			}
+			note.setTitle(title);
+			note.setContent(content);
+			note.setCreateTime(createTime);
+			note.setIsKey(isKey);
+			note.setUserId(getCurrentUserId(request));
+			note.setCourseId(courseId);
+			noteServiceImpl.update(note);
+			if (request instanceof MultipartRequest) {
+				try {
+					List<MultipartFile> files = null;
+					MultipartRequest multipartRequest = (MultipartRequest) request;
+					files = multipartRequest.getFiles("myFiles");
+					noteServiceImpl.saveNoteFiles(note.getNoteId(), files,FileUtil.getUploadPath());
+				} catch (Exception e) {
+					e.printStackTrace();
+					return new ReturnBody(ReturnBody.RESULT_FAILURE,
+							ReturnBody.ERROR_MSG);
+				}
+			}
+			if (StringUtil.isNotEmpty(deleted)) {
+				List<Map<String, String>> delList = (List<Map<String, String>>)JSONUtils.parse(deleted);
+				if (null != delList && delList.size() > 0) {
+					for (int i = 0; i < delList.size(); i++) {
+						fileServiceImpl.deletebyFileId(delList.get(i).get("fileId"), FileUtil.getUploadPath());
+					}
+				}
+			}
+			return new ReturnBody("修改成功！");
 		} else {
 			return ReturnBody.getParamError();
 		}

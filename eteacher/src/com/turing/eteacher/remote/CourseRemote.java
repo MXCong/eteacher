@@ -36,6 +36,7 @@ import com.turing.eteacher.model.CourseClasses;
 import com.turing.eteacher.model.CourseItem;
 import com.turing.eteacher.model.CourseScorePrivate;
 import com.turing.eteacher.model.CustomFile;
+import com.turing.eteacher.model.Teacher;
 import com.turing.eteacher.model.Textbook;
 import com.turing.eteacher.model.User;
 import com.turing.eteacher.service.ICourseCellService;
@@ -48,6 +49,7 @@ import com.turing.eteacher.service.IMajorService;
 import com.turing.eteacher.service.ISignInService;
 import com.turing.eteacher.service.ITextbookService;
 import com.turing.eteacher.util.FileUtil;
+import com.turing.eteacher.util.SpringTimerTest;
 import com.turing.eteacher.util.StringUtil;
 
 @RestController
@@ -72,7 +74,7 @@ public class CourseRemote extends BaseRemote {
 	private ICourseScoreService courseScoreServiceImpl;
 	
 	@Autowired
-	private ICourseItemService courseItemService;
+	private ICourseItemService courseItemServiceImpl;
 
 	@Autowired
 	private ICourseCellService courseCellService;
@@ -82,6 +84,9 @@ public class CourseRemote extends BaseRemote {
 
 	@Autowired
 	private IFileService fileServiceImpl;
+	
+	@Autowired
+	private SpringTimerTest springTimerTest;
 
 
 	/**
@@ -513,8 +518,6 @@ public class CourseRemote extends BaseRemote {
 							}
 						}
 					}
-				} else {
-					System.out.println("fslfjlsdjfisdfjosdjfodsf");
 				}
 			}
 			Map<String, String> map = new HashMap();
@@ -524,6 +527,7 @@ public class CourseRemote extends BaseRemote {
 			return ReturnBody.getParamError();
 		}
 	}
+	
 
 	/**
 	 * 增加或修改课程组成项信息
@@ -590,14 +594,7 @@ public class CourseRemote extends BaseRemote {
 			item.setRepeatNumber(Integer.parseInt(repeatNumber));
 			item.setStartDay(start);
 			item.setEndDay(end);
-//			if (repeatType.equals("01")) {
-//				item.setStartDay(start);
-//				item.setEndDay(end);
-//			} else {
-//				item.setStartWeek(Integer.parseInt(start));
-//				item.setEndWeek(Integer.parseInt(end));
-//			}
-			courseItemService.save(item);
+			courseItemServiceImpl.save(item);
 			Map<String, String> map = new HashMap<>();
 			map.put("courseItemId", item.getCiId());
 			return new ReturnBody(map);
@@ -780,17 +777,23 @@ public class CourseRemote extends BaseRemote {
 	@RequestMapping(value = "teacher/course/addTeachTime", method = RequestMethod.POST)
 	public ReturnBody addTeachTime(HttpServletRequest request) {
 		String data = request.getParameter("data");
-		if (StringUtil.checkParams(data)) {
+		String courseItemId = request.getParameter("courseItemId");
+		if (StringUtil.checkParams(data,courseItemId)) {
 			List<Map<String, String>> jsonList = (List<Map<String, String>>) JSONUtils
 					.parse(data);
 			for (int i = 0; i < jsonList.size(); i++) {
 				CourseCell cell = new CourseCell();
-				cell.setCiId(jsonList.get(i).get("courseCellId"));
+				cell.setCiId(courseItemId);
 				cell.setWeekDay(jsonList.get(i).get("weekday"));
 				cell.setLessonNumber(jsonList.get(i).get("lessonNumber"));
 				cell.setLocation(jsonList.get(i).get("location"));
 				cell.setClassRoom(jsonList.get(i).get("classroom"));
 				courseCellService.save(cell);
+			}
+			CourseItem courseItem = courseItemServiceImpl.get(courseItemId);
+			Teacher teacher = getCurrentTeacher(request);
+			if (null != courseItem) {
+				springTimerTest.checkCourseById(courseItem.getCourseId(), teacher.getSchoolId());
 			}
 			return new ReturnBody("保存成功！");
 		} else {

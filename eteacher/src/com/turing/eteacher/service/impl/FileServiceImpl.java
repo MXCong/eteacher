@@ -75,4 +75,17 @@ public class FileServiceImpl extends BaseService<CustomFile> implements IFileSer
 		return null;
 	}
 
+	@Override
+	public void deletebyFileId(String fileId, String path) {
+		CustomFile cfile = fileDAO.get(fileId);
+		if (null != cfile) {
+				File file = new File(path +"/" + cfile.getServerName());
+				if (file.exists()) {
+					file.delete();
+				}
+				fileDAO.delete(cfile);
+		}
+		
+	}
+
 }
