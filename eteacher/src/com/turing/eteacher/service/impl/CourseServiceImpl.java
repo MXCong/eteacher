@@ -511,7 +511,6 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 				String time2 = DateUtil.timeSubtraction(time, "+", (Integer)c.get(0).get("after"));
 				
 				//查询lesson对应的开始时间
-				System.out.println("*****:"+currentCourse.toString());
 				String lessons = (String) currentCourse.get("lessonNumber");
 				for (int k = 0; k < timeTable.size(); k++) {
 					String ln = (String) timeTable.get(k).get("lessonNumber");
@@ -580,7 +579,8 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 			List<Map> list = new ArrayList<>();
 			String cids = courseIds.substring(1, courseIds.length()-1);
 			String [] cIdList = cids.split(",");
-			String hql = "select c.courseName as courseName, cc.location as location, "
+			String hql = "select c.courseId as courseId, c.courseName as courseName, "
+					+ "cc.location as location, "
 					+ "cc.classRoom as classRoom, cc.lessonNumber as lessonNumber, "
 					+ "t.name as teacherName, t.teacherId as teacherId "
 					+ "from Course c, CourseItem ci, CourseCell cc, Teacher t "
@@ -590,6 +590,24 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 				String courseId = cIdList[i].substring(1, cIdList[i].length()-1);
 				List<Map> m = courseDAO.findMap(hql, courseId);
 				if(null != m && m.size() > 0){
+					//1.课程名称与授课班级的拼接--->软件工程（13软工A班）
+					String hq = "select cl.className as className from "
+							+ "Classes cl, CourseClasses cc where "
+							+ "cc.classId = cl.classId and cc.courseId = ?";
+					for (int j = 0; j < m.size(); j++) {
+						List<Map> cls = courseDAO.findMap(hq, (String)m.get(j).get("courseId"));
+						String courseName = (String) m.get(j).get("courseName")+"(";
+						String newName = (String) m.get(j).get("courseName");
+						if(null != cls && cls.size() > 0){
+							for (int k = 0; k < cls.size(); k++) {
+								courseName += cls.get(k).get("className")+",";
+							}
+							newName = courseName.substring(0,courseName.length()-1);
+							newName = newName + ")";
+						}
+						m.get(j).put("courseName", newName);
+					}
+					//
 					list.add(m.get(0));
 				}
 			}
@@ -747,8 +765,8 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	 * 
 	 * } System.out.println("转换结果："+m); return null; }
 	 */
+	
 	// 获取课程的详细信息
-	// @SuppressWarnings("unchecked")
 	@Override
 	public List<Map> getCourseDetail(String courseId, String status) {
 		List<Map> list = null;
@@ -953,8 +971,16 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 				String cid = courseId[i].substring(1, courseId[i].length()-1);
 				List<Map> m = courseDAO.findMap(hql2,cid);
 				if(null != m && m.size() > 0){
-					m.get(0).put("lessonNumber", timeTable.get(0).get("lessonNumber"));
-					return m.get(0);
+					//获取该课程的上课时间
+					String lessons = (String) m.get(0).get("lessonNumber");
+					String [] lns = lessons.split(",|，");
+					for(int a=0; a<lns.length; a++){
+						if(lns[a].equals(timeTable.get(0).get("lessonNumber"))){
+							m.get(0).put("lessonNumber", timeTable.get(0).get("lessonNumber"));
+							return m.get(0);
+						}
+					}
+					
 				}
 			}
 		}
