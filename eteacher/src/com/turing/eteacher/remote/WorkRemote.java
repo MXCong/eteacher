@@ -203,12 +203,9 @@ public class WorkRemote extends BaseRemote {
 	 * @param request
 	 * @return
 	 */
-	int i = 0;
-
 	@RequestMapping(value = "teacher/work/detail", method = RequestMethod.POST)
 	public ReturnBody getWorkDetail(HttpServletRequest request) {
 		try {
-			i++;
 			String workId = request.getParameter("workId"); 
 			if (StringUtil.checkParams(workId)) {
 				Map data = workServiceImpl.getWorkDetail(workId,FileUtil.getRequestUrl(request));
@@ -238,21 +235,40 @@ public class WorkRemote extends BaseRemote {
 		String content = request.getParameter("content");
 		String endTime = request.getParameter("endTime");
 		String publishTime = request.getParameter("publishTime");
-		String remindTime = request.getParameter("remindTime");
+		//String remindTime = request.getParameter("remindTime");
+		String course = request.getParameter("course");
 		String status = request.getParameter("status");
-		if (StringUtil.checkParams(content,endTime,publishTime,remindTime,status)) {
-			try {	
-				Work work = new Work();
-				work.setContent(request.getParameter("content"));
-				work.setEndTime(request.getParameter("endTime"));
-				work.setPublishTime(request.getParameter("publishTime"));
-				work.setRemindTime(request.getParameter("remindTime"));
-				work.setStatus(Integer.parseInt(request.getParameter("status")));
+		String workId = request.getParameter("workId"); 
+		String deleted = request.getParameter("deleted");
+		if (StringUtil.checkParams(course,content,endTime,publishTime,status)) {
+			Work work = null;
+			String wId = null;
+			if (StringUtil.isNotEmpty(workId)) {
+				work = workServiceImpl.get(workId);
+				if (null == work) {
+					return ReturnBody.getParamError();
+				}
+				work.setContent(content);
+				work.setEndTime(endTime);
+				work.setPublishTime(publishTime);
+				//work.setRemindTime(remindTime);
+				work.setStatus(Integer.parseInt(status));
+				workServiceImpl.update(work);
+				workCourseServiceImpl.deleteData(workId);
+				wId = workId;
+			}else{
+				work = new Work();
+				work.setContent(content);
+				work.setEndTime(endTime);
+				work.setPublishTime(publishTime);
+				//work.setRemindTime(remindTime);
+				work.setStatus(Integer.parseInt(status));
 				//作业（除附件之外）的操作
 				workServiceImpl.add(work);
-				String wId = work.getWorkId();
+				wId = work.getWorkId();
+			}
+			try {	
 				//获取该作业作用的班级列表
-				String course = request.getParameter("course");
 				List<Map> list = (List<Map>) JSONUtils.parse(course);
 				for(int n=0;n<list.size();n++){
 					WorkCourse workCourse = new WorkCourse();
@@ -260,7 +276,16 @@ public class WorkRemote extends BaseRemote {
 					workCourse.setCourseId((String)list.get(n).get("id"));
 					workCourseServiceImpl.add(workCourse);
 				}
-				//对作业附件的处理
+				//删除已有的附件
+				if (StringUtil.isNotEmpty(deleted)) {
+					List<Map<String, String>> delList = (List<Map<String, String>>)JSONUtils.parse(deleted);
+					if (null != delList && delList.size() > 0) {
+						for (int i = 0; i < delList.size(); i++) {
+							fileServiceImpl.deletebyFileId(delList.get(i).get("fileId"), FileUtil.getUploadPath());
+						}
+					}
+				}
+				//对新增附件的处理
 				if (request instanceof MultipartRequest) {
 					try {
 						List<MultipartFile> files = null;
@@ -292,16 +317,16 @@ public class WorkRemote extends BaseRemote {
 						e.printStackTrace();
 						return new ReturnBody(ReturnBody.RESULT_FAILURE,ReturnBody.ERROR_MSG);
 					}
-				}else{
-					System.out.println("不是文件请求");;
 				}
-				if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
-					TaskModel model = new TaskModel();
-					model.setId(work.getWorkId());
-					model.setDate(publishTime);
-					model.setType(TaskModel.UTYPE_STUDENT);
-					model.setType(TaskModel.TYPE_NOTICE);
-					springTimerTest.addTask(model);
+				if (status.equals("02")) {
+					if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+						TaskModel model = new TaskModel();
+						model.setId(work.getWorkId());
+						model.setDate(publishTime);
+						model.setType(TaskModel.UTYPE_STUDENT);
+						model.setType(TaskModel.TYPE_NOTICE);
+						springTimerTest.addTask(model);
+					}
 				}
 				return new ReturnBody("保存成功！");
 			}catch (Exception e) {

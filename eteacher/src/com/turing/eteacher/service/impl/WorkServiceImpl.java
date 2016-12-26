@@ -10,11 +10,13 @@ import org.springframework.stereotype.Service;
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
 import com.turing.eteacher.dao.WorkDAO;
+import com.turing.eteacher.model.TaskModel;
 import com.turing.eteacher.model.Work;
 import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.IWorkCourseService;
 import com.turing.eteacher.service.IWorkService;
 import com.turing.eteacher.util.DateUtil;
+import com.turing.eteacher.util.SpringTimerTest;
 import com.turing.eteacher.util.StringUtil;
 
 @Service
@@ -25,6 +27,9 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	
 	@Autowired
 	private IFileService fileServiceImpl;
+	
+	@Autowired
+	private SpringTimerTest springTimerTest;
 	@Override
 	public BaseDAO<Work> getDAO() {
 		return workDAO;
@@ -247,7 +252,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 				+ "from Work w where w.workId = ?";
 		List<Map> list = workDAO.findMap(wi, workId);
 		if(null != list && list.size() > 0){
-			Map data = workDAO.findMap(wi, workId).get(0);
+			Map data = list.get(0);
 			List listCourse =  workCourseServiceImpl.getCoursesByWId(workId);
 			if (null != listCourse && listCourse.size() > 0) {
 				data.put("courses", listCourse);
@@ -267,18 +272,37 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	 */
 	@Override
 	public void updateWorkStatus(String workId,String status) {
-		String hql="update Work w ";
-		if("0".equals(status)){//删除作业
-			hql+="set w.status=0";
-		}
+		Work work = workDAO.get(workId);
+		String before = work.getPublishTime();
+		work.setStatus(Integer.parseInt(status.trim()));
 		if("1".equals(status)){//（未发布作业->立即发布）
-			hql+="set w.status=1,w.publishTime=now()";
+			work.setPublishTime(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM));
 		}
-		if("2".equals(status)){//已发布作业撤回到草稿状态
-			hql+="set w.status=2";
+		workDAO.update(work);
+		switch (Integer.parseInt(status)) {
+		case 0:
+			if (DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM), before, DateUtil.YYYYMMDDHHMM)
+					&& DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+				springTimerTest.deleteTask(workId, TaskModel.TYPE_HOMEWORK_PUBLISH);
+			}
+			break;
+		case 1:
+			TaskModel model = new TaskModel();
+			model.setDate(work.getPublishTime());
+			model.setId(workId);
+			model.setType(TaskModel.TYPE_HOMEWORK_PUBLISH);
+			model.setUserType(TaskModel.UTYPE_STUDENT);
+			springTimerTest.addTask(model);
+			break;
+		case 2:
+			if (DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM), before, DateUtil.YYYYMMDDHHMM)
+					&& DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+				springTimerTest.deleteTask(workId, TaskModel.TYPE_HOMEWORK_PUBLISH);
+			}
+			break;
+		default:
+			break;
 		}
-		hql+=" where w.workId=?";
-		workDAO.executeHql(hql, workId);
 	}
 	/**
 	 * 删除作业
