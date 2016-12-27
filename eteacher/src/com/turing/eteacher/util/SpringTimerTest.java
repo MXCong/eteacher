@@ -76,9 +76,8 @@ public class SpringTimerTest {
 	 * 
 	 * @author lifei
 	 */
-	@Scheduled(cron = "0 0 0 * * ?")
-	//	@Scheduled(cron = "0 0/10 13,14 * * ?")
-	// 每天凌晨触发//0 0 0 * * ?
+	//@Scheduled(cron = "0 0 0 * * ?")
+	@Scheduled(cron = "0 0/10 10,11 * * ?")
 	public void test() {
 		System.out.println(new SimpleDateFormat("yyyy 年 MM 月 dd 日 HH 时 mm 分 ss 秒").format(new Date()));
 		getTimer().cancel();

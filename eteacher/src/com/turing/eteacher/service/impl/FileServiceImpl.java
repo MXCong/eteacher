@@ -11,6 +11,7 @@ import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
 import com.turing.eteacher.dao.FileDAO;
 import com.turing.eteacher.model.CustomFile;
+import com.turing.eteacher.service.IDictionary2PrivateService;
 import com.turing.eteacher.service.IFileService;
 
 @Service
@@ -19,10 +20,14 @@ public class FileServiceImpl extends BaseService<CustomFile> implements IFileSer
 	@Autowired
 	private FileDAO fileDAO;
 	
+	@Autowired
+	private IDictionary2PrivateService dictionary2PrivateServiceImpl;
+	
 	@Override
 	public BaseDAO<CustomFile> getDAO() {
 		return fileDAO;
 	}
+	
 
 	@Override
 	public List<Map> getFileList(String noteId,String url) {
@@ -65,9 +70,15 @@ public class FileServiceImpl extends BaseService<CustomFile> implements IFileSer
 				"AND tf.FILE_AUTH = '01' AND tf.DATA_ID = ? ";
 		List<Map> list = fileDAO.findBySqlAndPage(sql, page*20, 20,url, courseId);
 		if (null != list && list.size()> 0) {
-			return list;
+			for (int i = 0; i < list.size(); i++) {
+				String id = (String)list.get(i).get("vocabularyId");
+				Map map = dictionary2PrivateServiceImpl.getValueById(id);
+				if (null != map) {
+					list.get(i).put("vocabulary", map.get("value"));
+				}
+			}
 		}
-		return null;
+		return list;
 	}
 
 	@Override

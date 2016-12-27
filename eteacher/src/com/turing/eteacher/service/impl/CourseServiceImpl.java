@@ -834,10 +834,10 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 			detail.put("textbookjf", listJf);
 		}
 		
-		List listFile = fileServiceImpl.getFileList(courseId, url);
-		if (null != listFile && listFile.size() > 0) {
-			detail.put("files", listFile);
-		}
+//		List listFile = fileServiceImpl.getFileList(courseId, url);
+//		if (null != listFile && listFile.size() > 0) {
+//			detail.put("files", listFile);
+//		}
 //			// 获取资源信息
 //			hql1 = "select fileName as fileName,f.vocabularyId as vocabularyId from CustomFile f where f.dataId=?";
 //			list2 = courseDAO.findMap(hql1, courseId);

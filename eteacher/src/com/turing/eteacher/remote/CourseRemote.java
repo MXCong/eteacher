@@ -81,7 +81,8 @@ public class CourseRemote extends BaseRemote {
 	
 	@Autowired
 	private ITermService termServiceImpl;
-
+	
+	@Autowired
 	private IFileService fileServiceImpl;
 	
 	@Autowired
@@ -700,35 +701,35 @@ public class CourseRemote extends BaseRemote {
 					textbookServiceImpl.save(item);
 				}
 			}
-//			if (StringUtil.isNotEmpty(myFiles)) {
-//				if (request instanceof MultipartRequest) {
-//					MultipartRequest muiltRequest = (MultipartRequest) request;
-//					String savePath = FileUtil.getUploadPath();
-//					List<Map<String, String>> fileList = (List<Map<String, String>>) JSONUtils
-//							.parse(myFiles);
-//					for (int i = 0; i < fileList.size(); i++) {
-//						MultipartFile mFile = muiltRequest.getFile(fileList.get(i).get("fileName"));
-//						if (!mFile.isEmpty()) {
-//							String serverName = FileUtil.makeFileName(mFile
-//									.getOriginalFilename());
-//							try {
-//								FileUtils.copyInputStreamToFile(mFile.getInputStream(), new File(savePath,serverName));
-//								CustomFile file = new CustomFile();
-//								file.setDataId(courseId);
-//								file.setFileAuth(fileList.get(i).get("fileAuth"));
-//								file.setFileName(fileList.get(i).get("fileName"));
-//								file.setIsCourseFile(1);
-//								file.setVocabularyId(fileList.get(i).get("typeId"));
-//								file.setServerName(serverName);
-//								System.out.println("file:"+file.toString());
-//								fileServiceImpl.save(file);
-//							} catch (IOException e) {
-//								e.printStackTrace();
-//							}
-//						}
-//					}
-//				}
-//			}
+			if (StringUtil.isNotEmpty(myFiles)) {
+				if (request instanceof MultipartRequest) {
+					MultipartRequest muiltRequest = (MultipartRequest) request;
+					String savePath = FileUtil.getUploadPath();
+					List<Map<String, String>> fileList = (List<Map<String, String>>) JSONUtils
+							.parse(myFiles);
+					for (int i = 0; i < fileList.size(); i++) {
+						MultipartFile mFile = muiltRequest.getFile(fileList.get(i).get("fileName"));
+						if (!mFile.isEmpty()) {
+							String serverName = FileUtil.makeFileName(mFile
+									.getOriginalFilename());
+							try {
+								FileUtils.copyInputStreamToFile(mFile.getInputStream(), new File(savePath,serverName));
+								CustomFile file = new CustomFile();
+								file.setDataId(courseId);
+								file.setFileAuth(fileList.get(i).get("fileAuth"));
+								file.setFileName(fileList.get(i).get("fileName"));
+								file.setIsCourseFile(1);
+								file.setVocabularyId(fileList.get(i).get("typeId"));
+								file.setServerName(serverName);
+								System.out.println("file:"+file.toString());
+								fileServiceImpl.save(file);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+			}
 			Map<String, String> map = new HashMap();
 			map.put("courseId", course.getCourseId());
 			return new ReturnBody(map);
