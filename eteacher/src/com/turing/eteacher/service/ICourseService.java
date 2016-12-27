@@ -60,7 +60,7 @@ public interface ICourseService extends IService<Course> {
 	//根据课程Id，获取课程的简略信息
 	public List<Map> getCourseInfo(String courseIds);
 	//获取课程详细信息
-	public List<Map> getCourseDetail(String courseId, String status);
+	public Map getCourseDetail(String courseId,String url);
 	//修改教材教辅信息
 	public void updateTextbook(Textbook text);
 	//修改成绩组成项信息

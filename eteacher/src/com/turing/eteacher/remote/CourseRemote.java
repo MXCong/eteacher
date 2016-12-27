@@ -42,6 +42,7 @@ import com.turing.eteacher.service.IMajorService;
 import com.turing.eteacher.service.ITermPrivateService;
 import com.turing.eteacher.service.ITermService;
 import com.turing.eteacher.service.ITextbookService;
+import com.turing.eteacher.util.CustomIdGenerator;
 import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.FileUtil;
 import com.turing.eteacher.util.SpringTimerTest;
@@ -574,24 +575,22 @@ public class CourseRemote extends BaseRemote {
 	 * 
 	 * @param request
 	 * @param courseId
-	 * @param status
 	 * @return
 	 */
 	@RequestMapping(value = "teacher/course/getCourseDetail", method = RequestMethod.POST)
 	public ReturnBody getCourseDetail(HttpServletRequest request) {
-		try {
 			String courseId = request.getParameter("courseId");
-			String status = request.getParameter("status");
-			System.out.println("courseId:" + courseId + "   status:" + status);
-			List<Map> list = courseServiceImpl
-					.getCourseDetail(courseId, status);
-			System.out.println("结果：" + list.get(0).toString());
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, list.get(0));
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ReturnBody(ReturnBody.RESULT_FAILURE,
-					ReturnBody.ERROR_MSG);
-		}
+			if(StringUtil.checkParams(courseId)){
+				Map detail = courseServiceImpl.getCourseDetail(courseId,FileUtil.getRequestUrl(request));
+				System.out.println("detail:"+detail.toString());
+				if (null != detail ) {
+					return new ReturnBody(detail);
+				}else {
+					return ReturnBody.getParamError();
+				}
+			}else {
+				return ReturnBody.getParamError();
+			}
 	}
 
 	/**
@@ -677,7 +676,7 @@ public class CourseRemote extends BaseRemote {
 				Map<String, String> bookObj = (Map<String, String>) JSONUtils
 						.parse(book);
 				Textbook item = new Textbook();
-				item.setTextbookName(bookObj.get("name"));
+				item.setTextbookName(bookObj.get("textbookName"));
 				item.setAuthor(bookObj.get("author"));
 				item.setCourseId(courseId);
 				item.setPublisher(bookObj.get("publisher"));
@@ -691,7 +690,7 @@ public class CourseRemote extends BaseRemote {
 						.parse(books);
 				for (int i = 0; i < bookList.size(); i++) {
 					Textbook item = new Textbook();
-					item.setTextbookName(bookList.get(i).get("bookName"));
+					item.setTextbookName(bookList.get(i).get("textbookName"));
 					item.setAuthor(bookList.get(i).get("author"));
 					item.setCourseId(courseId);
 					item.setPublisher(bookList.get(i).get("publisher"));
@@ -701,40 +700,35 @@ public class CourseRemote extends BaseRemote {
 					textbookServiceImpl.save(item);
 				}
 			}
-			if (StringUtil.isNotEmpty(myFiles)) {
-				if (request instanceof MultipartRequest) {
-					MultipartRequest muiltRequest = (MultipartRequest) request;
-					String savePath = FileUtil.getUploadPath();
-					List<Map<String, String>> fileList = (List<Map<String, String>>) JSONUtils
-							.parse(myFiles);
-					for (int i = 0; i < fileList.size(); i++) {
-						MultipartFile mFile = muiltRequest.getFile(fileList
-								.get(i).get("fileName"));
-						if (!mFile.isEmpty()) {
-							String serverName = FileUtil.makeFileName(mFile
-									.getOriginalFilename());
-							try {
-								FileUtils.copyInputStreamToFile(mFile
-										.getInputStream(), new File(savePath,
-										serverName));
-								CustomFile file = new CustomFile();
-								file.setDataId(courseId);
-								file.setFileAuth(fileList.get(i)
-										.get("fileAuth"));
-								file.setFileName(fileList.get(i)
-										.get("fileName"));
-								file.setIsCourseFile(1);
-								file.setVocabularyId(fileList.get(i).get(
-										"typeId"));
-								file.setServerName(serverName);
-								fileServiceImpl.save(file);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-					}
-				}
-			}
+//			if (StringUtil.isNotEmpty(myFiles)) {
+//				if (request instanceof MultipartRequest) {
+//					MultipartRequest muiltRequest = (MultipartRequest) request;
+//					String savePath = FileUtil.getUploadPath();
+//					List<Map<String, String>> fileList = (List<Map<String, String>>) JSONUtils
+//							.parse(myFiles);
+//					for (int i = 0; i < fileList.size(); i++) {
+//						MultipartFile mFile = muiltRequest.getFile(fileList.get(i).get("fileName"));
+//						if (!mFile.isEmpty()) {
+//							String serverName = FileUtil.makeFileName(mFile
+//									.getOriginalFilename());
+//							try {
+//								FileUtils.copyInputStreamToFile(mFile.getInputStream(), new File(savePath,serverName));
+//								CustomFile file = new CustomFile();
+//								file.setDataId(courseId);
+//								file.setFileAuth(fileList.get(i).get("fileAuth"));
+//								file.setFileName(fileList.get(i).get("fileName"));
+//								file.setIsCourseFile(1);
+//								file.setVocabularyId(fileList.get(i).get("typeId"));
+//								file.setServerName(serverName);
+//								System.out.println("file:"+file.toString());
+//								fileServiceImpl.save(file);
+//							} catch (IOException e) {
+//								e.printStackTrace();
+//							}
+//						}
+//					}
+//				}
+//			}
 			Map<String, String> map = new HashMap();
 			map.put("courseId", course.getCourseId());
 			return new ReturnBody(map);

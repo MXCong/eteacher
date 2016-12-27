@@ -3,15 +3,10 @@ package com.turing.eteacher.service.impl;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import javax.crypto.spec.IvParameterSpec;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.druid.support.json.JSONParser;
-import com.alibaba.druid.support.json.JSONWriter;
-import com.fasterxml.jackson.core.JsonParser;
-import com.google.gson.JsonObject;
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
 import com.turing.eteacher.dao.FileDAO;

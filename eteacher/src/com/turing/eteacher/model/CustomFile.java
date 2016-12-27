@@ -78,4 +78,12 @@ public class CustomFile extends BaseModel implements Serializable {
 	public void setFileAuth(String fileAuth) {
 		this.fileAuth = fileAuth;
 	}
+	@Override
+	public String toString() {
+		return "CustomFile [fileId=" + fileId + ", dataId=" + dataId
+				+ ", fileName=" + fileName + ", serverName=" + serverName
+				+ ", isCourseFile=" + isCourseFile + ", vocabularyId="
+				+ vocabularyId + ", fileAuth=" + fileAuth + "]";
+	}
+	
 }
