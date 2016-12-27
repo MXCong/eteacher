@@ -56,7 +56,7 @@ public class FileUtil {
 		// //创建临时目录
 		// filesavePath.mkdir();
 		// }
-		String savePath = "D:\\upload";
+		String savePath = "/usr/local/eteacherFile";
 		File filesavePath = new File(savePath);
 		if (!filesavePath.exists()) {
 			filesavePath.mkdir();
