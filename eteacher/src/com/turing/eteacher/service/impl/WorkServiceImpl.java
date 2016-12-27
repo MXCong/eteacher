@@ -198,11 +198,11 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		 * 修改：macong 
 		 * 一个作业可能对应多门课程，一门课程可能包含多个班级信息。对这些信息进行拼接 
 		 */
+		String hq = "select cl.className as className from "
+				+ "Classes cl, CourseClasses cc where "
+				+ "cc.classId = cl.classId and cc.courseId = ?";
 		for(int a = 0; a < list.size(); a++){
 			//1.课程名称与授课班级的拼接--->软件工程（13软工A班）
-			String hq = "select cl.className as className from "
-					+ "Classes cl, CourseClasses cc where "
-					+ "cc.classId = cl.classId and cc.courseId = ?";
 			List<Map> cnlist = workDAO.findMap(hq, (String)list.get(a).get("courseId"));
 			if (null != cnlist && cnlist.size() > 0) {
 				String courseName = list.get(a).get("courseName")+"(";
@@ -214,7 +214,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 				list.get(a).put("courseName", courseName);
 			}	
 			//2. 一个作业对应多门课程
-			Object wid = list.get(a).get("workId");
+			String wid = (String) list.get(a).get("workId");
 			for(int b = 0; b < list.size(); b++){
 				if(a != b && wid.equals(list.get(b).get("workId"))){
 					String ncn = (String) list.get(a).get("courseName")+"||"+(String) list.get(b).get("courseName");
@@ -237,7 +237,6 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		}else{
 			return null;
 		}
-		
 	}
 	/**
 	 * @author macong
