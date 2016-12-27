@@ -172,7 +172,7 @@ public class NoticeServiceImpl extends BaseService<Notice> implements INoticeSer
 	//查看通知未读人员列表
 	@Override
 	public List<Map> getNoticeReadList(String noticeId,int type, int page) {
-		String sql = "SELECT DISTINCT stu.STU_ID AS studentId, stu.STU_NAME AS studentName ";
+		String sql = "SELECT DISTINCT stu.STU_ID AS studentId, stu.STU_NO as studentNo , stu.STU_NAME AS studentName ";
 		List<String> params = new ArrayList<>();
 		switch (type) {
 		case 1:
