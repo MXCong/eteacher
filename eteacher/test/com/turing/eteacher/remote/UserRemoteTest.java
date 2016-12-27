@@ -42,7 +42,7 @@ public class UserRemoteTest {
 	}
 
 	@Test
-	public void testRegister() {
+	public void Register() {
 		fail("Not yet implemented");
 	}
 

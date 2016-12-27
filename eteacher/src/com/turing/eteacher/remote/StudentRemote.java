@@ -2,7 +2,6 @@ package com.turing.eteacher.remote;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,15 +20,10 @@ import org.springframework.web.multipart.MultipartRequest;
 
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
-import com.turing.eteacher.model.CourseCell;
 import com.turing.eteacher.model.Student;
-import com.turing.eteacher.service.ICourseCellService;
 import com.turing.eteacher.service.ICourseService;
 import com.turing.eteacher.service.IStudentService;
-import com.turing.eteacher.service.ITermPrivateService;
-import com.turing.eteacher.service.ITermService;
 import com.turing.eteacher.util.BeanUtils;
-import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.FileUtil;
 import com.turing.eteacher.util.StringUtil;
 

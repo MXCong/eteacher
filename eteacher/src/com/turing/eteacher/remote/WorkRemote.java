@@ -318,13 +318,13 @@ public class WorkRemote extends BaseRemote {
 						return new ReturnBody(ReturnBody.RESULT_FAILURE,ReturnBody.ERROR_MSG);
 					}
 				}
-				if (status.equals("02")) {
+				if (status.equals("1")) {
 					if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
 						TaskModel model = new TaskModel();
 						model.setId(work.getWorkId());
 						model.setDate(publishTime);
 						model.setType(TaskModel.UTYPE_STUDENT);
-						model.setType(TaskModel.TYPE_NOTICE);
+						model.setType(TaskModel.TYPE_HOMEWORK_PUBLISH);
 						springTimerTest.addTask(model);
 					}
 				}
@@ -436,38 +436,5 @@ public class WorkRemote extends BaseRemote {
 			return ReturnBody.getParamError();
 		}
 	}
-	// @RequestMapping(value="teacher/work/updateWorkStatus",
-	// method=RequestMethod.POST)
-	// public ReturnBody updateWorkStatus(HttpServletRequest request,Work
-	// work,WorkCourse workCourse){
-	// try{
-	// int status=Integer.parseInt(request.getParameter("status"));
-	// String wId = request.getParameter("workId");
-	// //作业的作用对象ID
-	// work.setStatus(status);
-	// //获取该作业作用的班级列表
-	// String list = request.getParameter("courseIds");
-	// //System.out.println(list);
-	// if(list!=null){//作业的接受对象发生变化，更新"作业-课程"关联表。
-	// String lists = list.replace("[", "").replace("]", "").replace("\"", "");
-	// String [] cIds = lists.split(",");
-	// //更新“作业-课程”关联表
-	// workCourseServiceImpl.deleteData(wId);//删除原有数据
-	// for(int n=0;n<cIds.length;n++){
-	// //生成作业表主键（uuid）
-	// String wcId = CustomIdGenerator.generateShortUuid();
-	// workCourse.setWcId(wcId);
-	// workCourse.setWorkId(wId);
-	// workCourse.setCourseId(cIds[n]);
-	// workCourseServiceImpl.add(workCourse);
-	// }
-	// }
-	// workServiceImpl.saveOrUpdate(work);
-	// return new ReturnBody(ReturnBody.RESULT_SUCCESS, new HashMap());
-	// }
-	// catch(Exception e){
-	// e.printStackTrace();
-	// return new ReturnBody(ReturnBody.RESULT_FAILURE,ReturnBody.ERROR_MSG);
-	// }
-	// }
+
 }

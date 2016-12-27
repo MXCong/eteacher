@@ -21,7 +21,6 @@ import com.turing.eteacher.model.CourseItem;
 import com.turing.eteacher.model.Notice;
 import com.turing.eteacher.model.PushMessage;
 import com.turing.eteacher.model.TaskModel;
-import com.turing.eteacher.model.TermPrivate;
 import com.turing.eteacher.model.TimeTable;
 import com.turing.eteacher.model.Work;
 import com.turing.eteacher.service.ICourseCellService;
@@ -71,15 +70,14 @@ public class SpringTimerTest {
 	private static List<TaskModel> allList = new ArrayList<>();
 	
 	private static Timer timer;
-	
-	private static SpringTimerTest instance;
-	
+		
 	/**
 	 * Spring定时器测试方法
 	 * 
 	 * @author lifei
 	 */
 	@Scheduled(cron = "0 0 0 * * ?")
+	//	@Scheduled(cron = "0 0/10 13,14 * * ?")
 	// 每天凌晨触发//0 0 0 * * ?
 	public void test() {
 		System.out.println(new SimpleDateFormat("yyyy 年 MM 月 dd 日 HH 时 mm 分 ss 秒").format(new Date()));
@@ -121,6 +119,7 @@ public class SpringTimerTest {
 				temp.setUserType(TaskModel.UTYPE_STUDENT);
 				tempList.add(temp);
 			}
+			System.out.println("通知提醒有："+tempList.size()+"条");
 		}
 		return tempList;
 	}
@@ -188,7 +187,7 @@ public class SpringTimerTest {
 											TimeTable timeTable = timeTableServiceImpl.getItemBySchoolId((String)map.get("schoolId"), lessions[m]);
 											Map registMap = registConfigServiceImpl.getRegistTimeByCourseId((String)map.get("courseId"));
 											if (null != timeTable) {
-												int remind = Integer.parseInt(((String)map.get("remindTime")).trim());
+												int remind = (int)map.get("remindTime");
 												String remindTime = DateUtil.deleteMinutes(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" "+timeTable.getStartTime(),remind);
 												//System.out.println("*课程的提醒时间："+remindTime);
 												int regist = 10;
@@ -254,7 +253,7 @@ public class SpringTimerTest {
 															TimeTable timeTable = timeTableServiceImpl.getItemBySchoolId((String)map.get("schoolId"), lessions[n]);
 															Map registMap = registConfigServiceImpl.getRegistTimeByCourseId((String)map.get("courseId"));
 															if (null != timeTable) {
-																int remind = Integer.parseInt(((String)map.get("remindTime")).trim());
+																int remind = (int)map.get("remindTime");
 																String remindTime = DateUtil.deleteMinutes(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" "+timeTable.getStartTime(),remind);
 																int regist = 10;
 																if (null != registMap) {
@@ -539,6 +538,9 @@ public class SpringTimerTest {
 	 * 发起推送
 	 */
 	private void doPush(){
+		if (allList.size() <= 0) {
+			return ;
+		}
 		TaskModel model = allList.get(0);
 		allList.remove(0);
 		switch (model.getType()) {
@@ -589,7 +591,7 @@ public class SpringTimerTest {
 			message.setExtra(map);
 			JPushUtil.pushMessage(message);
 			System.out.println("message:"+message.toString());
-			System.out.println("执行推送啦");
+			System.out.println("执行通知推送啦");
 		}
 	}
 	/**
@@ -621,7 +623,7 @@ public class SpringTimerTest {
 			message.setExtra(map);
 			JPushUtil.pushMessage(message);
 			System.out.println("message:"+message.toString());
-			System.out.println("执行推送啦");
+			System.out.println("执行作业推送啦");
 		}
 	}
 	
@@ -653,7 +655,7 @@ public class SpringTimerTest {
 			message.setUserType(model.getUserType());
 			JPushUtil.pushMessage(message);
 			System.out.println("message:"+message.toString());
-			System.out.println("执行推送啦");
+			System.out.println("执行上课签到推送啦");
 		}
 	}
 	/**
@@ -685,7 +687,7 @@ public class SpringTimerTest {
 			message.setUserType(model.getUserType());
 			JPushUtil.pushMessage(message);
 			System.out.println("message:"+message.toString());
-			System.out.println("执行推送啦");
+			System.out.println("执行上课提醒推送啦");
 			//课程上课次数+1
 			signInServiceImpl.updateCourseNum(course.getCourseId());
 		}
