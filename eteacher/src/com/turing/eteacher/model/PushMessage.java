@@ -3,9 +3,9 @@ package com.turing.eteacher.model;
 import java.util.Map;
 
 public class PushMessage {
-	public static final int UTYPE_STUDENT = 0;
-	public static final int UTYPE_TEACHER = 1;
-	public static final int UTYPE_ALL = 2;
+	public static final int UTYPE_STUDENT = 1;
+	public static final int UTYPE_TEACHER = 2;
+	public static final int UTYPE_ALL = 3;
 	private String title;
 	private String content;
 	private String show;

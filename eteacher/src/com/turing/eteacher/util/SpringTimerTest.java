@@ -208,7 +208,7 @@ public class SpringTimerTest {
 													model1.setDate(registTime);
 													model1.setId((String)map.get("courseId"));
 													model1.setType(TaskModel.TYPE_SIGN_IN);
-													model1.setUserType(TaskModel.UTYPE_TEACHER);
+													model1.setUserType(TaskModel.UTYPE_STUDENT);
 													result.add(model1);
 												}
 											}
@@ -273,7 +273,7 @@ public class SpringTimerTest {
 																		model1.setDate(registTime);
 																		model1.setId((String)map.get("courseId"));
 																		model1.setType(TaskModel.TYPE_SIGN_IN);
-																		model1.setUserType(TaskModel.UTYPE_TEACHER);
+																		model1.setUserType(TaskModel.UTYPE_STUDENT);
 																		result.add(model1);
 																	}
 																}
@@ -352,7 +352,7 @@ public class SpringTimerTest {
 												model1.setDate(registTime);
 												model1.setId(courseId);
 												model1.setType(TaskModel.TYPE_SIGN_IN);
-												model1.setUserType(TaskModel.UTYPE_TEACHER);
+												model1.setUserType(TaskModel.UTYPE_STUDENT);
 												result.add(model1);
 											}
 										}
@@ -417,7 +417,7 @@ public class SpringTimerTest {
 																	model1.setDate(registTime);
 																	model1.setId(courseId);
 																	model1.setType(TaskModel.TYPE_SIGN_IN);
-																	model1.setUserType(TaskModel.UTYPE_TEACHER);
+																	model1.setUserType(TaskModel.UTYPE_STUDENT);
 																	result.add(model1);
 																}
 															}
@@ -567,7 +567,6 @@ public class SpringTimerTest {
 	private void pushNotice(TaskModel model){
 		Notice notice = noticeServiceImpl.get(model.getId());
 		if (null != notice) {
-			String schoolId = noticeServiceImpl.getSchoolIdbyNoticeId(model.getId()); 
 			List<Map> list = noticeServiceImpl.getClassIdByNoticeId(model.getId());
 			String classIds = ""; 
 			if (null != list && list.size() > 0) {
@@ -581,9 +580,8 @@ public class SpringTimerTest {
 			message.setTitle(notice.getTitle());
 			message.setContent(notice.getContent());
 			message.setShow(JPushUtil.SHOW_ON);
-			message.setUserType(model.getUserType());
-			message.setSchoolId(schoolId);
 			message.setClassId(classIds);
+			message.setUserType(PushMessage.UTYPE_STUDENT);
 			Map<String, String> map = new HashMap();
 			map.put("noticeId", model.getId());
 			map.put("flag", "1");
@@ -600,7 +598,6 @@ public class SpringTimerTest {
 	private void pushHomeWorkPublish(TaskModel model){
 		Work work = workServiceImpl.get(model.getId());
 		if (null != work) {
-			String schoolId = workServiceImpl.getSchoolIdbyWorkId(model.getId()); 
 			List<Map> list = workServiceImpl.getClassIdByWorkId(model.getId());
 			String classIds = ""; 
 			if (null != list && list.size() > 0) {
@@ -614,8 +611,7 @@ public class SpringTimerTest {
 			message.setTitle("有新作业啦！");
 			message.setContent(work.getContent());
 			message.setShow(JPushUtil.SHOW_ON);
-			message.setUserType(model.getUserType());
-			message.setSchoolId(schoolId);
+			message.setUserType(PushMessage.UTYPE_STUDENT);
 			message.setClassId(classIds);
 			Map<String, String> map = new HashMap();
 			map.put("workId", model.getId());
@@ -633,7 +629,6 @@ public class SpringTimerTest {
 	private void pushSignIn(TaskModel model){
 		Course course = courseServiceImpl.get(model.getId());
 		if (null != course) {
-			Map map = courseServiceImpl.getSchoolIdbyCourseId(course.getCourseId());
 			List<Map> list = noticeServiceImpl.getClassIdByNoticeId(model.getId());
 			String classIds = ""; 
 			if (null != list && list.size() > 0) {
@@ -644,12 +639,10 @@ public class SpringTimerTest {
 			}
 			PushMessage message = new PushMessage();
 			message.setAction(JPushUtil.ACTION_ALERT);
+			message.setUserType(PushMessage.UTYPE_STUDENT);
 			message.setTitle(course.getCourseName()+" 快要上课啦！");
 			message.setContent("提前"+course.getCourseId()+"进行课程提醒！");
 			message.setShow(JPushUtil.SHOW_ON);
-			if (null != map) {
-				message.setSchoolId((String)map.get("schoolId"));
-			}
 			message.setClassId(classIds);
 			message.setUserType(model.getUserType());
 			JPushUtil.pushMessage(message);
@@ -664,26 +657,13 @@ public class SpringTimerTest {
 	private void pushCourseStartRemind(TaskModel model){
 		Course course = courseServiceImpl.get(model.getId());
 		if (null != course) {
-			Map map = courseServiceImpl.getSchoolIdbyCourseId(course.getCourseId());
-			List<Map> list = noticeServiceImpl.getClassIdByNoticeId(model.getId());
-			String classIds = ""; 
-			if (null != list && list.size() > 0) {
-				for (int i = 0; i < list.size(); i++) {
-					classIds += list.get(i).get("classId")+",";
-				}
-				classIds = classIds.substring(0, classIds.length()-1);
-			}
 			PushMessage message = new PushMessage();
 			message.setAction(JPushUtil.ACTION_ALERT);
 			message.setTitle(course.getCourseName()+" 快要上课啦！");
 			message.setContent("提前"+course.getCourseId()+"进行课程提醒！");
 			message.setUserId(course.getUserId());
 			message.setShow(JPushUtil.SHOW_ON);
-			if (null != map) {
-				message.setSchoolId((String)map.get("schoolId"));
-			}
-			message.setClassId(classIds);
-			message.setUserType(model.getUserType());
+			message.setUserType(PushMessage.UTYPE_TEACHER);
 			JPushUtil.pushMessage(message);
 			System.out.println("message:"+message.toString());
 			System.out.println("执行上课提醒推送啦");

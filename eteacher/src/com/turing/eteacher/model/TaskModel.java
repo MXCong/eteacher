@@ -10,9 +10,9 @@ public class TaskModel {
 	public static final int TYPE_SIGN_IN = 2;//签到提醒
 	public static final int TYPE_HOMEWORK_PUBLISH = 3;//作业发布提醒
 	
-	public static final int UTYPE_STUDENT = 0;
-	public static final int UTYPE_TEACHER = 1;
-	public static final int UTYPE_ALL = 2;
+	public static final int UTYPE_STUDENT = 1;
+	public static final int UTYPE_TEACHER = 2;
+	public static final int UTYPE_ALL = 3;
 	private int type;
 	private String id;
 	private String date;

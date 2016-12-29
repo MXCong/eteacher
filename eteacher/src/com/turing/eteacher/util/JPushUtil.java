@@ -55,15 +55,17 @@ public class JPushUtil {
 	
 	public static void main(String[] args) {
 		PushMessage message = new PushMessage();
-		message.setAction(ACTION_HOMEWORK_DETAIL);
+		message.setAction(ACTION_NOTICE_DETAIL);
 		message.setContent("消息内容打发第三方了解阿斯蒂芬骄傲了打发斯蒂芬拉萨的房间里的撒！");
 		message.setTitle("消息标题发第三方了解阿斯蒂芬骄傲了打发斯蒂芬拉萨的房间里的撒！");
-		message.setSchoolId("4");
-		message.setClassId("p74GYIXJss");
+		//message.setSchoolId("4");
+		//message.setClassId("p74GYIXJs1s");
+		//message.setUserId("BLx00leujb");
 		message.setShow(SHOW_ON);
-		message.setUserType(PushMessage.UTYPE_STUDENT);
-		Map<String,String> map = new HashMap<>();
-		map.put("workId", "jUwJin0jmo");
+		message.setUserType(PushMessage.UTYPE_TEACHER);
+		Map map = new HashMap<>();
+		map.put("noticeId", "1DQXtG2pWN");
+		map.put("flag", 1);
 		message.setExtra(map);
 		pushMessage(message);
 		//testMessage();
