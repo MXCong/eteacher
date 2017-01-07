@@ -20,7 +20,7 @@ public class TermPrivate extends CreateTimeModel implements Serializable{
 	private String endDate;
 	private Integer weekCount;
 	private String userId;
-	private String termId;
+	private String termName;
 	private Integer status;
 	
 	@Id
@@ -66,12 +66,12 @@ public class TermPrivate extends CreateTimeModel implements Serializable{
 		this.userId = userId;
 	}
 	
-	@Column(name="TREM_ID")
-	public String getTermId() {
-		return termId;
+	@Column(name="TERM_NAME")
+	public String getTermName() {
+		return termName;
 	}
-	public void setTermId(String termId) {
-		this.termId = termId;
+	public void setTermName(String termName) {
+		this.termName = termName;
 	}
 	
 	@Column(name = "STATUS")
@@ -81,13 +81,6 @@ public class TermPrivate extends CreateTimeModel implements Serializable{
 
 	public void setStatus(Integer status) {
 		this.status = status;
-	}
-	@Override
-	public String toString() {
-		return "TermPrivate [tpId=" + tpId + ", startDate=" + startDate
-				+ ", endDate=" + endDate + ", weekCount=" + weekCount
-				+ ", userId=" + userId + ", termId=" + termId + ", status="
-				+ status + "]";
 	}
 
 }

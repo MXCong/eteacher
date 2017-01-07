@@ -34,4 +34,10 @@ public interface ITermPrivateService  extends IService<TermPrivate>{
 	 * @return
 	 */
 	public List<Map> getContainDateList(String start,String end);
+	/**
+	 * 分类获取学期列表
+	 * @author lifei
+	 * @date 20170105
+	 */
+	public Map getAllTerms(String userId);
 }

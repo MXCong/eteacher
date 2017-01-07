@@ -581,7 +581,7 @@ public class SpringTimerTest {
 			message.setContent(notice.getContent());
 			message.setShow(JPushUtil.SHOW_ON);
 			message.setClassId(classIds);
-			message.setUserType(PushMessage.UTYPE_STUDENT);
+			message.setUserType(model.getUserType());
 			Map<String, String> map = new HashMap();
 			map.put("noticeId", model.getId());
 			map.put("flag", "1");
@@ -611,7 +611,7 @@ public class SpringTimerTest {
 			message.setTitle("有新作业啦！");
 			message.setContent(work.getContent());
 			message.setShow(JPushUtil.SHOW_ON);
-			message.setUserType(PushMessage.UTYPE_STUDENT);
+			message.setUserType(model.getUserType());
 			message.setClassId(classIds);
 			Map<String, String> map = new HashMap();
 			map.put("workId", model.getId());
@@ -663,7 +663,7 @@ public class SpringTimerTest {
 			message.setContent("提前"+course.getCourseId()+"进行课程提醒！");
 			message.setUserId(course.getUserId());
 			message.setShow(JPushUtil.SHOW_ON);
-			message.setUserType(PushMessage.UTYPE_TEACHER);
+			message.setUserType(model.getUserType());
 			JPushUtil.pushMessage(message);
 			System.out.println("message:"+message.toString());
 			System.out.println("执行上课提醒推送啦");

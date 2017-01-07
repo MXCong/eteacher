@@ -1,8 +1,10 @@
 package com.turing.eteacher.service.impl;
 
-import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.turing.eteacher.base.BaseDAO;
@@ -40,7 +42,6 @@ public class TermPrivateServiceImpl extends BaseService<TermPrivate> implements 
 	//删除学期
 	@Override
 	public void deleteById(String tpId) {
-//		String hql2 = "delete from TermPrivate where tpId = ?";
 		String hql = "update TermPrivate tp set tp.status = 2 where tp.tpId = ?";
 		termPrivateDAO.executeHql(hql, tpId);
 	}
@@ -95,5 +96,25 @@ public class TermPrivateServiceImpl extends BaseService<TermPrivate> implements 
 				"AND DATE_ADD(t.END_DATE,INTERVAL 1 DAY)  > ? ";
 		System.out.println("sql:"+sql);
 		return termPrivateDAO.findBySql(sql, start,end);
+	}
+	@Override
+	public Map getAllTerms(String userId) {
+		Map result = new HashMap<>(); 
+		String currentHql = "from TermPrivate tp where tp.startDate <= current_date() and tp.endDate > current_date() and tp.status = 1  order by tp.startDate desc";
+		List currentList = termPrivateDAO.find(currentHql);
+		if (null != currentList && currentList.size() > 0) {
+			result.put("current", currentList);
+		}
+		String beforeHql = "from TermPrivate tp where tp.endDate <= current_date() and tp.status = 1 order by tp.endDate desc";
+		List beforeList = termPrivateDAO.find(beforeHql);
+		if (null != beforeList && beforeList.size() > 0) {
+			result.put("before", beforeList);
+		}
+		String futureHql = "from TermPrivate tp where tp.startDate > current_date() and tp.status = 1 order by tp.startDate asc";
+		List futureList = termPrivateDAO.find(futureHql);
+		if (null != futureList && futureList.size() > 0) {
+			result.put("future", futureList);
+		}
+		return result;
 	}
 }

@@ -73,11 +73,7 @@ public class TermRemote extends BaseRemote {
 		try {
 			String userId = getCurrentUser(request).getUserId();
 			List<Map> list = termServiceImpl.getListTermPrivates(userId);
-			if (null != list) {
-				return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
-			}else {
-				return ReturnBody.getSystemError();
-			}
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
@@ -140,7 +136,7 @@ public class TermRemote extends BaseRemote {
 		try {
 			String tpId = request.getParameter("tpId");
 			termPrivateServiceImpl.deleteById(tpId);
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, new HashMap());
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, "删除成功！");
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
@@ -154,26 +150,38 @@ public class TermRemote extends BaseRemote {
 	 * @return
 	 */
 	@RequestMapping(value = "teacher/term/addTerm", method = RequestMethod.POST)
-	public ReturnBody addTerm(HttpServletRequest request, TermPrivate tp) {
-		tp.setStartDate(request.getParameter("startDate"));
-		tp.setEndDate(request.getParameter("endDate"));
-		tp.setWeekCount(Integer.parseInt(request.getParameter("weekCount")));
-		try {
-			String userId = getCurrentUser(request) == null ? null : getCurrentUser(request).getUserId();
-			// String[] termPrivate=request.getParameterValues("termPrivate");
-			// tp.setUserId(userId);
-			// String tpId=(String) termServiceImpl.save(tp);
-			// for(int i=0;i<termPrivate.length;i++){
-			// termServiceImpl.addTermPrivate(tpId, termPrivate[i]);
-			tp.setUserId(userId);
-			String tpId = termPrivateServiceImpl.saveTermPrivate(tp);
-			Map m = new HashMap<>();
-			m.put("tpId", tpId);
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, m);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
+	public ReturnBody addTerm(HttpServletRequest request) {
+		String tpId = request.getParameter("tpId");
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate"); 
+		String weekCount = request.getParameter("weekCount");
+		String termName  = request.getParameter("termName");
+		if (StringUtil.checkParams(startDate,endDate,weekCount,termName)) {
+			TermPrivate termPrivate = null;
+			if (StringUtil.isNotEmpty(tpId)) {
+				termPrivate = termPrivateServiceImpl.get(tpId);
+				termPrivate.setStartDate(startDate);
+				termPrivate.setEndDate(endDate);
+				termPrivate.setWeekCount(Integer.parseInt(weekCount));
+				termPrivate.setUserId(getCurrentUserId(request));
+				termPrivate.setTermName(termName);
+				termPrivate.setStatus(1);
+				termPrivateServiceImpl.update(termPrivate);
+				//FIXME 课程判断是否合法
+				return new ReturnBody("保存成功！");
+			}else{
+				termPrivate = new TermPrivate();
+				termPrivate.setStartDate(startDate);
+				termPrivate.setEndDate(endDate);
+				termPrivate.setWeekCount(Integer.parseInt(weekCount));
+				termPrivate.setUserId(getCurrentUserId(request));
+				termPrivate.setTermName(termName);
+				termPrivate.setStatus(1);
+				termPrivateServiceImpl.add(termPrivate);
+				return new ReturnBody("创建成功！");
+			}
+		}else {
+			return ReturnBody.getParamError();
 		}
 	}
 
@@ -191,5 +199,19 @@ public class TermRemote extends BaseRemote {
 		List<Term> list = termServiceImpl.getTermArray((String) map.get("schoolId"));
 		return new ReturnBody(list);
 	}
-
+	/**
+	 * 获取学期模块中学期的列表
+	 * @author lifei
+	 * @creatTime 2017-01-05
+	 * @param request
+	 * @param term
+	 * @return
+	 */
+	@RequestMapping(value = "teacher/term/getAllTerms", method = RequestMethod.POST)
+	public ReturnBody getAllTerms(HttpServletRequest request) {
+		Map map = termPrivateServiceImpl.getAllTerms(getCurrentUserId(request));
+		return new ReturnBody(map);
+	}
+	
+	
 }

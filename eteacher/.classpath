@@ -50,5 +50,6 @@
 	<classpathentry kind="lib" path="F:/mywork/trunk/eteacher/WebContent/WEB-INF/lib/slf4j-log4j12-1.7.7.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="WebContent/WEB-INF/classes"/>
 </classpath>

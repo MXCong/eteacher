@@ -118,9 +118,7 @@ public class TermServiceImpl extends BaseService<Term> implements ITermService {
 	 */
 	@Override
 	public List<Map> getListTermPrivates(String userId) {
-		String hql="select tp.tpId as tpId,t.termName as termName,tp.startDate as startTime,tp.weekCount as weekCount,"+
-	               "tp.endDate as endTime from TermPrivate tp,Term t where tp.termId=t.termId "+
-				   "and tp.userId=? and tp.status = 1";
+		String hql="from TermPrivate tp where tp.userId = ?";
 		List<Map> list = termDAO.findMap(hql, userId);
 		return list;
 	}
