@@ -452,8 +452,9 @@ public class CourseRemote extends BaseRemote {
 	public ReturnBody getCourseInfo(HttpServletRequest request) {
 		try {
 			String courseIds = request.getParameter("courseIds");
-			if(StringUtil.checkParams(courseIds)){
-				List<Map> list = courseServiceImpl.getCourseInfo(courseIds);
+			String targetDate = request.getParameter("targetDate");
+			if(StringUtil.checkParams(courseIds,targetDate)){
+				List<Map> list = courseServiceImpl.getCourseInfo(courseIds,targetDate);
 				return new ReturnBody(ReturnBody.RESULT_SUCCESS,list);
 			}
 			return new ReturnBody(null);

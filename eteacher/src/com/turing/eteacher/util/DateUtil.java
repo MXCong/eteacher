@@ -42,8 +42,6 @@ public class DateUtil {
 	}
 	/**
 	 * 获取指定日期时星期几
-	 * @param date1
-	 * @param date2
 	 * @return
 	 */
 	public static int getWeekNum(String date){

@@ -106,33 +106,14 @@ public class SignInServiceImpl extends BaseService<SignIn> implements ISignInSer
 	 */
 	@Override
 	public void courseSignIn(String studentId, String courseId, String lon, String lat) {
-		//获取当前系统时间，并计算出当前时间距离学期开始后的第多少周，当前时间为第几节课。
-//		1.根据课程ID，获取课程所在学期的开始时间
-		String tql = "select tp.tpId as termId, tp.startDate as startDate, "
-				+ "c.userId as teacherId, t.schoolId as schoolId "
-				+ "from TermPrivate tp, Course c, Teacher t "
-				+ "where c.termId = tp.tpId and c.courseId = ? "
-				+ "and tp.status = 1 and c.userId = t.teacherId ";
-		Map term = signInDAO.findMap(tql, courseId).get(0);
-		
-//		2.计算出当前时间距离学期开始后的第多少周，当前时间为第几节课
-		String startDate = (String) term.get("startDate");
-		String cd = DateUtil.getCurrentDateStr("yyyy-MM-dd");
-		String weekNum = Integer.toString(DateUtil.getWeekCount(startDate, cd));
-		//当前时间是第几节课的签到时间
-		String lessonNum = (String)getCurrentLessonNum((String)term.get("schoolId"),(String)term.get("teacherId"));
 		//数据存储
 		SignIn sign = new SignIn();
-		if(StringUtil.checkParams(lessonNum,weekNum)){
-			sign.setCourseId(courseId);
-			sign.setCurrentLessons(lessonNum);
-//			sign.setCurrentWeek(weekNum);
-			sign.setStudentId(studentId);
-			sign.setLat(lat);
-			sign.setLon(lon);
-			sign.setStatus(1);
-			signInDAO.save(sign);
-		}
+		sign.setCourseId(courseId);
+		sign.setStudentId(studentId);
+		sign.setLat(lat);
+		sign.setLon(lon);
+		sign.setStatus(1);
+		signInDAO.save(sign);
 	}
 
 	/**
