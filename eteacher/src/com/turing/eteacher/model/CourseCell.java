@@ -22,6 +22,8 @@ public class CourseCell implements Serializable{
 	private String lessonNumber;
 	private String location;
 	private String classRoom;
+	private String startTime;
+	private String endTime;
 	
 	@Id
 	@GeneratedValue(generator = "customId")
@@ -67,6 +69,20 @@ public class CourseCell implements Serializable{
 	}
 	public void setClassRoom(String classRoom) {
 		this.classRoom = classRoom;
+	}
+	@Column(name="START_TIME")
+	public String getStartTime() {
+		return startTime;
+	}
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
+	@Column(name="END_TIME")
+	public String getEndTime() {
+		return endTime;
+	}
+	public void setEndTime(String endTime) {
+		this.endTime = endTime;
 	}
 	
 }

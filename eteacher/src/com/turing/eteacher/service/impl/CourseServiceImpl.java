@@ -573,7 +573,7 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	 * @author macong
 	 * @param courseIds
 	 * @return { "courseId":"dsznUBKa2", "courseName":"软件工程", "location":"尚学楼",
-	 *         "classRoom":"316", "lessonNumber":"1,2", "teacherId":"zhjBY21",
+	 *         "classRoom":"316", "lessonNumber":"8:00-10:00","classes":"13软工A班，14科技1班"（String类型）, "teacherId":"zhjBY21",
 	 *         "teacherName":"张三" }
 	 */
 	@Override
@@ -582,7 +582,7 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 			List<Map> list = new ArrayList<>();
 			String cids = courseIds.substring(1, courseIds.length() - 1);
 			String[] cIdList = cids.split(",");
-			String hql = "select c.courseId as courseId, c.courseName as courseName, " 
+			/*String hql = "select c.courseId as courseId, c.courseName as courseName, " 
 					+ "cc.location as location, cc.weekDay as weekDay , "
 					+ "cc.classRoom as classRoom, cc.lessonNumber as lessonNumber, "
 					+ "t.name as teacherName, t.teacherId as teacherId "
@@ -618,8 +618,26 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 						}
 					}
 				}
+			}*/
+			String hql ="select distinct c.courseId as courseId, c.courseName as courseName, " 
+					+ "cc.location as location, cc.endTime as endTime , "
+					+ "cc.classRoom as classRoom, cc.startTime as startTime , "
+					+ "t.name as teacherName, t.teacherId as teacherId, "
+					+ "cl.className as className , ccl.classId as classId "
+					+ "from Course c, CourseItem ci, CourseCell cc, Teacher t , "
+					+ "Classes cl, CourseClasses ccl "
+					+ "where c.courseId = ? and ci.courseId = c.courseId "
+					+ "and ccl.classId = cl.classId "
+					+ "and cc.ciId = ci.ciId and c.userId = t.teacherId ";
+			System.out.println(hql);
+			for (int i = 0; i < cIdList.length; i++) {
+				String courseId = cIdList[i].substring(1, cIdList[i].length() - 1);
+				list = courseDAO.findMap(hql, courseId);
 			}
 			if (null != list && list.size() > 0) {
+				for (int i = 0; i < list.size() ; i++) {
+					
+				}
 				return list;
 			}
 		} catch (Exception e) {

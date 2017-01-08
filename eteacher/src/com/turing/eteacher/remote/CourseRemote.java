@@ -443,7 +443,8 @@ public class CourseRemote extends BaseRemote {
 		  "courseName":"软件工程",
 		  "location":"尚学楼",
 		  "classRoom":"316",
-		  "lessonNumber":"1,2",
+		  "lessonNumber":"8:00-10:00",
+		  "classes":"13软工A班，14科技1班",（String类型）
 		  "teacherId":"zhjBY21",
 		  "teacherName":"张三"
 		}
