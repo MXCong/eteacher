@@ -1182,6 +1182,7 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 				if (null != listClass && listClass.size() > 0) {
 					item.put("classes", listClass);
 				}
+				datas.add(item);
 			}
 		}
 		return datas;
