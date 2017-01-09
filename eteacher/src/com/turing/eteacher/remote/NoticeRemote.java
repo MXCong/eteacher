@@ -25,10 +25,10 @@ import com.turing.eteacher.model.CustomFile;
 import com.turing.eteacher.model.Notice;
 import com.turing.eteacher.model.TaskModel;
 import com.turing.eteacher.model.User;
-import com.turing.eteacher.model.WorkCourse;
+import com.turing.eteacher.model.WorkClass;
 import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.INoticeService;
-import com.turing.eteacher.service.IWorkCourseService;
+import com.turing.eteacher.service.IWorkClassService;
 import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.FileUtil;
 import com.turing.eteacher.util.SpringTimerTest;
@@ -42,7 +42,7 @@ public class NoticeRemote extends BaseRemote {
 	private INoticeService noticeServiceImpl;
 	
 	@Autowired
-	private IWorkCourseService workCourseServiceImpl;
+	private IWorkClassService workCourseServiceImpl;
 	
 	@Autowired
 	private IFileService fileServiceImpl;
@@ -240,7 +240,7 @@ public class NoticeRemote extends BaseRemote {
 					// 重新加入关联表
 					for (int i = 0; i < list.size(); i++) {
 						String courseId = (String) list.get(i).get("id");
-						WorkCourse workCourse =new WorkCourse();
+						WorkClass workCourse =new WorkClass();
 						workCourse.setWorkId(noticeId);
 						workCourse.setCourseId(courseId);
 						workCourseServiceImpl.add(workCourse);
@@ -283,7 +283,7 @@ public class NoticeRemote extends BaseRemote {
 					noticeId = notice.getNoticeId();
 					for (int i = 0; i < list.size(); i++) {
 						String courseId = (String) list.get(i).get("id");
-						WorkCourse workCourse =new WorkCourse();
+						WorkClass workCourse =new WorkClass();
 						workCourse.setWorkId(noticeId);
 						workCourse.setCourseId(courseId);
 						workCourseServiceImpl.add(workCourse);

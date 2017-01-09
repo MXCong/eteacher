@@ -18,7 +18,7 @@ import com.turing.eteacher.model.Notice;
 import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.ILogService;
 import com.turing.eteacher.service.INoticeService;
-import com.turing.eteacher.service.IWorkCourseService;
+import com.turing.eteacher.service.IWorkClassService;
 import com.turing.eteacher.util.StringUtil;
 
 @Service
@@ -28,7 +28,7 @@ public class NoticeServiceImpl extends BaseService<Notice> implements INoticeSer
 	private NoticeDAO noticeDAO;
 	
 	@Autowired
-	private IWorkCourseService workCourseServiceImpl;
+	private IWorkClassService workCourseServiceImpl;
 	
 	@Autowired
 	private ILogService logServiceImpl;

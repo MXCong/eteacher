@@ -10,17 +10,17 @@ import org.springframework.stereotype.Service;
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
 import com.turing.eteacher.dao.CourseDAO;
-import com.turing.eteacher.model.WorkCourse;
-import com.turing.eteacher.service.IWorkCourseService;
+import com.turing.eteacher.model.WorkClass;
+import com.turing.eteacher.service.IWorkClassService;
 
 @Service
-public class WorkCourseServiceImpl extends BaseService<WorkCourse> implements IWorkCourseService {
+public class WorkClassServiceImpl extends BaseService<WorkClass> implements IWorkClassService {
 	
 	@Autowired
-	private BaseDAO<WorkCourse> workCourseDAO; 
+	private BaseDAO<WorkClass> workCourseDAO; 
 	
 	@Override
-	public BaseDAO<WorkCourse> getDAO() {
+	public BaseDAO<WorkClass> getDAO() {
 		// TODO Auto-generated method stub
 		return workCourseDAO;
 	}

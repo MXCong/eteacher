@@ -13,7 +13,7 @@ import com.turing.eteacher.dao.WorkDAO;
 import com.turing.eteacher.model.TaskModel;
 import com.turing.eteacher.model.Work;
 import com.turing.eteacher.service.IFileService;
-import com.turing.eteacher.service.IWorkCourseService;
+import com.turing.eteacher.service.IWorkClassService;
 import com.turing.eteacher.service.IWorkService;
 import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.SpringTimerTest;
@@ -36,7 +36,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	}
 	
 	@Autowired
-	private IWorkCourseService workCourseServiceImpl;
+	private IWorkClassService workCourseServiceImpl;
 	
 	@Override
 	public List<Map> getListForTable(String termId, String courseId) {
@@ -142,7 +142,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	
 	/**
 	 * 教师相关接口   获取作业列表（已过期、未过期、待发布、指定截止日期）
-	 * @author zjx
+	 * @author macong
 	 *  返回结果： 作业ID，作业所属课程名称[],作业内容，作业发布时间，作业到期时间，作业状态
 	 *  
 	 */
@@ -179,19 +179,23 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 				 "w.content as content," +
 				 "w.status as status,"+
 				 "w.endTime as endTime "+
-				 "from Work w,Course c,WorkCourse wc " +
+				 "from Work w,Course c,WorkClass wc " +
 				 "where w.workId=wc.workId and wc.courseId = c.courseId and c.userId=? "+
 		         "and (w.status=2 or (w.status=1 and w.publishTime>now())) "+
 			     "order by w.publishTime asc";
 			list=workDAO.findMapByPage(hql, page*20, 20, userId);
 		}
 		if("3".equals(status)){//获取指定截止日期的作业
-			hql+="w.content as content, wc.wcId as wcId "+
-			    "from Work w, Course c, WorkCourse wc " +
-			    "where w.workId = wc.workId and wc.courseId = c.courseId "+
-		        "and c.userId = ? and  w.endTime like CONCAT(?,'%') "+
+			hql+="w.content as content, wc.wcId as wcId , w.title as title "+
+			    "from Work w, Course c, WorkClass wc " +
+			    "where w.courseId = c.courseId and w.workId = wc.workId "+
+			    "and c.userId = ? and  w.endTime like CONCAT(?,'%') "+
 			    "and w.status = 1 and w.publishTime < now() "+
 			    "order by w.publishTime asc";
+//			    "where w.workId = wc.workId and wc.courseId = c.courseId "+
+//		        "and c.userId = ? and  w.endTime like CONCAT(?,'%') "+
+//			    "and w.status = 1 and w.publishTime < now() "+
+//			    "order by w.publishTime asc";
 			list=workDAO.findMap(hql,userId,date);
 		}
 		/*
@@ -201,7 +205,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		String hq = "select cl.className as className from "
 				+ "Classes cl, CourseClasses cc where "
 				+ "cc.classId = cl.classId and cc.courseId = ?";
-		for(int a = 0; a < list.size(); a++){
+		/*for(int a = 0; a < list.size(); a++){
 			//1.课程名称与授课班级的拼接--->软件工程（13软工A班）
 			List<Map> cnlist = workDAO.findMap(hq, (String)list.get(a).get("courseId"));
 			if (null != cnlist && cnlist.size() > 0) {
@@ -222,7 +226,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 					list.get(a).put("courseName", ncn);//覆盖原有的course为拼接后的值
 				}
 			}
-		}
+		}*/
 		if(null != list && list.size()>0){
 			//判断作业是否存在附件
 			for (int i = 0; i < list.size(); i++) {
@@ -316,7 +320,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		cLastDay = DateUtil.addDays(cLastDay, 1);
 		String cFirstDay = ym + "-01";
 		String sql = "SELECT SUBSTRING(tw.END_TIME,1,10) AS date FROM t_work tw WHERE tw.WORK_ID IN ( "+
-					 "SELECT twc.WORK_ID FROM t_work_course twc WHERE twc.COURSE_ID IN ( "+
+					 "SELECT twc.WORK_ID FROM t_work_class twc WHERE twc.COURSE_ID IN ( "+
 					 "SELECT tc.COURSE_ID FROM t_course tc WHERE tc.USER_ID = ?)) "+ 
 					 "AND  tw.END_TIME BETWEEN  ? AND ?";
 		List list = workDAO.findBySql(sql, userId, cFirstDay, cLastDay);

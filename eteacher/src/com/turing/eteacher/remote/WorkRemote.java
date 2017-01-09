@@ -22,10 +22,10 @@ import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.CustomFile;
 import com.turing.eteacher.model.TaskModel;
 import com.turing.eteacher.model.Work;
-import com.turing.eteacher.model.WorkCourse;
+import com.turing.eteacher.model.WorkClass;
 import com.turing.eteacher.model.WorkStatus;
 import com.turing.eteacher.service.IFileService;
-import com.turing.eteacher.service.IWorkCourseService;
+import com.turing.eteacher.service.IWorkClassService;
 import com.turing.eteacher.service.IWorkService;
 import com.turing.eteacher.util.CustomIdGenerator;
 import com.turing.eteacher.util.DateUtil;
@@ -59,7 +59,7 @@ public class WorkRemote extends BaseRemote {
 	private IWorkService workServiceImpl;
 
 	@Autowired
-	private IWorkCourseService workCourseServiceImpl;
+	private IWorkClassService workCourseServiceImpl;
 	
 	@Autowired
 	private IFileService fileServiceImpl;
@@ -178,6 +178,7 @@ public class WorkRemote extends BaseRemote {
 	 * @param request
 	 * @return
 	 */
+	
 	@RequestMapping(value = "teacher/work/getWorkList", method = RequestMethod.POST)
 	public ReturnBody getListWork(HttpServletRequest request) {
 		String status = (String) request.getParameter("status");
@@ -271,7 +272,7 @@ public class WorkRemote extends BaseRemote {
 				//获取该作业作用的班级列表
 				List<Map> list = (List<Map>) JSONUtils.parse(course);
 				for(int n=0;n<list.size();n++){
-					WorkCourse workCourse = new WorkCourse();
+					WorkClass workCourse = new WorkClass();
 					workCourse.setWorkId(wId);
 					workCourse.setCourseId((String)list.get(n).get("id"));
 					workCourseServiceImpl.add(workCourse);
@@ -344,7 +345,7 @@ public class WorkRemote extends BaseRemote {
 	 * @return
 	 */
 	@RequestMapping(value = "teacher/work/editWork", method = RequestMethod.POST)
-	public ReturnBody editWork(HttpServletRequest request, Work work, WorkCourse workCourse) {
+	public ReturnBody editWork(HttpServletRequest request, Work work, WorkClass workCourse) {
 		try {
 			// String file = request.getParameter("fileURL");
 			// 作业（除附件之外）的操作;

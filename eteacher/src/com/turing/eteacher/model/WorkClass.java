@@ -11,14 +11,15 @@ import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
-@Table(name = "T_WORK_COURSE")
-public class WorkCourse implements Serializable {
+@Table(name = "T_WORK_CLASS")
+public class WorkClass implements Serializable {
 	
 	private static final long serialVersionUID = -7629717533890787921L;
 
 	private String wcId;
 	private String workId;
 	private String courseId;
+	private String classId;
 	
 	@Id
 	@GeneratedValue(generator = "customId")
@@ -43,6 +44,13 @@ public class WorkCourse implements Serializable {
 	}
 	public void setCourseId(String courseId) {
 		this.courseId = courseId;
+	}
+	@Column(name = "CLASS_ID")
+	public String getClassId() {
+		return classId;
+	}
+	public void setClassId(String classId) {
+		this.classId = classId;
 	}
 	
 }

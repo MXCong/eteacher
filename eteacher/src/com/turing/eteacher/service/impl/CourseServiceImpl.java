@@ -623,21 +623,29 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 			String hql ="select distinct c.courseId as courseId, c.courseName as courseName, " 
 					+ "cc.location as location, cc.endTime as endTime , "
 					+ "cc.classRoom as classRoom, cc.startTime as startTime , "
-					+ "t.name as teacherName, t.teacherId as teacherId, "
-					+ "cl.className as className , ccl.classId as classId "
-					+ "from Course c, CourseItem ci, CourseCell cc, Teacher t , "
-					+ "Classes cl, CourseClasses ccl "
+					+ "t.name as teacherName, t.teacherId as teacherId "
+//					+ "cl.className as className , ccl.classId as classId "
+					+ "from Course c, CourseItem ci, CourseCell cc, Teacher t "
+//					+ "Classes cl, CourseClasses ccl "
 					+ "where c.courseId = ? and ci.courseId = c.courseId "
-					+ "and ccl.classId = cl.classId "
+//					+ "and ccl.classId = cl.classId "
 					+ "and cc.ciId = ci.ciId and c.userId = t.teacherId ";
-			System.out.println(hql);
+			String hq = "select cl.className as className from " 
+					+ "Classes cl, CourseClasses cc where "
+					+ "cc.classId = cl.classId and cc.courseId = ?";
 			for (int i = 0; i < cIdList.length; i++) {
 				String courseId = cIdList[i].substring(1, cIdList[i].length() - 1);
 				list = courseDAO.findMap(hql, courseId);
 			}
 			if (null != list && list.size() > 0) {
 				for (int i = 0; i < list.size() ; i++) {
+					List<Map> classLists = courseDAO.findMap(hq, (String)list.get(i).get("courseId"));
+					String cls = "";
+					for(int k = 0; k < classLists.size(); k++){
+						cls += classLists.get(k).get("className")+",";
+					}
 					
+					list.get(i).put("classes", cls.substring(0, cls.length()-1));
 				}
 				return list;
 			}

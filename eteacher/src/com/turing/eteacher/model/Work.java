@@ -23,6 +23,8 @@ public class Work implements Serializable {
 	private Date createTime;
 	private String remindTime;
 	private Integer status;  //1：发布/待发布作业； 2：草稿
+	private String title;//作业标题
+	private String courseId;//课程ID
 	
 	@Id
 	@GeneratedValue(generator = "customId")
@@ -34,13 +36,13 @@ public class Work implements Serializable {
 	public void setWorkId(String workId) {
 		this.workId = workId;
 	}
-	/*@Column(name = "COURSE_ID")
+	@Column(name = "COURSE_ID")
 	public String getCourseId() {
 		return courseId;
 	}
 	public void setCourseId(String courseId) {
 		this.courseId = courseId;
-	}*/
+	}
 	@Column(name = "CONTENT")
 	public String getContent() {
 		return content;
@@ -79,12 +81,19 @@ public class Work implements Serializable {
 	public void setRemindTime(String remindTime) {
 		this.remindTime = remindTime;
 	}
-	@Column(name="STATUS")
+	@Column(name = "STATUS")
 	public Integer getStatus() {
 		return status;
 	}
 	public void setStatus(Integer status) {
 		this.status = status;
+	}
+	@Column(name = "TITLE")
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
 	}
 	
 }
