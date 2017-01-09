@@ -117,9 +117,9 @@ public class TermServiceImpl extends BaseService<Term> implements ITermService {
 	 * 获取学期私有数据列表
 	 */
 	@Override
-	public List<Map> getListTermPrivates(String userId) {
-		String hql="from TermPrivate tp where tp.userId = ?";
-		List<Map> list = termDAO.findMap(hql, userId);
+	public List getListTermPrivates(String userId) {
+		String hql="from TermPrivate tp where tp.userId = ? and tp.status = 1";
+		List list = termDAO.find(hql, userId);
 		return list;
 	}
 	/**

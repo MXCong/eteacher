@@ -72,7 +72,7 @@ public class TermRemote extends BaseRemote {
 	public ReturnBody getListTerms(HttpServletRequest request) {
 		try {
 			String userId = getCurrentUser(request).getUserId();
-			List<Map> list = termServiceImpl.getListTermPrivates(userId);
+			List list = termServiceImpl.getListTermPrivates(userId);
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
 		} catch (Exception e) {
 			e.printStackTrace();

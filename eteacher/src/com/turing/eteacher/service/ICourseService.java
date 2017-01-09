@@ -178,4 +178,11 @@ public interface ICourseService extends IService<Course> {
 	 * @return
 	 */
 	public Map getSchoolIdbyCourseId(String courseId);
+	/**
+	 * 教师端—获取指定学期下的课程信息
+	 * @param userId
+	 * @param termId
+	 * @return
+	 */
+	public List<Map> getCourseListByTerm(String userId,String termId);
 }

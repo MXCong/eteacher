@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.mysql.fabric.xmlrpc.base.Array;
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
 import com.turing.eteacher.constants.ConfigContants;
@@ -1151,6 +1152,31 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 				+ "AND DATE_ADD(tci.END_DAY,INTERVAL 1 DAY) > ? ";
 		List list = courseDAO.findBySql(sql, start, end);
 		return list;
+	}
+
+	@Override
+	public List<Map> getCourseListByTerm(String userId, String termId) {
+		List<Map> datas = new ArrayList<>();
+		String hql = "from Course tc where tc.termId = ? and tc.userId = ?";
+		List<Course> list = courseDAO.find(hql, termId,userId);
+		if (null != list && list.size() > 0) {
+			for (int i = 0; i < list.size(); i++) {
+				Course temp = list.get(i);
+				Map item = new HashMap<>();
+				item.put("courseId", temp.getCourseId());
+				item.put("courseName", temp.getCourseName());
+				String sql = "SELECT tc.CLASS_ID as classId, "+
+							"tc.CLASS_NAME as className "+
+							"FROM t_course_class tcc, t_class tc "+
+							"where tcc.COURSE_ID = ? "+
+							"and tcc.CLASS_ID = tc.CLASS_ID";
+				List listClass = courseDAO.findBySql(sql, temp.getCourseId());
+				if (null != listClass && listClass.size() > 0) {
+					item.put("classes", listClass);
+				}
+			}
+		}
+		return datas;
 	}
 
 }

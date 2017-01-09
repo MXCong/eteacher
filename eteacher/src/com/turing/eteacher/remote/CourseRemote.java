@@ -87,43 +87,7 @@ public class CourseRemote extends BaseRemote {
 	@Autowired
 	private SpringTimerTest springTimerTest;
 
-	/**
-	 * 学生端功能：获取用户特定日期的课程列表
-	 * 
-	 * @author macong
-	 * @param request
-	 * @return
-	 */
 
-	// {
-	// "result": "200",
-	// "data": [
-	// {
-	// "courseId": "zkje12IJMD",
-	// "courseName": "大学英语",
-	// "lessonNum": "3,4",
-	// "location": "尚德楼",
-	// "classroom": "301"
-	// }
-	// ]
-	// }
-	/*@RequestMapping(value = "student/getCourseByDate", method = RequestMethod.POST)
-	public ReturnBody getCourseByDate(HttpServletRequest request) {
-		String date = request.getParameter("date");
-		String userId = getCurrentUserId(request);
-		if (StringUtil.checkParams(userId, date)) {
-			try {
-				List<Map> data = courseServiceImpl
-						.getCourseByDate(userId, date);
-				return new ReturnBody(ReturnBody.RESULT_SUCCESS, data);
-			} catch (Exception e) {
-				log.error(this, e);
-				return new ReturnBody(ReturnBody.RESULT_FAILURE,
-						ReturnBody.ERROR_MSG);
-			}
-		}
-		return new ReturnBody(ReturnBody.RESULT_FAILURE, null);
-	}*/
 	/**
 	 *
 	 *学生端功能：获取指定学期下的课程列表
@@ -146,20 +110,6 @@ public class CourseRemote extends BaseRemote {
 	 * @author macong
 	 * @param request
 	 */
-	// {
-	// "result": 200,
-	// "data": [
-	// {
-	// "courseId": "znjewHK",
-	// "courseName": "软件工程",
-	// "startTime": "7:50",
-	// "endTime": "8:00",
-	// "distance"："200"
-	// "teacherName": "teacherName",
-	// "teacherId"："znueBJ2k"
-	// }
-	// ]
-	// }
 	@RequestMapping(value = "student/getSignCourse", method = RequestMethod.POST)
 	public ReturnBody getSignCourse(HttpServletRequest request) {
 		String userId = getCurrentUserId(request);
@@ -221,101 +171,6 @@ public class CourseRemote extends BaseRemote {
 		}
 	}
 
-	/**
-	 * 学生端功能：获取用户某学期下的课程列表 ！！！Abandon
-	 * 
-	 * @param request
-	 * @return
-	 */
-	/*@RequestMapping(value = "student/{year}/{term}/courses", method = RequestMethod.GET)
-	public ReturnBody studentCourses(HttpServletRequest request,
-			@PathVariable String year, @PathVariable String term) {
-		try {
-			User currentUser = getCurrentUser(request);
-			List<Course> list = courseServiceImpl.getListByTermAndStuId(year,
-					term, currentUser.getUserId());
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
-		} catch (Exception e) {
-			log.error(this, e);
-			return new ReturnBody(ReturnBody.RESULT_FAILURE,
-					ReturnBody.ERROR_MSG);
-		}
-	}*/
-
-	/**
-	 * 获取资料库内容列表  	Abandon
-	 * 
-	 * @param request
-	 * @param courseId
-	 * @return
-	 */
-	/*@RequestMapping(value = "course/{courseId}/files", method = RequestMethod.GET)
-	public ReturnBody courseFiles(HttpServletRequest request,
-			@PathVariable String courseId) {
-		try {
-			List<CustomFile> courseFiles = courseServiceImpl
-					.getPublicCourseFilesByCourseId(courseId);
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, courseFiles);
-		} catch (Exception e) {
-			log.error(this, e);
-			return new ReturnBody(ReturnBody.RESULT_FAILURE,
-					ReturnBody.ERROR_MSG);
-		}
-	}*/
-
-	/**
-	 * 课程资源下载  abandon
-	 * 
-	 * @param request
-	 * @param response
-	 * @param cfId
-	 * @return
-	 */
-	/*@RequestMapping(value = "course-files/{cfId}", method = RequestMethod.GET)
-	public ReturnBody downloadFile(HttpServletRequest request,
-			HttpServletResponse response, @PathVariable String cfId) {
-		InputStream is = null;
-		OutputStream os = null;
-		try {
-			CustomFile courseFile = (CustomFile) courseServiceImpl.get(
-					CustomFile.class, cfId);
-			String pathRoot = request.getSession().getServletContext()
-					.getRealPath("");
-			System.out.println("----" + pathRoot);
-			File file = new File(pathRoot + "/upload/"
-					+ courseFile.getServerName());
-			response.reset();
-			response.addHeader("Content-Disposition", "attachment;filename="
-					+ new String(courseFile.getFileName().getBytes(),
-							"ISO8859-1"));
-			response.addHeader("Content-Length", "" + file.length());
-			response.setContentType("application/octet-stream");
-
-			is = new BufferedInputStream(new FileInputStream(file));
-			os = new BufferedOutputStream(response.getOutputStream());
-			byte[] b = new byte[1024];
-			int i = 0;
-			while ((i = is.read(b)) > 0) {
-				os.write(b, 0, i);
-			}
-			return null;
-		} catch (Exception e) {
-			log.error(this, e);
-			return new ReturnBody(ReturnBody.RESULT_FAILURE,
-					ReturnBody.ERROR_MSG);
-		} finally {
-			try {
-				if (is != null) {
-					is.close();
-				}
-				if (os != null) {
-					os.close();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}*/
 	/**
 	 * 1.2.16 获取指定月份有课程的日期(学生端)
 	 * 
@@ -1153,5 +1008,13 @@ public class CourseRemote extends BaseRemote {
 		}
 	}
 
-	
+	@RequestMapping(value = "teacher/course/getCourseByTerm", method = RequestMethod.POST)
+	public ReturnBody teacherGetCourseByTerm(HttpServletRequest request) {
+		String termId = request.getParameter("termId");
+		if (StringUtil.checkParams(termId)) {
+			List list = courseServiceImpl.getCourseListByTerm(getCurrentUserId(request), termId);
+			return new ReturnBody(list);
+		}
+		return ReturnBody.getParamError();
+	}
 }
