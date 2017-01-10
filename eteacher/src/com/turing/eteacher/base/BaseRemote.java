@@ -17,7 +17,6 @@ import com.turing.eteacher.model.User;
 import com.turing.eteacher.service.ISchoolService;
 import com.turing.eteacher.service.IStudentService;
 import com.turing.eteacher.service.ITeacherService;
-import com.turing.eteacher.service.ITermService;
 import com.turing.eteacher.service.IUserService;
 import com.turing.eteacher.util.StringUtil;
 
@@ -31,8 +30,6 @@ public class BaseRemote {
 	private ITeacherService teacherServiceImpl;
 	@Autowired
 	private ISchoolService schoolServiceImpl;
-	@Autowired
-	private ITermService termServiceImpl;
 	/**
 	 * <li>功能描述：设置request中绑定的参数。
 	 * 
@@ -71,8 +68,9 @@ public class BaseRemote {
 	}
 	
 	public Map getCurrentTerm(HttpServletRequest request){
-		Map term = termServiceImpl.getCurrentTerm(getCurrentUserId(request));
-		return term;
+//		Map term = termServiceImpl.getCurrentTerm(getCurrentUserId(request));
+//		return term;
+		return null;
 	}
 	
 	/**
@@ -82,17 +80,17 @@ public class BaseRemote {
 	 */
 	public Map getThisTerm(HttpServletRequest request){
 		User user = getCurrentUser(request);
-		if (user.getUserType().equals("01")) {
-			Teacher teacher = getCurrentTeacher(request);
-			if (null != teacher) {
-				return termServiceImpl.getThisTerm(teacher.getSchoolId());
-			}
-		}else if(user.getUserType().equals("02")){
-			Student student = getCurrentStudent(request);
-			if (null != student) {
-				return termServiceImpl.getThisTerm(student.getSchoolId());
-			}
-		}
+//		if (user.getUserType().equals("01")) {
+//			Teacher teacher = getCurrentTeacher(request);
+//			if (null != teacher) {
+//				return termServiceImpl.getThisTerm(teacher.getSchoolId());
+//			}
+//		}else if(user.getUserType().equals("02")){
+//			Student student = getCurrentStudent(request);
+//			if (null != student) {
+//				return termServiceImpl.getThisTerm(student.getSchoolId());
+//			}
+//		}
 		return null;
 	}
 	

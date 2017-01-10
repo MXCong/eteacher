@@ -29,7 +29,6 @@ import com.turing.eteacher.service.ICourseService;
 import com.turing.eteacher.service.INoticeService;
 import com.turing.eteacher.service.IRegistConfigService;
 import com.turing.eteacher.service.ISignInService;
-import com.turing.eteacher.service.ITermPrivateService;
 import com.turing.eteacher.service.ITimeTableService;
 import com.turing.eteacher.service.IWorkService;
 
@@ -42,9 +41,6 @@ public class SpringTimerTest {
 
 	@Autowired
 	private INoticeService noticeServiceImpl;
-	
-	@Autowired
-	private ITermPrivateService termPrivateServiceImpl;
 	
 	@Autowired
 	private ICourseCellService courseCellServiceImpl;

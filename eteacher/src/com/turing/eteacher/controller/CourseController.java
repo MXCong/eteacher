@@ -31,7 +31,6 @@ import com.turing.eteacher.service.ICourseScoreService;
 import com.turing.eteacher.service.ICourseService;
 import com.turing.eteacher.service.IDictionary2PrivateService;
 import com.turing.eteacher.service.IDictionary2PublicService;
-import com.turing.eteacher.service.ITermService;
 import com.turing.eteacher.service.ITextbookService;
 import com.turing.eteacher.util.CustomIdGenerator;
 import com.turing.eteacher.util.StringUtil;
@@ -42,9 +41,6 @@ public class CourseController extends BaseController {
 	
 	@Autowired
 	private ICourseService courseServiceImpl;
-	
-	@Autowired
-	private ITermService termServiceImpl;
 	
 	@Autowired
 	private IClassService classServiceImpl;
@@ -72,8 +68,9 @@ public class CourseController extends BaseController {
 		}
 		//学期下拉列表数据
 		User currentUser = getCurrentUser(request);
-		List<Map> termList = termServiceImpl.getListTermPrivatesName(currentUser.getUserId());
-		request.setAttribute("termList", termList);
+		//FIXME 学期共有表删除注掉两行
+		//List<Map> termList = termServiceImpl.getListTermPrivatesName(currentUser.getUserId());
+		//request.setAttribute("termList", termList);
 		request.setAttribute("termId", termId);
 		return "course/listCourse";
 	}

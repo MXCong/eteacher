@@ -17,7 +17,6 @@ import com.turing.eteacher.model.CourseTable;
 import com.turing.eteacher.model.User;
 import com.turing.eteacher.service.IClassService;
 import com.turing.eteacher.service.ICourseTableService;
-import com.turing.eteacher.service.ITermService;
 
 @Controller
 @RequestMapping("courseTable")
@@ -29,9 +28,6 @@ public class CourseTableController extends BaseController {
 	@Autowired
 	private IClassService classServiceImpl;
 	
-	@Autowired
-	private ITermService termServiceImpl;
-
 	@RequestMapping("viewListCourseTable")
 	public String viewListCourseTable(HttpServletRequest request){
 		String courseId = request.getParameter("courseId");
@@ -81,7 +77,9 @@ public class CourseTableController extends BaseController {
 	public String viewCourseTable(HttpServletRequest request){
 		List classList = classServiceImpl.findAll();
 		String userId=getCurrentUser(request)==null?null:getCurrentUser(request).getUserId();;
-		Map tpId=termServiceImpl.getCurrentTerm(userId);
+		Map tpId = null;
+		//学期共有表删除注掉一行
+		//Map tpId=termServiceImpl.getCurrentTerm(userId);
 //		List classList = courseTableServiceImpl.getClassList(userId, tpId);
 		request.setAttribute("classList", classList);
 		

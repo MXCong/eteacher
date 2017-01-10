@@ -17,7 +17,6 @@ import com.turing.eteacher.constants.EteacherConstants;
 import com.turing.eteacher.model.Teacher;
 import com.turing.eteacher.model.User;
 import com.turing.eteacher.service.ITeacherService;
-import com.turing.eteacher.service.ITermService;
 import com.turing.eteacher.service.IUserService;
 import com.turing.eteacher.util.Encryption;
 import com.turing.eteacher.util.SmsUtil;
@@ -31,8 +30,6 @@ public class IndexController extends BaseController {
 	@Autowired
 	private ITeacherService teacherServiceImpl;
 	
-	@Autowired
-	private ITermService termServiceImpl;
 
 	@RequestMapping("login")
 	public String viewLogin(HttpServletRequest request){
@@ -58,7 +55,7 @@ public class IndexController extends BaseController {
 				Teacher currentTeacher = teacherServiceImpl.get(currentUser.getUserId());
 				request.getSession().setAttribute(EteacherConstants.CURRENT_USER, currentUser);
 				request.getSession().setAttribute(EteacherConstants.CURRENT_TEACHER, currentTeacher);
-				request.getSession().setAttribute(EteacherConstants.CURRENT_TERM, termServiceImpl.getCurrentTerm(currentUser.getUserId()));
+				//request.getSession().setAttribute(EteacherConstants.CURRENT_TERM, termServiceImpl.getCurrentTerm(currentUser.getUserId()));
 				return "success";
 			} else {
 				return "用户名或密码错误";

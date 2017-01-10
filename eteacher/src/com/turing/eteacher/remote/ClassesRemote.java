@@ -12,10 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
-import com.turing.eteacher.model.Student;
 import com.turing.eteacher.model.Teacher;
 import com.turing.eteacher.service.IClassService;
-import com.turing.eteacher.service.ITermService;
 import com.turing.eteacher.util.StringUtil;
 
 @RestController
@@ -24,9 +22,6 @@ public class ClassesRemote extends BaseRemote {
 
 		@Autowired
 		private IClassService classServiceImpl;
-		
-		@Autowired
-		private ITermService termServiceImpl;
 		/**
 		 * 获取用户当前学期所有课程对应的班级列表
 		 * @param request

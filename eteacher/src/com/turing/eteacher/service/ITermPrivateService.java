@@ -7,7 +7,6 @@ import com.turing.eteacher.base.IService;
 import com.turing.eteacher.model.TermPrivate;
 
 public interface ITermPrivateService  extends IService<TermPrivate>{
-	public List<TermPrivate> getListTermPrivatesName(String userId);
 	
 	public void addTermPrivate(String termId, String tpId);
 	

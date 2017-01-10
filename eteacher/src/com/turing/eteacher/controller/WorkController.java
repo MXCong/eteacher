@@ -15,14 +15,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.turing.eteacher.base.BaseController;
-import com.turing.eteacher.constants.EteacherConstants;
 import com.turing.eteacher.model.Course;
 import com.turing.eteacher.model.CustomFile;
-import com.turing.eteacher.model.Term;
 import com.turing.eteacher.model.User;
 import com.turing.eteacher.model.Work;
 import com.turing.eteacher.service.ICourseService;
-import com.turing.eteacher.service.ITermService;
 import com.turing.eteacher.service.IWorkService;
 import com.turing.eteacher.util.CustomIdGenerator;
 
@@ -33,8 +30,6 @@ public class WorkController extends BaseController {
 	@Autowired
 	private IWorkService workServiceImpl;
 	
-	@Autowired
-	private ITermService termServiceImpl;
 	
 	@Autowired
 	private ICourseService courseServiceImpl;
@@ -43,10 +38,11 @@ public class WorkController extends BaseController {
 	public String viewListWork(HttpServletRequest request){
 		String termId = request.getParameter("termId");
 		if(termId == null){
-			Term currentTerm = (Term)request.getSession().getAttribute(EteacherConstants.CURRENT_TERM);
-			if(currentTerm != null){
-				termId = currentTerm.getTermId();
-			}
+			//FIXME 学期表删除了进行了屏蔽
+//			Term currentTerm = (Term)request.getSession().getAttribute(EteacherConstants.CURRENT_TERM);
+//			if(currentTerm != null){
+//				termId = currentTerm.getTermId();
+//			}
 		}
 		String courseId = request.getParameter("courseId");
 		//学期下拉列表数据

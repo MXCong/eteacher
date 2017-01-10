@@ -21,6 +21,7 @@ import com.turing.eteacher.dao.CourseDAO;
 import com.turing.eteacher.dao.CourseScoreDAO;
 import com.turing.eteacher.dao.CourseTableDAO;
 import com.turing.eteacher.dao.MajorDAO;
+import com.turing.eteacher.dao.TermPrivateDAO;
 import com.turing.eteacher.dao.TextbookDAO;
 import com.turing.eteacher.model.Course;
 import com.turing.eteacher.model.CourseClasses;
@@ -30,12 +31,12 @@ import com.turing.eteacher.model.CourseTable;
 import com.turing.eteacher.model.CourseWorkload;
 import com.turing.eteacher.model.CustomFile;
 import com.turing.eteacher.model.Major;
+import com.turing.eteacher.model.TermPrivate;
 import com.turing.eteacher.model.Textbook;
 import com.turing.eteacher.model.User;
 import com.turing.eteacher.service.ICourseService;
 import com.turing.eteacher.service.IDictionary2PrivateService;
 import com.turing.eteacher.service.IFileService;
-import com.turing.eteacher.service.ITermService;
 import com.turing.eteacher.util.BeanUtils;
 import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.StringUtil;
@@ -59,11 +60,11 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	private MajorDAO majorDAO;
 
 	@Autowired
-	private ITermService termServiceImpl;
-
-	@Autowired
 	private IDictionary2PrivateService dictionary2PrivateServiceImpl;
 
+	@Autowired
+	private TermPrivateDAO termPrivateDAO;
+	
 	@Override
 	public BaseDAO<Course> getDAO() {
 		return courseDAO;
@@ -365,12 +366,12 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 		for (CourseTable courseTable : courseTables) {
 			// 获取当前时间是本学期的第几周
 			Course course = courseDAO.get(courseTable.getCourseId());
-			Map currentTerm = termServiceImpl.getCurrentTerm(course.getUserId());
+			TermPrivate currentTerm = termPrivateDAO.getTermByUser(course.getUserId());
 			Calendar termStart = Calendar.getInstance();
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			Calendar now = Calendar.getInstance();
 			try {
-				termStart.setTime(dateFormat.parse((String) currentTerm.get("startDate")));
+				termStart.setTime(dateFormat.parse(currentTerm.getStartDate()));
 				termStart.add(Calendar.DATE, -(DateUtil.getDayOfWeek(termStart) - 1));
 				now.setTime(dateFormat.parse(dateFormat.format(new Date())));
 			} catch (Exception e) {

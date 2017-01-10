@@ -13,4 +13,13 @@ public class TermPrivateDAO extends BaseDAO<TermPrivate> {
 		return this.findMap(hql);
 
 	}
+
+	public TermPrivate getTermByUser(String userId) {
+		String hql = "form TermPrivate tp where tp.userId = ?";
+		List<TermPrivate> list = find(hql, userId);
+		if (null != list && list.size() > 0) {
+			return list.get(0);
+		}
+		return null;
+	}
 }

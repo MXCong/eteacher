@@ -40,7 +40,6 @@ import com.turing.eteacher.service.ICourseService;
 import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.IMajorService;
 import com.turing.eteacher.service.ITermPrivateService;
-import com.turing.eteacher.service.ITermService;
 import com.turing.eteacher.service.ITextbookService;
 import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.FileUtil;
@@ -78,8 +77,6 @@ public class CourseRemote extends BaseRemote {
 	@Autowired
 	private ICourseCellService courseCellServiceImpl;
 	
-	@Autowired
-	private ITermService termServiceImpl;
 	
 	@Autowired
 	private IFileService fileServiceImpl;
@@ -178,95 +175,96 @@ public class CourseRemote extends BaseRemote {
 	 */
 	@RequestMapping(value = "student/Course/getWorkday", method = RequestMethod.POST)
 	public ReturnBody getWorkday_student(HttpServletRequest request) {
-		String ym = request.getParameter("month");
-		if (StringUtil.checkParams(ym)) {
-			List<Map> result = new ArrayList<>(); 
-			String cLastDay = DateUtil.getLastDayOfMonth(ym);
-			String cFirstDay = ym + "-01";
-			List<Map> list = termServiceImpl.getTermsList(getCurrentUserId(request));
-			
-			for (int i = 0; i < list.size(); i++) {
-				if (DateUtil.isOverlap(cFirstDay, cLastDay, ""+list.get(i).get("startDate"), ""+list.get(i).get("endDate"))) {
-					List<Map> list2 = courseServiceImpl.getCourseTimebyStuId(getCurrentUserId(request),(String)list.get(i).get("termId"));
-					if (null != list2) {
-						for (int j = 0; j < list2.size(); j++) {
-							Map map = list2.get(j);
-							//天循环的课程
-							if (map.get("repeatType").equals("01")) {
-								//判断课程的开始结束时间是否与本月有交集
-								if (DateUtil.isOverlap(cFirstDay, cLastDay, (String)map.get("startDay"), (String)map.get("endDay"))) {
-									//课程重复天数
-									int repeatNumber = (int)map.get("repeatNumber");
-									//该课程一共有多少天
-									int distance = DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay"));
-									//一共上几次课
-									int repeat = distance / repeatNumber;
-									for (int k = 0; k <= repeat; k++) {
-										//每次上课的具体日期
-										String date = DateUtil.addDays((String)map.get("startDay"), k*repeatNumber);
-										//判断是否上课时间在指定月份里
-										if (DateUtil.isInRange(date, cFirstDay, cLastDay)) {
-											Map<String, String> m = new HashMap<>(); 
-											m.put("date", date);
-											m.put("courseId", (String)map.get("courseId"));
-											if (!result.contains(m)) {
-												result.add(m);
-											}
-									   }
-									}
-								}
-							}else{
-								//获取周重复课程的开始时间
-								String start =  (String)map.get("startDay");
-								//获取周重复课程结束周的周一
-								String end =  (String)map.get("endDay");
-								//查看课程是否与指定的月份有交集
-								if (DateUtil.isOverlap(cFirstDay, cLastDay, start, end)) {
-									//获取课程的重复规律
-									List<CourseCell> list3 = courseCellServiceImpl.getCells((String)map.get("ciId"));
-									if (null != list3) {
-										for (int k = 0; k < list3.size(); k++) {
-											CourseCell cell = list3.get(k);
-											if (null != cell.getWeekDay()) {
-												//查看具体课程在周几上课
-												String[] week = cell.getWeekDay().split(",");
-												for (int l = 0; l < week.length; l++) {
-													//课程的间隔周期
-													int repeatNumber = (int)map.get("repeatNumber");
-													//课程一共上几周
-													int repeatCount = (DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay")))/(repeatNumber*7);
-													for (int m = 0; m <= repeatCount; m++) {
-														//获取课程具体在指定星期的上课时间
-														String dateStr = DateUtil.getWeek(start, m*repeatNumber, Integer.parseInt(week[l]));
-														if (null != dateStr) {
-															//如果上课时间在学期内&&在所指定的月份内
-															if (DateUtil.isBefore(dateStr,(String)map.get("termEndDay"),DateUtil.YYYYMMDD) && DateUtil.isInRange(dateStr, cFirstDay, cLastDay)) {
-																Map<String, String> n = new HashMap<>(); 
-																n.put("date", dateStr);
-																n.put("courseId", (String)map.get("courseId"));
-																if (!result.contains(n)) {
-																	result.add(n);
-																}
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}else {
-						//没有相关课程
-						System.out.println("未查到相关课程！");
-					}
-				}
-			}
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS,result);
-		} else {
-			return ReturnBody.getParamError();
-		}
+//		String ym = request.getParameter("month");
+//		if (StringUtil.checkParams(ym)) {
+//			List<Map> result = new ArrayList<>(); 
+//			String cLastDay = DateUtil.getLastDayOfMonth(ym);
+//			String cFirstDay = ym + "-01";
+//			List<Map> list = termServiceImpl.getTermsList(getCurrentUserId(request));
+//			
+//			for (int i = 0; i < list.size(); i++) {
+//				if (DateUtil.isOverlap(cFirstDay, cLastDay, ""+list.get(i).get("startDate"), ""+list.get(i).get("endDate"))) {
+//					List<Map> list2 = courseServiceImpl.getCourseTimebyStuId(getCurrentUserId(request),(String)list.get(i).get("termId"));
+//					if (null != list2) {
+//						for (int j = 0; j < list2.size(); j++) {
+//							Map map = list2.get(j);
+//							//天循环的课程
+//							if (map.get("repeatType").equals("01")) {
+//								//判断课程的开始结束时间是否与本月有交集
+//								if (DateUtil.isOverlap(cFirstDay, cLastDay, (String)map.get("startDay"), (String)map.get("endDay"))) {
+//									//课程重复天数
+//									int repeatNumber = (int)map.get("repeatNumber");
+//									//该课程一共有多少天
+//									int distance = DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay"));
+//									//一共上几次课
+//									int repeat = distance / repeatNumber;
+//									for (int k = 0; k <= repeat; k++) {
+//										//每次上课的具体日期
+//										String date = DateUtil.addDays((String)map.get("startDay"), k*repeatNumber);
+//										//判断是否上课时间在指定月份里
+//										if (DateUtil.isInRange(date, cFirstDay, cLastDay)) {
+//											Map<String, String> m = new HashMap<>(); 
+//											m.put("date", date);
+//											m.put("courseId", (String)map.get("courseId"));
+//											if (!result.contains(m)) {
+//												result.add(m);
+//											}
+//									   }
+//									}
+//								}
+//							}else{
+//								//获取周重复课程的开始时间
+//								String start =  (String)map.get("startDay");
+//								//获取周重复课程结束周的周一
+//								String end =  (String)map.get("endDay");
+//								//查看课程是否与指定的月份有交集
+//								if (DateUtil.isOverlap(cFirstDay, cLastDay, start, end)) {
+//									//获取课程的重复规律
+//									List<CourseCell> list3 = courseCellServiceImpl.getCells((String)map.get("ciId"));
+//									if (null != list3) {
+//										for (int k = 0; k < list3.size(); k++) {
+//											CourseCell cell = list3.get(k);
+//											if (null != cell.getWeekDay()) {
+//												//查看具体课程在周几上课
+//												String[] week = cell.getWeekDay().split(",");
+//												for (int l = 0; l < week.length; l++) {
+//													//课程的间隔周期
+//													int repeatNumber = (int)map.get("repeatNumber");
+//													//课程一共上几周
+//													int repeatCount = (DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay")))/(repeatNumber*7);
+//													for (int m = 0; m <= repeatCount; m++) {
+//														//获取课程具体在指定星期的上课时间
+//														String dateStr = DateUtil.getWeek(start, m*repeatNumber, Integer.parseInt(week[l]));
+//														if (null != dateStr) {
+//															//如果上课时间在学期内&&在所指定的月份内
+//															if (DateUtil.isBefore(dateStr,(String)map.get("termEndDay"),DateUtil.YYYYMMDD) && DateUtil.isInRange(dateStr, cFirstDay, cLastDay)) {
+//																Map<String, String> n = new HashMap<>(); 
+//																n.put("date", dateStr);
+//																n.put("courseId", (String)map.get("courseId"));
+//																if (!result.contains(n)) {
+//																	result.add(n);
+//																}
+//															}
+//														}
+//													}
+//												}
+//											}
+//										}
+//									}
+//								}
+//							}
+//						}
+//					}else {
+//						//没有相关课程
+//						System.out.println("未查到相关课程！");
+//					}
+//				}
+//			}
+//			return new ReturnBody(ReturnBody.RESULT_SUCCESS,result);
+//		} else {
+//			return ReturnBody.getParamError();
+//		}
+		return ReturnBody.getParamError();
 	}
 	
 
@@ -620,25 +618,6 @@ public class CourseRemote extends BaseRemote {
 		}
 	}
 
-	/**
-	 * 删除特定的成绩组成项  abandon 
-	 * 
-	 * @param request
-	 * @param course_scoreid
-	 * @return
-	 */
-/*	@RequestMapping(value = "teacher/course/delType/{course_scoreid}", method = RequestMethod.GET)
-	public ReturnBody deleteType(HttpServletRequest request,
-			@PathVariable String course_scoreid) {
-		try {
-			courseServiceImpl.deleteById(course_scoreid);
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, new HashMap());
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ReturnBody(ReturnBody.RESULT_FAILURE,
-					ReturnBody.ERROR_MSG);
-		}
-	}*/
 
 	/**
 	 * 1.2.15 为课程添加重复周期和起止时间

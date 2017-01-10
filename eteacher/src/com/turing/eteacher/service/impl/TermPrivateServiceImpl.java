@@ -33,17 +33,6 @@ public class TermPrivateServiceImpl extends BaseService<TermPrivate> implements
 		List<Map> list = termPrivateDAO.findMap(hql, termId, tpId);
 	}
 
-	@Override
-	public List<TermPrivate> getListTermPrivatesName(String userId) {
-		String hql = "from Term t where t.termId not in "
-				+ "(select tp.termId from TermPrivate tp where tp.userId = ? and tp.status = 2)";
-		// String sql = "SELECT t_term_private.TP_ID  AS id,"
-		// "t_term.TERM_NAME AS content FROM t_term_private LEFT JOIN t_term ON t_term_private.TREM_ID =  t_term.TERM_ID"
-		// "WHERE t_term_private.USER_ID = 'GevJsmPZP9'"
-		List list = termPrivateDAO.find(hql, userId);
-		return list;
-	}
-
 	// 删除学期
 	@Override
 	public void deleteById(String tpId) {
@@ -63,10 +52,10 @@ public class TermPrivateServiceImpl extends BaseService<TermPrivate> implements
 	public Map getListTerm(String tpId) {
 		System.out.println("tpId:" + tpId);
 		String hql = "select tp.termId as termId,"
-				+ " t.termName as termName , " + "tp.startDate as startDate , "
-				+ "tp.endDate as endDate , "
-				+ "tp.weekCount as weekCount from Term t , TermPrivate tp "
-				+ "where t.termId = tp.termId and tp.tpId =?";
+				+ " tp.termName as termName , "
+				+ "tp.startDate as startDate , " + "tp.endDate as endDate , "
+				+ "tp.weekCount as weekCount from TermPrivate tp "
+				+ "where tp.tpId =?";
 		List<Map> list = termPrivateDAO.findMap(hql, tpId);
 		for (int i = 0; i < list.size(); i++) {
 			System.out.println("mapp" + i + ":" + list.get(i).toString());

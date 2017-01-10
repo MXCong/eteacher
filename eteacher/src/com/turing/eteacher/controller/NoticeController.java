@@ -15,7 +15,6 @@ import com.turing.eteacher.base.BaseController;
 import com.turing.eteacher.constants.EteacherConstants;
 import com.turing.eteacher.model.Course;
 import com.turing.eteacher.model.Notice;
-import com.turing.eteacher.model.Term;
 import com.turing.eteacher.model.User;
 import com.turing.eteacher.service.ICourseService;
 import com.turing.eteacher.service.INoticeService;
@@ -37,13 +36,15 @@ public class NoticeController extends BaseController {
 	
 	@RequestMapping("viewAddNotice")
 	public String viewAddWork(HttpServletRequest request){
-		Term currentTerm = (Term)request.getSession().getAttribute(EteacherConstants.CURRENT_TERM);
-		String termId = currentTerm.getTermId();
-		//课程下拉数据
-		User currentUser = getCurrentUser(request);
-		List<Course> courseList = courseServiceImpl.getListByTermId(termId, currentUser.getUserId());
-		request.setAttribute("courseList", courseList);
-		return "notice/noticeForm";
+		//FIXME 
+//		Term currentTerm = (Term)request.getSession().getAttribute(EteacherConstants.CURRENT_TERM);
+//		String termId = currentTerm.getTermId();
+//		//课程下拉数据
+//		User currentUser = getCurrentUser(request);
+//		List<Course> courseList = courseServiceImpl.getListByTermId(termId, currentUser.getUserId());
+//		request.setAttribute("courseList", courseList);
+//		return "notice/noticeForm";
+		return null;
 	}
 	
 	@RequestMapping("getNoticeListData")

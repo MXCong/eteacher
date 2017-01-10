@@ -16,11 +16,9 @@ import com.turing.eteacher.constants.EteacherConstants;
 import com.turing.eteacher.model.Course;
 import com.turing.eteacher.model.CourseTable;
 import com.turing.eteacher.model.Score;
-import com.turing.eteacher.model.Term;
 import com.turing.eteacher.model.User;
 import com.turing.eteacher.service.ICourseService;
 import com.turing.eteacher.service.IStudentService;
-import com.turing.eteacher.service.ITermService;
 
 @Controller
 @RequestMapping("student")
@@ -29,8 +27,6 @@ public class StudentController extends BaseController {
 	@Autowired
 	private IStudentService studentServiceImpl;
 	
-	@Autowired
-	private ITermService termServiceImpl;
 	
 	@Autowired
 	private ICourseService courseServiceImpl;
@@ -38,12 +34,13 @@ public class StudentController extends BaseController {
 	@RequestMapping("viewListStudent")
 	public String viewListStudent(HttpServletRequest request){
 		String termId = request.getParameter("termId");
-		Term currentTerm = (Term)request.getSession().getAttribute(EteacherConstants.CURRENT_TERM);
-		if(termId == null){//默认取当前学期
-			if(currentTerm != null){
-				termId = currentTerm.getTermId();
-			}
-		}
+		//FIXME 学期表删除 进行了修改
+		//Term currentTerm = (Term)request.getSession().getAttribute(EteacherConstants.CURRENT_TERM);
+//		if(termId == null){//默认取当前学期
+//			if(currentTerm != null){
+//				termId = currentTerm.getTermId();
+//			}
+//		}
 		String courseId = request.getParameter("courseId");
 		if(courseId == null){//默认如果当前时间有课，取当前课程。
 			Map courseMap = courseServiceImpl.getCourseRecordNow(getCurrentUser(request), null);
