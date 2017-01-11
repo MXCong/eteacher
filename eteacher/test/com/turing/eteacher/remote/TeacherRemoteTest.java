@@ -1,6 +1,6 @@
 package com.turing.eteacher.remote;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.HashMap;

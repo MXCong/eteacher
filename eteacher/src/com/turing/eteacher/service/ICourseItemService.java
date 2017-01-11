@@ -15,4 +15,11 @@ public interface ICourseItemService extends IService<CourseItem> {
 	 * @return
 	 */
 	public CourseItem getItemByCourseId(String courseId);
+	/**
+	 * 保存课程时间的详细信息
+	 * @author lifei
+	 * @param details
+	 * @return
+	 */
+	public boolean saveCourseTime(String courseId,String details);
 }

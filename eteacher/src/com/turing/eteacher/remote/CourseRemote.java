@@ -787,27 +787,16 @@ public class CourseRemote extends BaseRemote {
 	 */
 	@RequestMapping(value = "teacher/course/addTeachTime", method = RequestMethod.POST)
 	public ReturnBody addTeachTime(HttpServletRequest request) {
-		String data = request.getParameter("data");
-		String courseItemId = request.getParameter("courseItemId");
-		if (StringUtil.checkParams(data,courseItemId)) {
-			List<Map<String, String>> jsonList = (List<Map<String, String>>) JSONUtils
-					.parse(data);
-			for (int i = 0; i < jsonList.size(); i++) {
-				CourseCell cell = new CourseCell();
-				cell.setCiId(courseItemId);
-				cell.setWeekDay(jsonList.get(i).get("weekday"));
-				cell.setLessonNumber(jsonList.get(i).get("lessonNumber"));
-				cell.setLocation(jsonList.get(i).get("location"));
-				cell.setClassRoom(jsonList.get(i).get("classroom"));
-				courseCellServiceImpl.save(cell);
+		String courseTime = request.getParameter("courseTime");
+		String courseId = request.getParameter("courseId");
+		if(StringUtil.checkParams(courseId,courseTime)){
+			System.out.println("dfsfsdfsdf");
+			if (courseItemServiceImpl.saveCourseTime(courseId, courseTime)) {
+				return new ReturnBody("保存成功");
+			}else{
+				return ReturnBody.getErrorBody("保存失败，请重试！");
 			}
-			CourseItem courseItem = courseItemServiceImpl.get(courseItemId);
-			Teacher teacher = getCurrentTeacher(request);
-			if (null != courseItem) {
-				springTimerTest.checkCourseById(courseItem.getCourseId(), teacher.getSchoolId());
-			}
-			return new ReturnBody("保存成功！");
-		} else {
+		}else{
 			return ReturnBody.getParamError();
 		}
 	}
