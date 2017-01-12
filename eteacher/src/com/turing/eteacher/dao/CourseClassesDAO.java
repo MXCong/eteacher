@@ -8,4 +8,10 @@ import com.turing.eteacher.model.CourseClasses;
 @Repository
 public class CourseClassesDAO extends BaseDAO<CourseClasses> {
 
+	public boolean delByCourseId(String courseId) {
+		String sql = "DELETE FROM t_course_class WHERE t_course_class.COURSE_ID = ?";
+		executeBySql(sql, courseId);
+		return true;
+	}
+	
 }

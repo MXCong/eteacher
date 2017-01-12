@@ -1,8 +1,5 @@
 package com.turing.eteacher.remote;
 
-import java.io.File;
-import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,25 +7,20 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartRequest;
 
 import com.alibaba.druid.support.json.JSONUtils;
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.Course;
 import com.turing.eteacher.model.CourseCell;
-import com.turing.eteacher.model.CourseClasses;
 import com.turing.eteacher.model.CourseItem;
 import com.turing.eteacher.model.CourseScorePrivate;
-import com.turing.eteacher.model.CustomFile;
 import com.turing.eteacher.model.Teacher;
 import com.turing.eteacher.model.TermPrivate;
 import com.turing.eteacher.model.Textbook;
@@ -456,139 +448,8 @@ public class CourseRemote extends BaseRemote {
 	 */
 	@RequestMapping(value = "teacher/course/updateCourse", method = RequestMethod.POST)
 	public ReturnBody updateCourse(HttpServletRequest request) {
-		String termId = request.getParameter("termId");
-		String courseId = request.getParameter("courseId");
-		String courseName = request.getParameter("courseName");// *
-		String courseHours = request.getParameter("courseHours");// *
-		String teachMethodId = request.getParameter("teachMethodId");// *
-		String courseTypeId = request.getParameter("courseTypeId");// *
-		String examTypeId = request.getParameter("examTypeId");// *
-		String majorId = request.getParameter("majorId");// *
-		String introduction = request.getParameter("introduction");
-		String formula = request.getParameter("formula");
-		String remindTime = request.getParameter("remindTime");// *
-		String classes = request.getParameter("classes");// *
-		String scores = request.getParameter("scores");// *
-		String book = request.getParameter("book");
-		String books = request.getParameter("books");
-		String myFiles = request.getParameter("myFiles");
-		if (StringUtil.checkParams(courseName, courseHours, teachMethodId,
-				courseTypeId, examTypeId, majorId, remindTime, classes, scores)) {
-			Course course = null;
-			if (StringUtil.isNotEmpty(courseId)) {
-				course = courseServiceImpl.get(courseId);
-			} else {
-				course = new Course();
-			}
-			course.setTermId(termId);
-			course.setCourseName(courseName);
-			course.setIntroduction(introduction);
-			course.setMajorId(majorId);
-			course.setClassHours(Integer.parseInt(courseHours));
-			course.setTeachingMethodId(teachMethodId);
-			course.setCourseTypeId(courseTypeId);
-			course.setExaminationModeId(examTypeId);
-			course.setFormula(formula);
-			course.setUserId(getCurrentUserId(request));
-			course.setRemindTime(remindTime);
-			if (StringUtil.isNotEmpty(courseId)) {
-				courseServiceImpl.update(course);
-				// 删除原有成绩组成数据
-				courseClassServiceImpl.delByCourseId(courseId);
-				courseScoreServiceImpl.delScoresByCourseId(courseId);
-				textbookServiceImpl.delTextbook(courseId, "01");
-				textbookServiceImpl.delTextbook(courseId, "02");
-			} else {
-				courseServiceImpl.add(course);
-			}
-			courseId = course.getCourseId();
-			if (StringUtil.isNotEmpty(classes)) {
-				List<Map<String, String>> classesList = (List<Map<String, String>>) JSONUtils
-						.parse(classes);
-				for (int i = 0; i < classesList.size(); i++) {
-					CourseClasses item = new CourseClasses();
-					item.setCourseId(courseId);
-					item.setClassId(classesList.get(i).get("classId"));
-					courseClassServiceImpl.save(item);
-				}
-			}
-			// 增加新数据
-			List<Map<String, String>> scoresList = (List<Map<String, String>>) JSONUtils
-					.parse(scores);
-			for (int i = 0; i < scoresList.size(); i++) {
-				CourseScorePrivate item = new CourseScorePrivate();
-				item.setCourseId(courseId);
-				item.setScoreName(scoresList.get(i).get("scoreName"));
-				item.setScorePercent(new BigDecimal(scoresList.get(i).get(
-						"scorePercent")));
-				item.setScorePointId(scoresList.get(i).get("scorePointId"));
-				item.setStatus(Integer
-						.parseInt(scoresList.get(i).get("status")));
-				courseScoreServiceImpl.add(item);
-			}
-			if (StringUtil.isNotEmpty(book)) {
-				Map<String, String> bookObj = (Map<String, String>) JSONUtils
-						.parse(book);
-				Textbook item = new Textbook();
-				item.setTextbookName(bookObj.get("textbookName"));
-				item.setAuthor(bookObj.get("author"));
-				item.setCourseId(courseId);
-				item.setPublisher(bookObj.get("publisher"));
-				item.setEdition(bookObj.get("edition"));
-				item.setIsbn(bookObj.get("isbn"));
-				item.setTextbookType("01");
-				textbookServiceImpl.save(item);
-			}
-			if (StringUtil.isNotEmpty(books)) {
-				List<Map<String, String>> bookList = (List<Map<String, String>>) JSONUtils
-						.parse(books);
-				for (int i = 0; i < bookList.size(); i++) {
-					Textbook item = new Textbook();
-					item.setTextbookName(bookList.get(i).get("textbookName"));
-					item.setAuthor(bookList.get(i).get("author"));
-					item.setCourseId(courseId);
-					item.setPublisher(bookList.get(i).get("publisher"));
-					item.setEdition(bookList.get(i).get("edition"));
-					item.setIsbn(bookList.get(i).get("isbn"));
-					item.setTextbookType("02");
-					textbookServiceImpl.save(item);
-				}
-			}
-			if (StringUtil.isNotEmpty(myFiles)) {
-				if (request instanceof MultipartRequest) {
-					MultipartRequest muiltRequest = (MultipartRequest) request;
-					String savePath = FileUtil.getUploadPath();
-					List<Map<String, String>> fileList = (List<Map<String, String>>) JSONUtils
-							.parse(myFiles);
-					for (int i = 0; i < fileList.size(); i++) {
-						MultipartFile mFile = muiltRequest.getFile(fileList.get(i).get("fileName"));
-						if (!mFile.isEmpty()) {
-							String serverName = FileUtil.makeFileName(mFile
-									.getOriginalFilename());
-							try {
-								FileUtils.copyInputStreamToFile(mFile.getInputStream(), new File(savePath,serverName));
-								CustomFile file = new CustomFile();
-								file.setDataId(courseId);
-								file.setFileAuth(fileList.get(i).get("fileAuth"));
-								file.setFileName(fileList.get(i).get("fileName"));
-								file.setIsCourseFile(1);
-								file.setVocabularyId(fileList.get(i).get("typeId"));
-								file.setServerName(serverName);
-								System.out.println("file:"+file.toString());
-								fileServiceImpl.save(file);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-					}
-				}
-			}
-			Map<String, String> map = new HashMap();
-			map.put("courseId", course.getCourseId());
-			return new ReturnBody(map);
-		} else {
-			return ReturnBody.getParamError();
-		}
+		Teacher teacher = getCurrentTeacher(request);
+		return courseServiceImpl.saveCourse(request,teacher.getSchoolId());
 	}
 	
 
@@ -864,64 +725,38 @@ public class CourseRemote extends BaseRemote {
 		}
 	}
 
-	/**
-	 * 修改授课班级
-	 * 
-	 */
-	@RequestMapping(value = "teacher/course/updateTeachClass", method = RequestMethod.POST)
-	public ReturnBody updateTeachClass(HttpServletRequest request) {
-		try {
-			String courseId = request.getParameter("courseId");
-			String classes = request.getParameter("classes");
-			courseClassServiceImpl.delByCourseId(courseId);
-			List<Map<String, String>> classesList = (List<Map<String, String>>) JSONUtils
-					.parse(classes);
-			for (int i = 0; i < classesList.size(); i++) {
-				CourseClasses item = new CourseClasses();
-				item.setCourseId(courseId);
-				item.setClassId((String) classesList.get(i).get("classId"));
-				courseClassServiceImpl.save(item);
-			}
-			return new ReturnBody("保存成功！");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ReturnBody(ReturnBody.RESULT_FAILURE,
-					ReturnBody.ERROR_MSG);
-		}
-	}
-
-	/**
-	 * 修改成绩组成
-	 * 
-	 */
-	@RequestMapping(value = "teacher/course/updateScoreZc", method = RequestMethod.POST)
-	public ReturnBody updateScoreZc(HttpServletRequest request) {
-		try {
-			String courseId = request.getParameter("courseId");
-			String scores = request.getParameter("scores");
-			System.out.println("courseId :" + courseId + "    scores: "
-					+ scores);
-			courseScoreServiceImpl.delScoresByCourseId(courseId);
-			List<Map<String, String>> scoresList = (List<Map<String, String>>) JSONUtils
-					.parse(scores);
-			for (int i = 0; i < scoresList.size(); i++) {
-				CourseScorePrivate item = new CourseScorePrivate();
-				item.setCourseId(courseId);
-				item.setScoreName(scoresList.get(i).get("scoreName"));
-				item.setScorePercent(new BigDecimal(scoresList.get(i).get(
-						"scorePercent")));
-				item.setScorePointId(scoresList.get(i).get("scorePointId"));
-				item.setStatus(Integer
-						.parseInt(scoresList.get(i).get("status")));
-				courseScoreServiceImpl.save(item);
-			}
-			return new ReturnBody("保存成功！");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ReturnBody(ReturnBody.RESULT_FAILURE,
-					ReturnBody.ERROR_MSG);
-		}
-	}
+//	/**
+//	 * 修改成绩组成
+//	 * 
+//	 */
+//	@RequestMapping(value = "teacher/course/updateScoreZc", method = RequestMethod.POST)
+//	public ReturnBody updateScoreZc(HttpServletRequest request) {
+//		try {
+//			String courseId = request.getParameter("courseId");
+//			String scores = request.getParameter("scores");
+//			System.out.println("courseId :" + courseId + "    scores: "
+//					+ scores);
+//			courseScoreServiceImpl.delScoresByCourseId(courseId);
+//			List<Map<String, String>> scoresList = (List<Map<String, String>>) JSONUtils
+//					.parse(scores);
+//			for (int i = 0; i < scoresList.size(); i++) {
+//				CourseScorePrivate item = new CourseScorePrivate();
+//				item.setCourseId(courseId);
+//				item.setScoreName(scoresList.get(i).get("scoreName"));
+//				item.setScorePercent(new BigDecimal(scoresList.get(i).get(
+//						"scorePercent")));
+//				item.setScorePointId(scoresList.get(i).get("scorePointId"));
+//				item.setStatus(Integer
+//						.parseInt(scoresList.get(i).get("status")));
+//				courseScoreServiceImpl.save(item);
+//			}
+//			return new ReturnBody("保存成功！");
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			return new ReturnBody(ReturnBody.RESULT_FAILURE,
+//					ReturnBody.ERROR_MSG);
+//		}
+//	}
 
 	/**
 	 * 修改教材教辅信息

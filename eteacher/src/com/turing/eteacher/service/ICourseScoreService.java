@@ -14,10 +14,4 @@ public interface ICourseScoreService extends IService<CourseScorePrivate>{
 	 * @return
 	 */
 	public List<Map> getScoresByCourseId(String courseId);
-	/**
-	 * 根据课程Id删除对应的成绩组成部分
-	 * @author lifei
-	 * 
-	 */
-	public boolean delScoresByCourseId(String courseId);
 }

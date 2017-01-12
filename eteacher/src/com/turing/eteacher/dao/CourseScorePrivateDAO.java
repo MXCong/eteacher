@@ -6,5 +6,9 @@ import com.turing.eteacher.model.CourseScorePrivate;
 
 @Repository
 public class CourseScorePrivateDAO extends BaseDAO<CourseScorePrivate> {
-
+	public boolean delScoresByCourseId(String courseId) {
+		String sql = "DELETE FROM t_course_score_private WHERE t_course_score_private.COURSE_ID = ?";
+		executeBySql(sql, courseId);
+		return true;
+	}
 }

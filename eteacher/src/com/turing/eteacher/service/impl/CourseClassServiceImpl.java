@@ -23,12 +23,6 @@ public class CourseClassServiceImpl extends BaseService<CourseClasses> implement
 		return courseClassesDao;
 	}
 
-	@Override
-	public boolean delByCourseId(String courseId) {
-		String sql = "DELETE FROM t_course_class WHERE t_course_class.COURSE_ID = ?";
-		courseClassesDao.executeBySql(sql, courseId);
-		return true;
-	}
 	//通过CourseId获取对应的课程以及班级
 	@Override
 	public List<Map> getCoursesByCourseId(String courseId) {

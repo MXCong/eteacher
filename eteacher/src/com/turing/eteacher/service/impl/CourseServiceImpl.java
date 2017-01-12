@@ -1,5 +1,8 @@
 package com.turing.eteacher.service.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -8,17 +11,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartRequest;
 
+import com.alibaba.druid.support.json.JSONUtils;
 import com.mysql.fabric.xmlrpc.base.Array;
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
+import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.constants.ConfigContants;
 import com.turing.eteacher.constants.EteacherConstants;
+import com.turing.eteacher.dao.ClassDAO;
+import com.turing.eteacher.dao.CourseClassesDAO;
 import com.turing.eteacher.dao.CourseDAO;
 import com.turing.eteacher.dao.CourseScoreDAO;
+import com.turing.eteacher.dao.CourseScorePrivateDAO;
 import com.turing.eteacher.dao.CourseTableDAO;
 import com.turing.eteacher.dao.MajorDAO;
 import com.turing.eteacher.dao.TermPrivateDAO;
@@ -31,6 +44,7 @@ import com.turing.eteacher.model.CourseTable;
 import com.turing.eteacher.model.CourseWorkload;
 import com.turing.eteacher.model.CustomFile;
 import com.turing.eteacher.model.Major;
+import com.turing.eteacher.model.Teacher;
 import com.turing.eteacher.model.TermPrivate;
 import com.turing.eteacher.model.Textbook;
 import com.turing.eteacher.model.User;
@@ -39,6 +53,7 @@ import com.turing.eteacher.service.IDictionary2PrivateService;
 import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.util.BeanUtils;
 import com.turing.eteacher.util.DateUtil;
+import com.turing.eteacher.util.FileUtil;
 import com.turing.eteacher.util.StringUtil;
 
 @Service
@@ -64,6 +79,15 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 
 	@Autowired
 	private TermPrivateDAO termPrivateDAO;
+	
+	@Autowired
+	private CourseClassesDAO courseClassesDAO;
+	
+	@Autowired
+	private CourseScorePrivateDAO courseScorePrivateDAO;
+	
+	@Autowired
+	private ClassDAO classDAO;
 	
 	@Override
 	public BaseDAO<Course> getDAO() {
@@ -1187,6 +1211,68 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 			}
 		}
 		return datas;
+	}
+
+	@Override
+	public ReturnBody saveCourse(HttpServletRequest request,String schoolId) {
+		String termId = request.getParameter("termId");
+		String courseId = request.getParameter("courseId");
+		String courseName = request.getParameter("courseName");// *
+		String teachMethodId = request.getParameter("teachMethodId");// *
+		String examTypeId = request.getParameter("examTypeId");// *
+		String introduction = request.getParameter("introduction");
+		String classes = request.getParameter("classes");// *
+		String scores = request.getParameter("scores");// *
+		if (StringUtil.checkParams(courseName, teachMethodId, examTypeId, classes, scores)) {
+			Course course = null;
+			if (StringUtil.isNotEmpty(courseId)) {
+				course = get(courseId);
+			} else {
+				course = new Course();
+			}
+			course.setTermId(termId);
+			course.setCourseName(courseName);
+			course.setIntroduction(introduction);
+			course.setTeachingMethodId(teachMethodId);
+			course.setExaminationModeId(examTypeId);
+			if (StringUtil.isNotEmpty(courseId)) {
+				update(course);
+				// 删除原有成绩组成数据
+				courseClassesDAO.delByCourseId(courseId);
+				courseScorePrivateDAO.delScoresByCourseId(courseId);
+			} else {
+				save(course);
+			}
+			courseId = course.getCourseId();
+			if (StringUtil.isNotEmpty(classes)) {
+				List<Map<String, String>> classesList = (List<Map<String, String>>) JSONUtils.parse(classes);
+				for (int i = 0; i < classesList.size(); i++) {
+					Map<String,String> classTemp =  classesList.get(i);
+					String classNum = classTemp.get("classNum");
+					String degree = classTemp.get("degree");
+					String grade = classTemp.get("grade");
+					String majorId = classTemp.get("majorId");
+					String className = classTemp.get("className");
+					classDAO.getClassIdbyFilter(classNum, degree, grade, majorId, className, schoolId);
+					//获取对应的班级Id
+				}
+			}
+			// 增加新数据
+			List<Map<String, String>> scoresList = (List<Map<String, String>>) JSONUtils.parse(scores);
+			for (int i = 0; i < scoresList.size(); i++) {
+				CourseScorePrivate item = new CourseScorePrivate();
+				item.setCourseId(courseId);
+				item.setScoreName(scoresList.get(i).get("scoreName"));
+				item.setScorePercent(new BigDecimal(scoresList.get(i).get("scorePercent")));
+				courseScorePrivateDAO.save(item);
+			}
+
+			Map<String, String> map = new HashMap();
+			map.put("courseId", course.getCourseId());
+			return new ReturnBody(map);
+		} else {
+			return ReturnBody.getParamError();
+		}
 	}
 
 }

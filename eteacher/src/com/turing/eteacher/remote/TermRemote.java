@@ -1,6 +1,5 @@
 package com.turing.eteacher.remote;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,8 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
-import com.turing.eteacher.model.Student;
-import com.turing.eteacher.model.Teacher;
 import com.turing.eteacher.model.TermPrivate;
 import com.turing.eteacher.service.IClassService;
 import com.turing.eteacher.service.ITermPrivateService;
@@ -22,9 +19,6 @@ import com.turing.eteacher.util.StringUtil;
 @RestController
 @RequestMapping("remote")
 public class TermRemote extends BaseRemote {
-
-	@Autowired
-	private IClassService classServiceImpl;
 
 	@Autowired
 	private ITermPrivateService termPrivateServiceImpl;
@@ -103,6 +97,19 @@ public class TermRemote extends BaseRemote {
 	public ReturnBody getAllTerms(HttpServletRequest request) {
 		Map map = termPrivateServiceImpl.getAllTerms(getCurrentUserId(request));
 		return new ReturnBody(map);
+	}
+	/**
+	 * 获取已创建的学期列表
+	 * @author lifei
+	 * @creatTime 2017-01-12
+	 * @param request
+	 * @param term
+	 * @return
+	 */
+	@RequestMapping(value = "teacher/term/getTermList", method = RequestMethod.POST)
+	public ReturnBody getTermList(HttpServletRequest request) {
+		String userId = getCurrentUserId(request);
+		return termPrivateServiceImpl.getListTerms(userId);
 	}
 	
 	

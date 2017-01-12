@@ -3,7 +3,10 @@ package com.turing.eteacher.service;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.turing.eteacher.base.IService;
+import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.Course;
 import com.turing.eteacher.model.CourseScorePrivate;
 import com.turing.eteacher.model.CourseWorkload;
@@ -185,4 +188,6 @@ public interface ICourseService extends IService<Course> {
 	 * @return
 	 */
 	public List<Map> getCourseListByTerm(String userId,String termId);
+	
+	public ReturnBody saveCourse(HttpServletRequest request,String schoolId);
 }

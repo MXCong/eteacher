@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
+import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.dao.TermPrivateDAO;
 import com.turing.eteacher.model.TermPrivate;
 import com.turing.eteacher.service.ITermPrivateService;
@@ -111,6 +112,13 @@ public class TermPrivateServiceImpl extends BaseService<TermPrivate> implements
 			result.put("future", futureList);
 		}
 		return result;
+	}
+
+	@Override
+	public ReturnBody getListTerms(String userId) {
+		String hql = "from TermPrivate tp where tp.userId = ?";
+		List list = termPrivateDAO.find(hql, userId);
+		return new ReturnBody(list);
 	}
 
 	@Override

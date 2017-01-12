@@ -8,10 +8,6 @@ import com.turing.eteacher.model.CourseClasses;
 
 public interface ICourseClassService extends IService<CourseClasses> {
 	/**
-	 * 通过CourseId删除对应的课程班级关联数据
-	 */
-	public boolean delByCourseId(String courseId);
-	/**
 	 * 通过CourseId获取对应的课程以及班级
 	 * @param courseId 课程Id
 	 * @return
