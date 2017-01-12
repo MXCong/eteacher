@@ -149,7 +149,6 @@ public class CourseRemote extends BaseRemote {
 
 	/**
 	 * 学生端功能：查看某门课程的课程详情
-	 * 
 	 * @param request
 	 * @param courseId
 	 * @return
@@ -975,10 +974,18 @@ public class CourseRemote extends BaseRemote {
 					ReturnBody.ERROR_MSG);
 		}
 	}
-
+	/**
+	 * 教师端—获取指定学期下的课程信息
+	 * @param userId
+	 * @param termId
+	 * @return
+	 */
 	@RequestMapping(value = "teacher/course/getCourseByTerm", method = RequestMethod.POST)
 	public ReturnBody teacherGetCourseByTerm(HttpServletRequest request) {
 		String termId = request.getParameter("termId");
+		if(null == termId){
+			termId = (String) getCurrentTerm(request).get("termId");
+		}
 		if (StringUtil.checkParams(termId)) {
 			List list = courseServiceImpl.getCourseListByTerm(getCurrentUserId(request), termId);
 			return new ReturnBody(list);

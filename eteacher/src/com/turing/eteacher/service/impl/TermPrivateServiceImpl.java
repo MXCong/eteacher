@@ -112,4 +112,25 @@ public class TermPrivateServiceImpl extends BaseService<TermPrivate> implements
 		}
 		return result;
 	}
+
+	@Override
+	public Map getCurrentTerm(String userId) {
+		// TODO Auto-generated method stub
+		String hql = "select tp.tpId as termId , tp.termName as termName "
+				+ "from TermPrivate tp "
+				+ "where tp.userId = ? and tp.status = 1 "
+				+ "and tp.startDate < now() and tp.endDate > now()";
+		List<Map> tlist = termPrivateDAO.findMap(hql, userId);
+		if(null == tlist || tlist.size() == 0){
+			String hq = "select tp.tpId as termId , tp.termName as termName "
+					+ "from TermPrivate tp "
+					+ "where tp.userId = ? and tp.status = 1 "
+					+ "order by tp.createTime desc";
+			tlist = termPrivateDAO.findMap(hq, userId);
+			}
+		if(null != tlist && tlist.size()>0){
+			return tlist.get(0);
+		}
+		return null;
+	}
 }

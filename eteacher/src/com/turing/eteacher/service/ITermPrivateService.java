@@ -39,4 +39,10 @@ public interface ITermPrivateService  extends IService<TermPrivate>{
 	 * @date 20170105
 	 */
 	public Map getAllTerms(String userId);
+	/**
+	 * 获取用户当前学期
+	 * @param currentUserId
+	 * @return
+	 */
+	public Map getCurrentTerm(String currentUserId);
 }
