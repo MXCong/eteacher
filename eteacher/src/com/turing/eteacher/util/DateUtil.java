@@ -77,6 +77,25 @@ public class DateUtil {
 		int i = (int) l / (1000 * 60 * 60 * 24);
 		return i;
 	}
+	
+	
+	/**
+	 * 获取两个日期相差几天
+	 * 
+	 * @param from
+	 * @param to
+	 * @return
+	 */
+	public static long getSecondBetween(Date from, Date to) {
+		if (from == null || to == null) {
+			return 0;
+		}
+		long l = to.getTime() - from.getTime();
+	
+		return l;
+	}
+	
+	
 
 	public static int getDayBetween(String from, String to) {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");

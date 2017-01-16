@@ -27,7 +27,7 @@ public class ClassesRemote extends BaseRemote {
 		private IClassService classServiceImpl;
 		/**
 		 * 获取用户当前学期所有课程对应的班级列表
-		 * @param request
+		 * @param request 
 		 * @return
 		 */
 		@RequestMapping(value="teacher/classes/getClassList",method=RequestMethod.POST)

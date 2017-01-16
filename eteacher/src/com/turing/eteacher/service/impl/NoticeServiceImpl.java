@@ -128,8 +128,8 @@ public class NoticeServiceImpl extends BaseService<Notice> implements INoticeSer
 						e.printStackTrace();
 					} 
 					Date NewDate=new Date();
-					int timediffer=DateUtil.getDayBetween(publishTime,NewDate);
-					if(timediffer>0){
+					long timediffer=DateUtil.getSecondBetween(publishTime,NewDate);
+					if(timediffer>=0){
 						list.get(i).put("publishAlready",0);
 					}
 						int all = workCourseServiceImpl.getStudentCountByWId((String)list.get(i).get("noticeId"));
@@ -338,7 +338,7 @@ public class NoticeServiceImpl extends BaseService<Notice> implements INoticeSer
 
 	@Override
 	public List<Map> getClassIdByNoticeId(String noticeId) {
-		String sql = "SELECT DISTINCT tcc.CLASS_ID AS classId FROM t_work_course twc ,t_notice tn ,t_course_class tcc "+ 
+		String sql = "SELECT DISTINCT tcc.CLASS_ID AS classId FROM t_work_class twc ,t_notice tn ,t_course_class tcc "+ 
 				"WHERE twc.WORK_ID = tn.NOTICE_ID AND tcc.COURSE_ID = twc.COURSE_ID AND tn.NOTICE_ID = ?";
 		List list = noticeDAO.findBySql(sql, noticeId);
 		return list;
