@@ -1,5 +1,6 @@
 package com.turing.eteacher.service.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -126,6 +127,25 @@ public class ClassServiceImpl extends  BaseService<Classes> implements IClassSer
 	return list;
 	}
 
+	@Override
+	public List<Map> selectByCondition(String majorId, String grade, 
+			                          String classType, String schoolId) {
+	    String sql="SELECT  CLASS_ID FROM  t_class WHERE MAJOR_ID = ? 	"
+	    		+ "      AND GRADE = ?   AND CLASS_TYPE = ?   AND SCHOOL_ID = ? ";
+	    String[] parm={majorId,grade,classType,schoolId};
+	    List<Map> list = classDAO.findBySql(sql,parm);
+		return list;
+	}
+
+	@Override
+	public boolean classAdd(Classes clas) {
+		Serializable i=classDAO.save(clas);
+		if(i!=null){
+            return true;			
+		}else{
+		    return false;
+		}
+	}
 
 
 }

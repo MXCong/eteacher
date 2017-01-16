@@ -1,5 +1,6 @@
 package com.turing.eteacher.service.impl;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,6 +20,7 @@ import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.ILogService;
 import com.turing.eteacher.service.INoticeService;
 import com.turing.eteacher.service.IWorkClassService;
+import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.StringUtil;
 
 @Service
@@ -112,7 +114,35 @@ public class NoticeServiceImpl extends BaseService<Notice> implements INoticeSer
 					list.get(i).put("statistics", statistics);
 				}
 			}
+		}else{
+			hql+="from Notice n where n.userId=?  and n.status=1 order by n.createTime asc";
+			list=noticeDAO.findMapByPage(hql, page*20, 20, userId);
+			if (null != list) {
+				for (int i = 0; i < list.size(); i++) {
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd ");  
+				    Date publishTime = null;
+					try {
+					String pubTime=	(String)list.get(i).get("publishTime");
+						publishTime = sdf.parse(pubTime);
+					} catch (ParseException e) {
+						e.printStackTrace();
+					} 
+					Date NewDate=new Date();
+					int timediffer=DateUtil.getDayBetween(publishTime,NewDate);
+					if(timediffer>0){
+						list.get(i).put("publishAlready",0);
+					}
+						int all = workCourseServiceImpl.getStudentCountByWId((String)list.get(i).get("noticeId"));
+						list.get(i).put("all", all);
+						int statistics = logServiceImpl.getCountByTargetId((String)list.get(i).get("noticeId"));
+						list.get(i).put("statistics", statistics);
+				}
+			}
 		}
+		
+		
+		
+		
 		if(null != list && list.size() > 0){
 			//查询通知是否有附件
 			for (int i = 0; i < list.size(); i++) {

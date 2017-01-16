@@ -2,6 +2,7 @@ package com.turing.eteacher.remote;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -12,8 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
+import com.turing.eteacher.model.Classes;
 import com.turing.eteacher.model.Teacher;
 import com.turing.eteacher.service.IClassService;
+import com.turing.eteacher.util.CustomIdGenerator;
 import com.turing.eteacher.util.StringUtil;
 
 @RestController
@@ -103,4 +106,66 @@ public class ClassesRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 		}
 	}
+	
+	/**
+	 * 班级创建
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value="student/classes/add",method=RequestMethod.POST)
+	public ReturnBody addClass(HttpServletRequest request){
+		try{	
+		String majorId = request.getParameter("majorId");
+		String majorName = request.getParameter("majorName");
+		String grade = request.getParameter("grade");
+		String classType = request.getParameter("classType");
+		String schoolId = request.getParameter("schoolId");
+		String schoolName = request.getParameter("schoolName");
+		String whatClass = request.getParameter("whatClass");
+		if(StringUtil.checkParams(majorId,majorName,grade,classType,schoolId,whatClass)){
+			     
+		  List<Map> list =classServiceImpl.selectByCondition(majorId,grade,classType,schoolId);
+		  	 if(!list.equals("")&&list.size()>0){
+		  		return new ReturnBody(ReturnBody.getErrorBody("班级已存在"));
+		  	 }else{
+		  	  	Classes clas=new Classes();
+		  	  	clas.setClassId(CustomIdGenerator.generateShortUuid());
+		  	  	clas.setMajorId(majorId);
+		  	  	clas.setGrade(grade);
+		  	  	clas.setClassType(classType);
+		  	  	clas.setSchoolId(schoolId);
+		  	    clas.setClassName(grade+majorName+classType+whatClass);
+		  	    boolean bn= classServiceImpl.classAdd(clas);
+		  	    if(bn=true){
+		  	    	return new ReturnBody(ReturnBody.RESULT_SUCCESS,"保存成功");
+		  	   	  }else{
+		  	   		return new ReturnBody(ReturnBody.getErrorBody("保存失败"));
+		  	      }
+		  	 }
+		}else {
+			return new ReturnBody(ReturnBody.getErrorBody("值不能为空"));
+		}
+		  }
+		catch(Exception e){
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

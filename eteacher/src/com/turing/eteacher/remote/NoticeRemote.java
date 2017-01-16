@@ -202,7 +202,7 @@ public class NoticeRemote extends BaseRemote {
 
 	}
 
-	/**
+	/**notice/getNoticeList
 	 * 添加通知/修改通知信息
 	 * 
 	 * @param request

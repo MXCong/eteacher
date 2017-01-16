@@ -21,7 +21,6 @@ public class WorkClassServiceImpl extends BaseService<WorkClass> implements IWor
 	
 	@Override
 	public BaseDAO<WorkClass> getDAO() {
-		// TODO Auto-generated method stub
 		return workCourseDAO;
 	}
 	
@@ -30,7 +29,6 @@ public class WorkClassServiceImpl extends BaseService<WorkClass> implements IWor
 
 	@Override
 	public void deleteData(String wId){
-		// TODO Auto-generated method stub
 		String hql = "delete from WorkCourse wc where wc.workId = ?";
 		workCourseDAO.executeHql(hql, wId);
 	}
@@ -39,7 +37,7 @@ public class WorkClassServiceImpl extends BaseService<WorkClass> implements IWor
 	public int getStudentCountByWId(String wId) {
 		String sql = "SELECT COUNT(*) FROM t_student WHERE t_student.CLASS_ID IN "+
 				 "(SELECT t_course_class.CLASS_ID FROM t_course_class WHERE t_course_class.COURSE_ID IN ( "+
-			 	 "SELECT t_work_course.COURSE_ID FROM t_work_course WHERE t_work_course.WORK_ID = ?))";
+			 	 "SELECT t_work_class.COURSE_ID FROM t_work_class WHERE t_work_class.WORK_ID = ?))";
 		return ((BigInteger)workCourseDAO.getUniqueResultBySql(sql, wId)).intValue();
 	}
 
@@ -47,8 +45,8 @@ public class WorkClassServiceImpl extends BaseService<WorkClass> implements IWor
 	public List<Map> getCoursesByWId(String wId) {
 		String sql = "SELECT t_course.COURSE_ID AS courseId, "+
 				 "t_course.COURSE_NAME AS courseName FROM "+
-			 	 "t_work_course LEFT JOIN t_course ON t_work_course.COURSE_ID = t_course.COURSE_ID "+ 
-			 	 "WHERE t_work_course.WORK_ID = ?";
+			 	 "t_work_class LEFT JOIN t_course ON t_work_class.COURSE_ID = t_course.COURSE_ID "+ 
+			 	 "WHERE t_work_class.WORK_ID = ?";
 		List<Map> list = workCourseDAO.findBySql(sql, wId);
 		if (null != list && list.size() > 0) {
 			for (int i = 0; i < list.size(); i++) {

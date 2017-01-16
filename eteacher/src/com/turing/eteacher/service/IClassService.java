@@ -51,4 +51,19 @@ public interface IClassService extends IService<Classes> {
 	 * @return
 	 */
 	public List<Map> search(String search,int endTime);
+	/**
+	 * 查询班级是否存在
+	 * @param majorId
+	 * @param grade
+	 * @param classType
+	 * @param schoolId
+	 * @return
+	 */
+	public List<Map> selectByCondition(String majorId, String grade, String classType, String schoolId);
+	/**
+	 * 班级创建
+	 * @param clas
+	 * @return
+	 */
+	public boolean classAdd(Classes clas);
 }
