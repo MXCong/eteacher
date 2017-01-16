@@ -59,20 +59,7 @@ public class CourseTimetableRemote extends BaseRemote {
 	 * 获取课程课表(课程)
 	 * @return
 	 */
-//{
-//	result : '200',
-//	data : [
-//		{
-//			courseName : '课程名称',
-//			className : '班级名称',	
-//			weekDay : '星期几',
-//			lessonNumber : '第几节课',
-//			location : '地点'
-//			classRoom : '教室',	
-//		}
-//	],
-//	msg : '提示信息XXX'
-//}
+
 	@RequestMapping(value="teacher/course/courseTableList", method=RequestMethod.POST)
 	public ReturnBody getCourseTableList(HttpServletRequest request){
 		try{
@@ -109,19 +96,6 @@ public class CourseTimetableRemote extends BaseRemote {
 	 * 获取教师个人课表(学期)
 	 * @return
 	 */
-//{
-//	result : '200',
-//	data : [
-//		{
-//			courseName : '课程名称',
-//			weekDay : '星期几',
-//			lessonNumber : '第几节课',
-//			location : '地点'
-//			classRoom : '教室',	
-//		}
-//	],
-//	msg : '提示信息XXX'
-//}
 	@RequestMapping(value="teacher/course/termCourseTable", method=RequestMethod.POST)
 	public ReturnBody getTermCourseTable(HttpServletRequest request){
 		try{

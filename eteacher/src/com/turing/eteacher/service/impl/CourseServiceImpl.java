@@ -1,7 +1,5 @@
 package com.turing.eteacher.service.impl;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,23 +11,23 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartRequest;
 
 import com.alibaba.druid.support.json.JSONUtils;
-import com.mysql.fabric.xmlrpc.base.Array;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.constants.ConfigContants;
 import com.turing.eteacher.constants.EteacherConstants;
 import com.turing.eteacher.dao.ClassDAO;
+import com.turing.eteacher.dao.CourseCellDAO;
 import com.turing.eteacher.dao.CourseClassesDAO;
 import com.turing.eteacher.dao.CourseDAO;
+import com.turing.eteacher.dao.CourseItemDAO;
 import com.turing.eteacher.dao.CourseScoreDAO;
 import com.turing.eteacher.dao.CourseScorePrivateDAO;
 import com.turing.eteacher.dao.CourseTableDAO;
@@ -37,27 +35,27 @@ import com.turing.eteacher.dao.MajorDAO;
 import com.turing.eteacher.dao.TermPrivateDAO;
 import com.turing.eteacher.dao.TextbookDAO;
 import com.turing.eteacher.model.Course;
+import com.turing.eteacher.model.CourseCell;
 import com.turing.eteacher.model.CourseClasses;
+import com.turing.eteacher.model.CourseItem;
 import com.turing.eteacher.model.CourseScore;
 import com.turing.eteacher.model.CourseScorePrivate;
 import com.turing.eteacher.model.CourseTable;
 import com.turing.eteacher.model.CourseWorkload;
 import com.turing.eteacher.model.CustomFile;
 import com.turing.eteacher.model.Major;
-import com.turing.eteacher.model.Teacher;
 import com.turing.eteacher.model.TermPrivate;
 import com.turing.eteacher.model.Textbook;
 import com.turing.eteacher.model.User;
 import com.turing.eteacher.service.ICourseService;
 import com.turing.eteacher.service.IDictionary2PrivateService;
-import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.util.BeanUtils;
 import com.turing.eteacher.util.DateUtil;
-import com.turing.eteacher.util.FileUtil;
 import com.turing.eteacher.util.StringUtil;
 
 @Service
-public class CourseServiceImpl extends BaseService<Course> implements ICourseService {
+public class CourseServiceImpl extends BaseService<Course> implements
+		ICourseService {
 
 	@Autowired
 	private CourseDAO courseDAO;
@@ -79,20 +77,28 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 
 	@Autowired
 	private TermPrivateDAO termPrivateDAO;
-	
+
 	@Autowired
 	private CourseClassesDAO courseClassesDAO;
-	
+
 	@Autowired
 	private CourseScorePrivateDAO courseScorePrivateDAO;
-	
+
 	@Autowired
 	private ClassDAO classDAO;
+
+	@Autowired
+	private CourseItemDAO courseItemDAO;
+	
+	@Autowired
+	private CourseCellDAO courseCellDAO;
 	
 	@Override
 	public BaseDAO<Course> getDAO() {
 		return courseDAO;
 	}
+	
+	
 
 	// 获取学期下的课程数据，判断该学期下是否含有课程数据
 	@Override
@@ -124,7 +130,8 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	@Transactional(readOnly = true)
 	public List<Map> getListByTermId2(String termId, String userId) {
 		List args = new ArrayList();
-		String sql = "select t_course.COURSE_ID as courseId, " + "t_course.COURSE_NAME as courseName, "
+		String sql = "select t_course.COURSE_ID as courseId, "
+				+ "t_course.COURSE_NAME as courseName, "
 				+ "t_course.COURSE_TYPE_ID as courseTypeId, "
 				+ "t_major.MAJOR_NAME as specialty from t_course left join t_major on t_course.MAJOR_ID = t_major.MAJOR_ID where ";
 		if (StringUtil.isNotEmpty(userId)) {
@@ -138,7 +145,8 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 		List<Map> list = courseDAO.findBySql(sql, args);
 		for (int i = 0; i < list.size(); i++) {
 			String typeId = (String) list.get(i).get("courseTypeId");
-			String sql1 = "SELECT  VALUE as type FROM t_dictionary2_public WHERE  DICTIONARY_ID = ? " + "UNION "
+			String sql1 = "SELECT  VALUE as type FROM t_dictionary2_public WHERE  DICTIONARY_ID = ? "
+					+ "UNION "
 					+ "SELECT  VALUE as type FROM t_dictionary2_private WHERE DP_ID =  ?";
 			List<Map> list2 = courseDAO.findBySql(sql1, typeId, typeId);
 			if (null != list2 && list2.size() >= 1) {
@@ -157,13 +165,15 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	@Override
 	public List<CustomFile> getPublicCourseFilesByCourseId(String courseId) {
 		String hql = "from customFile where courseId = ? and fileAuth = ?";
-		return courseDAO.find(hql, courseId, EteacherConstants.COURSE_FILE_AUTH_PUBLIC);
+		return courseDAO.find(hql, courseId,
+				EteacherConstants.COURSE_FILE_AUTH_PUBLIC);
 	}
 
 	@Override
-	public void addCourse(Course course, String[] classIds, List<CourseWorkload> courseWorkloads,
-			List<CourseScorePrivate> courseScores, Textbook textbook, List<Textbook> textbookOthers,
-			List<CustomFile> customFile) {
+	public void addCourse(Course course, String[] classIds,
+			List<CourseWorkload> courseWorkloads,
+			List<CourseScorePrivate> courseScores, Textbook textbook,
+			List<Textbook> textbookOthers, List<CustomFile> customFile) {
 		String courseId = (String) courseDAO.save(course);
 		// 授课班级
 		if (classIds != null) {
@@ -214,9 +224,10 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	}
 
 	@Override
-	public void updateCourse(Course course, String[] classIds, List<CourseWorkload> courseWorkloads,
-			List<CourseScorePrivate> courseScores, Textbook textbook, List<Textbook> textbookOthers,
-			List<CustomFile> customFile) {
+	public void updateCourse(Course course, String[] classIds,
+			List<CourseWorkload> courseWorkloads,
+			List<CourseScorePrivate> courseScores, Textbook textbook,
+			List<Textbook> textbookOthers, List<CustomFile> customFile) {
 		Course serverCourse = courseDAO.get(course.getCourseId());
 		BeanUtils.copyToModel(course, serverCourse);
 		courseDAO.update(serverCourse);
@@ -336,12 +347,16 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 			if (StringUtil.isNotEmpty(lessonNumber)) {
 				for (String ln : lessonNumber.split(",")) {
 					// 每节课挨个判断
-					String startTime = ConfigContants.configMap.get(ConfigContants.CLASS_TIME[Integer.parseInt(ln)])
+					String startTime = ConfigContants.configMap.get(
+							ConfigContants.CLASS_TIME[Integer.parseInt(ln)])
 							.split("-")[0];
-					String endTime = ConfigContants.configMap.get(ConfigContants.CLASS_TIME[Integer.parseInt(ln)])
+					String endTime = ConfigContants.configMap.get(
+							ConfigContants.CLASS_TIME[Integer.parseInt(ln)])
 							.split("-")[1];
-					Calendar lessonStart = DateUtil.getCalendarByTime(startTime + ":00");
-					Calendar lessonEnd = DateUtil.getCalendarByTime(endTime + ":59");
+					Calendar lessonStart = DateUtil.getCalendarByTime(startTime
+							+ ":00");
+					Calendar lessonEnd = DateUtil.getCalendarByTime(endTime
+							+ ":59");
 					if (now.after(lessonStart) && now.before(lessonEnd)) {
 						result = new HashMap();
 						startTimeStr = startTime;
@@ -377,38 +392,48 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 			args.add(courseId);
 		} else {
 			if (EteacherConstants.USER_TYPE_TEACHER.equals(user.getUserType())) {// 获取某个教师的课程的课表信息
-				hql = "select ct from CourseTable ct,Course c " + "where ct.courseId = c.courseId and c.userId = ?";
+				hql = "select ct from CourseTable ct,Course c "
+						+ "where ct.courseId = c.courseId and c.userId = ?";
 			} else {// 获取某个学生的课程的课表信息
-				hql = "select ct from CourseTable ct,Course c " + "where ct.courseId = c.courseId "
+				hql = "select ct from CourseTable ct,Course c "
+						+ "where ct.courseId = c.courseId "
 						+ "and exists (select cc.courseId from CourseClasses cc,Student s "
 						+ "where cc.classId = s.classId and cc.courseId = ct.courseId and s.stuId = ?) ";
 			}
 			args.add(user.getUserId());
 		}
-		List<CourseTable> courseTables = courseTableDAO.find(hql, args.toArray());
+		List<CourseTable> courseTables = courseTableDAO.find(hql,
+				args.toArray());
 		// 遍历筛选后的课表数据
 		for (CourseTable courseTable : courseTables) {
 			// 获取当前时间是本学期的第几周
 			Course course = courseDAO.get(courseTable.getCourseId());
-			TermPrivate currentTerm = termPrivateDAO.getTermByUser(course.getUserId());
+			TermPrivate currentTerm = termPrivateDAO.getTermByUser(course
+					.getUserId());
 			Calendar termStart = Calendar.getInstance();
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			Calendar now = Calendar.getInstance();
 			try {
 				termStart.setTime(dateFormat.parse(currentTerm.getStartDate()));
-				termStart.add(Calendar.DATE, -(DateUtil.getDayOfWeek(termStart) - 1));
+				termStart.add(Calendar.DATE,
+						-(DateUtil.getDayOfWeek(termStart) - 1));
 				now.setTime(dateFormat.parse(dateFormat.format(new Date())));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			int weekNo = (int) ((now.getTimeInMillis() - termStart.getTimeInMillis()) / (1000 * 60 * 60 * 24 * 7) + 1);
+			int weekNo = (int) ((now.getTimeInMillis() - termStart
+					.getTimeInMillis()) / (1000 * 60 * 60 * 24 * 7) + 1);
 			// 获取这门课程的课表数据，筛选条件为包含本周。
-			if (weekNo >= courseTable.getStartWeek() && weekNo <= courseTable.getEndWeek()) {
+			if (weekNo >= courseTable.getStartWeek()
+					&& weekNo <= courseTable.getEndWeek()) {
 				// 判断今天是否有课
 				now.setTime(new Date());
-				if (EteacherConstants.COURSETABLE_REPEATTYPE_DAY.equals(courseTable.getRepeatType())
-						|| (((weekNo - courseTable.getStartWeek()) % courseTable.getRepeatNumber() == 0)
-								&& courseTable.getWeekday().contains(DateUtil.getDayOfWeek(now) + ""))) {
+				if (EteacherConstants.COURSETABLE_REPEATTYPE_DAY
+						.equals(courseTable.getRepeatType())
+						|| (((weekNo - courseTable.getStartWeek())
+								% courseTable.getRepeatNumber() == 0) && courseTable
+								.getWeekday().contains(
+										DateUtil.getDayOfWeek(now) + ""))) {
 					result.add(courseTable);
 				}
 			}
@@ -438,10 +463,12 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 				startWeek = courseTable.getStartWeek() + "";
 				endWeek = courseTable.getEndWeek() + "";
 				String[] lessonNumberArr = lessonNumber.split(",");
-				startTime = ConfigContants.configMap
-						.get(ConfigContants.CLASS_TIME[Integer.parseInt(lessonNumberArr[0])]).split("-")[0];
+				startTime = ConfigContants.configMap.get(
+						ConfigContants.CLASS_TIME[Integer
+								.parseInt(lessonNumberArr[0])]).split("-")[0];
 				endTime = ConfigContants.configMap
-						.get(ConfigContants.CLASS_TIME[Integer.parseInt(lessonNumberArr[lessonNumberArr.length - 1])])
+						.get(ConfigContants.CLASS_TIME[Integer
+								.parseInt(lessonNumberArr[lessonNumberArr.length - 1])])
 						.split("-")[1];
 				break;
 			}
@@ -536,8 +563,10 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 				c = courseDAO.findMap(hql2);
 			}
 			// 时间处理： （当前时间-after）< 课程开始时间 < （当前时间+before）,符合签到条件
-			String time1 = DateUtil.timeSubtraction(time, "-", (Integer) c.get(0).get("before"));
-			String time2 = DateUtil.timeSubtraction(time, "+", (Integer) c.get(0).get("after"));
+			String time1 = DateUtil.timeSubtraction(time, "-",
+					(Integer) c.get(0).get("before"));
+			String time2 = DateUtil.timeSubtraction(time, "+",
+					(Integer) c.get(0).get("after"));
 
 			// 查询lesson对应的开始时间
 			String lessons = (String) currentCourse.get("lessonNumber");
@@ -551,10 +580,12 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 					long t2 = DateUtil.getTimeBetween(st, time2);
 					if (t1 > 0 && t2 < 0) {
 						// 签到开始时间和签到结束时间
-						String startTime = DateUtil.timeSubtraction((String) timeTable.get(k).get("startTime"), "-",
-								(Integer) c.get(0).get("before"));
-						String endTime = DateUtil.timeSubtraction((String) timeTable.get(k).get("startTime"), "+",
-								(Integer) c.get(0).get("after"));
+						String startTime = DateUtil.timeSubtraction(
+								(String) timeTable.get(k).get("startTime"),
+								"-", (Integer) c.get(0).get("before"));
+						String endTime = DateUtil.timeSubtraction(
+								(String) timeTable.get(k).get("startTime"),
+								"+", (Integer) c.get(0).get("after"));
 						Map re = new HashMap<>();
 						re.put("courseId", currentCourse.get("courseId"));
 						re.put("courseName", currentCourse.get("courseName"));
@@ -599,78 +630,76 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	 * @author macong
 	 * @param courseIds
 	 * @return { "courseId":"dsznUBKa2", "courseName":"软件工程", "location":"尚学楼",
-	 *         "classRoom":"316", "lessonNumber":"8:00-10:00","classes":"13软工A班，14科技1班"（String类型）, "teacherId":"zhjBY21",
-	 *         "teacherName":"张三" }
+	 *         "classRoom":"316",
+	 *         "lessonNumber":"8:00-10:00","classes":"13软工A班，14科技1班"（String类型）,
+	 *         "teacherId":"zhjBY21", "teacherName":"张三" }
 	 */
 	@Override
-	public List<Map> getCourseInfo(String courseIds , String targetDate) {
+	public List<Map> getCourseInfo(String courseIds, String targetDate) {
 		try {
 			List<Map> list = new ArrayList<>();
 			String cids = courseIds.substring(1, courseIds.length() - 1);
 			String[] cIdList = cids.split(",");
-			/*String hql = "select c.courseId as courseId, c.courseName as courseName, " 
-					+ "cc.location as location, cc.weekDay as weekDay , "
-					+ "cc.classRoom as classRoom, cc.lessonNumber as lessonNumber, "
-					+ "t.name as teacherName, t.teacherId as teacherId "
-					+ "from Course c, CourseItem ci, CourseCell cc, Teacher t "
-					+ "where c.courseId = ? and ci.courseId = c.courseId "
-					+ "and cc.ciId = ci.ciId and c.userId = t.teacherId ";
-			//当前日期时周几。
-			String cw = Integer.toString(DateUtil.getWeekNum(targetDate));
-			for (int i = 0; i < cIdList.length; i++) {
-				String courseId = cIdList[i].substring(1, cIdList[i].length() - 1);
-				List<Map> m = courseDAO.findMap(hql, courseId);
-				if (null != m && m.size() > 0) {
-					// 1.课程名称与授课班级的拼接--->软件工程（13软工A班）
-					String hq = "select cl.className as className from " + "Classes cl, CourseClasses cc where "
-							+ "cc.classId = cl.classId and cc.courseId = ?";
-					for (int j = 0; j < m.size(); j++) {
-						String newName = "";
-						//一门课程，一天内有多个授课时间段。即一天内该课程上课多次。
-						//一门课程，一周内有多个授课时间，且每个上课时间的授课时间段不同。
-						if(m.get(j).get("weekDay").equals(cw) || m.get(j).get("weekDay").equals("0")){
-							List<Map> cls = courseDAO.findMap(hq, (String) m.get(j).get("courseId"));
-							String courseName = (String) m.get(j).get("courseName") + "(";
-						    newName = (String) m.get(j).get("courseName");
-							if (null != cls && cls.size() > 0) {
-								for (int k = 0; k < cls.size(); k++) {
-									courseName += cls.get(k).get("className") + ",";
-								}
-								newName = courseName.substring(0, courseName.length() - 1);
-								newName = newName + ")";
-							}
-							m.get(j).put("courseName", newName);
-							list.add(m.get(j));
-						}
-					}
-				}
-			}*/
-			String hql ="select distinct c.courseId as courseId, c.courseName as courseName, " 
+			/*
+			 * String hql =
+			 * "select c.courseId as courseId, c.courseName as courseName, " +
+			 * "cc.location as location, cc.weekDay as weekDay , " +
+			 * "cc.classRoom as classRoom, cc.lessonNumber as lessonNumber, " +
+			 * "t.name as teacherName, t.teacherId as teacherId " +
+			 * "from Course c, CourseItem ci, CourseCell cc, Teacher t " +
+			 * "where c.courseId = ? and ci.courseId = c.courseId " +
+			 * "and cc.ciId = ci.ciId and c.userId = t.teacherId "; //当前日期时周几。
+			 * String cw = Integer.toString(DateUtil.getWeekNum(targetDate));
+			 * for (int i = 0; i < cIdList.length; i++) { String courseId =
+			 * cIdList[i].substring(1, cIdList[i].length() - 1); List<Map> m =
+			 * courseDAO.findMap(hql, courseId); if (null != m && m.size() > 0)
+			 * { // 1.课程名称与授课班级的拼接--->软件工程（13软工A班） String hq =
+			 * "select cl.className as className from " +
+			 * "Classes cl, CourseClasses cc where " +
+			 * "cc.classId = cl.classId and cc.courseId = ?"; for (int j = 0; j
+			 * < m.size(); j++) { String newName = "";
+			 * //一门课程，一天内有多个授课时间段。即一天内该课程上课多次。
+			 * //一门课程，一周内有多个授课时间，且每个上课时间的授课时间段不同。
+			 * if(m.get(j).get("weekDay").equals(cw) ||
+			 * m.get(j).get("weekDay").equals("0")){ List<Map> cls =
+			 * courseDAO.findMap(hq, (String) m.get(j).get("courseId")); String
+			 * courseName = (String) m.get(j).get("courseName") + "("; newName =
+			 * (String) m.get(j).get("courseName"); if (null != cls &&
+			 * cls.size() > 0) { for (int k = 0; k < cls.size(); k++) {
+			 * courseName += cls.get(k).get("className") + ","; } newName =
+			 * courseName.substring(0, courseName.length() - 1); newName =
+			 * newName + ")"; } m.get(j).put("courseName", newName);
+			 * list.add(m.get(j)); } } } }
+			 */
+			String hql = "select distinct c.courseId as courseId, c.courseName as courseName, "
 					+ "cc.location as location, cc.endTime as endTime , "
 					+ "cc.classRoom as classRoom, cc.startTime as startTime , "
 					+ "t.name as teacherName, t.teacherId as teacherId "
-//					+ "cl.className as className , ccl.classId as classId "
+					// + "cl.className as className , ccl.classId as classId "
 					+ "from Course c, CourseItem ci, CourseCell cc, Teacher t "
-//					+ "Classes cl, CourseClasses ccl "
+					// + "Classes cl, CourseClasses ccl "
 					+ "where c.courseId = ? and ci.courseId = c.courseId "
-//					+ "and ccl.classId = cl.classId "
+					// + "and ccl.classId = cl.classId "
 					+ "and cc.ciId = ci.ciId and c.userId = t.teacherId ";
-			String hq = "select cl.className as className from " 
+			String hq = "select cl.className as className from "
 					+ "Classes cl, CourseClasses cc where "
 					+ "cc.classId = cl.classId and cc.courseId = ?";
 			for (int i = 0; i < cIdList.length; i++) {
-				String courseId = cIdList[i].substring(1, cIdList[i].length() - 1);
+				String courseId = cIdList[i].substring(1,
+						cIdList[i].length() - 1);
 				list = courseDAO.findMap(hql, courseId);
 			}
 			if (null != list && list.size() > 0) {
-				for (int i = 0; i < list.size() ; i++) {
-					List<Map> classLists = courseDAO.findMap(hq, (String)list.get(i).get("courseId"));
+				for (int i = 0; i < list.size(); i++) {
+					List<Map> classLists = courseDAO.findMap(hq, (String) list
+							.get(i).get("courseId"));
 					String cls = "";
-					for(int k = 0; k < classLists.size(); k++){
-						cls += classLists.get(k).get("className")+",";
+					for (int k = 0; k < classLists.size(); k++) {
+						cls += classLists.get(k).get("className") + ",";
 					}
-					
-					list.get(i).put("classes", cls.substring(0, cls.length()-1));
+
+					list.get(i).put("classes",
+							cls.substring(0, cls.length() - 1));
 				}
 				return list;
 			}
@@ -796,7 +825,8 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 				+ "c.introduction as introduction,c.classHours as classHours,"
 				+ "m.majorName as major,m.majorId as majorId ,c.formula as formula,"
 				+ "c.teachingMethodId as teachingMethodId ,c.courseTypeId as courseTypeId ,"
-				+ "c.examinationModeId as examinationModeId,c.remindTime as remindTime " + "from Course c ,Major m "
+				+ "c.examinationModeId as examinationModeId,c.remindTime as remindTime "
+				+ "from Course c ,Major m "
 				+ "where c.majorId = m.majorId and c.courseId=?";
 		List<Map> list = courseDAO.findMap(hql, courseId);
 		if (null != list && list.size() > 0) {
@@ -811,17 +841,20 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 			detail.put("classes", listClass);
 		}
 		// 授课方式
-		Map mteachMethod = dictionary2PrivateServiceImpl.getValueById((String) detail.get("teachingMethodId"));
+		Map mteachMethod = dictionary2PrivateServiceImpl
+				.getValueById((String) detail.get("teachingMethodId"));
 		if (null != mteachMethod) {
 			detail.put("teachingMethod", mteachMethod.get("value"));
 		}
 		// 课程类型
-		Map mCourseType = dictionary2PrivateServiceImpl.getValueById((String) detail.get("courseTypeId"));
+		Map mCourseType = dictionary2PrivateServiceImpl
+				.getValueById((String) detail.get("courseTypeId"));
 		if (null != mCourseType) {
 			detail.put("courseType", mCourseType.get("value"));
 		}
 		// 获取考核类型
-		Map mExam = dictionary2PrivateServiceImpl.getValueById((String) detail.get("examinationModeId"));
+		Map mExam = dictionary2PrivateServiceImpl.getValueById((String) detail
+				.get("examinationModeId"));
 		if (null != mExam) {
 			detail.put("examinationMode", mExam.get("value"));
 		}
@@ -864,8 +897,10 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 				+ "where c.courseId=ci.courseId and ci.ciId=cc.ciId and cc.location=s.code and c.courseId=?";
 		List<Map> listTime = courseDAO.findMap(hql5, courseId);
 		if (null != listTime && listTime.size() > 0) {
-			String courseTable = listTime.get(0).get("lessonNumber") + "节   周" + listTime.get(0).get("weekDay") + "  "
-					+ listTime.get(0).get("location") + "#" + listTime.get(0).get("classRoom");
+			String courseTable = listTime.get(0).get("lessonNumber") + "节   周"
+					+ listTime.get(0).get("weekDay") + "  "
+					+ listTime.get(0).get("location") + "#"
+					+ listTime.get(0).get("classRoom");
 			// System.out.println((String)
 			// list2.get(0).get("lessonNumber")+"节
 			// 周"+list2.get(0).get("weekDay")+"
@@ -909,12 +944,15 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	public List<Map> getClassCourseTable(String classId, String tpId, int page) {
 		String sql = "SELECT c.COURSE_NAME as courseName, "
 				+ "ce.WEEKDAY as weekDay, ce.LESSON_NUMBER as lessonNumber, "
-				+ "s.VALUE as location, ce.CLASSROOM as classroom " + "FROM t_course_cell ce "
+				+ "s.VALUE as location, ce.CLASSROOM as classroom "
+				+ "FROM t_course_cell ce "
 				+ "INNER JOIN t_course_item ci ON ce.CI_ID=ci.CI_ID "
 				+ "INNER JOIN t_course c ON ci.COURSE_ID = c.COURSE_ID "
 				+ "INNER JOIN t_course_class cl ON c.COURSE_ID =cl.COURSE_ID "
-				+ "INNER JOIN t_school s ON ce.LOCATION = s.CODE " + "WHERE cl.CLASS_ID = ? and c.TERM_ID = ?";
-		List<Map> list = courseDAO.findBySqlAndPage(sql, page * 20, 20, classId, tpId);
+				+ "INNER JOIN t_school s ON ce.LOCATION = s.CODE "
+				+ "WHERE cl.CLASS_ID = ? and c.TERM_ID = ?";
+		List<Map> list = courseDAO.findBySqlAndPage(sql, page * 20, 20,
+				classId, tpId);
 		for (int i = 0; i < list.size(); i++) {
 			System.out.println("map" + i + ":" + list.get(i).toString());
 		}
@@ -959,7 +997,8 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 					String[] lns = lessons.split(",|，");
 					for (int a = 0; a < lns.length; a++) {
 						if (lns[a].equals(timeTable.get(0).get("lessonNumber"))) {
-							m.get(0).put("lessonNumber", timeTable.get(0).get("lessonNumber"));
+							m.get(0).put("lessonNumber",
+									timeTable.get(0).get("lessonNumber"));
 							return m.get(0);
 						}
 					}
@@ -975,17 +1014,21 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	public List<Map> getCourseTableList(String courseId, int page) {
 		String sql = "SELECT distinct c.COURSE_ID AS courseId,c.COURSE_NAME as courseName,"
 				+ "ce.WEEKDAY as weekDay,ce.LESSON_NUMBER as lessonNumber,"
-				+ "s.VALUE as location, ce.CLASSROOM as classroom " + "FROM t_course_cell ce "
+				+ "s.VALUE as location, ce.CLASSROOM as classroom "
+				+ "FROM t_course_cell ce "
 				+ "INNER JOIN t_course_item ci ON ce.CI_ID = ci.CI_ID "
 				+ "INNER JOIN t_course c ON ci.COURSE_ID = c.COURSE_ID "
 				+ "INNER JOIN t_course_class cc ON c.COURSE_ID = cc.COURSE_ID "
 				+ "INNER JOIN t_class cl ON cc.CLASS_ID = cl.CLASS_ID "
-				+ "INNER JOIN t_school s ON ce.LOCATION = s.CODE " + "WHERE c.COURSE_ID = ?";
-		List<Map> list = courseDAO.findBySqlAndPage(sql, page * 20, 20, courseId);
+				+ "INNER JOIN t_school s ON ce.LOCATION = s.CODE "
+				+ "WHERE c.COURSE_ID = ?";
+		List<Map> list = courseDAO.findBySqlAndPage(sql, page * 20, 20,
+				courseId);
 		if (null != list && list.size() > 0) {
 			for (int i = 0; i < list.size(); i++) {
 				String sql2 = "SELECT c.CLASS_NAME AS className  FROM t_class c WHERE c.CLASS_ID IN (SELECT cc.CLASS_ID FROM t_course_class cc WHERE cc.COURSE_ID = ?)";
-				List<Map> list2 = courseDAO.findBySql(sql2, list.get(i).get("courseId"));
+				List<Map> list2 = courseDAO.findBySql(sql2,
+						list.get(i).get("courseId"));
 				if (null != list2 && list2.size() > 0) {
 					String className = "(";
 					for (int j = 0; j < list2.size(); j++) {
@@ -993,7 +1036,8 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 					}
 					className = className.substring(0, className.length() - 1);
 					className += ")";
-					list.get(i).put("courseName", list.get(i).get("courseName") + className);
+					list.get(i).put("courseName",
+							list.get(i).get("courseName") + className);
 				}
 			}
 		}
@@ -1020,17 +1064,22 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	@Override
 	public List<Map> getTermCourseTable(String userId, String tpId, int page) {
 		String sql = "SELECT distinct c.COURSE_ID AS courseId,c.COURSE_NAME as courseName,ce.WEEKDAY as weekDay,"
-				+ "ce.LESSON_NUMBER as lessonNumber,s.VALUE as location," + " ce.CLASSROOM as classroom "
-				+ "FROM t_course_cell ce " + "INNER JOIN t_course_item ci ON ce.CI_ID = ci.CI_ID "
+				+ "ce.LESSON_NUMBER as lessonNumber,s.VALUE as location,"
+				+ " ce.CLASSROOM as classroom "
+				+ "FROM t_course_cell ce "
+				+ "INNER JOIN t_course_item ci ON ce.CI_ID = ci.CI_ID "
 				+ "INNER JOIN t_course c ON ci.COURSE_ID = c.COURSE_ID "
 				+ "INNER JOIN t_course_class cc ON c.COURSE_ID = cc.COURSE_ID "
 				+ "INNER JOIN t_class cl ON cc.CLASS_ID = cl.CLASS_ID "
-				+ "INNER JOIN t_school s ON ce.LOCATION = s.CODE " + "WHERE c.USER_ID = ? and c.TERM_ID = ? ";
-		List<Map> list = courseDAO.findBySqlAndPage(sql, page * 20, 20, userId, tpId);
+				+ "INNER JOIN t_school s ON ce.LOCATION = s.CODE "
+				+ "WHERE c.USER_ID = ? and c.TERM_ID = ? ";
+		List<Map> list = courseDAO.findBySqlAndPage(sql, page * 20, 20, userId,
+				tpId);
 		if (null != list && list.size() > 0) {
 			for (int i = 0; i < list.size(); i++) {
 				String sql2 = "SELECT c.CLASS_NAME AS className  FROM t_class c WHERE c.CLASS_ID IN (SELECT cc.CLASS_ID FROM t_course_class cc WHERE cc.COURSE_ID = ?)";
-				List<Map> list2 = courseDAO.findBySql(sql2, list.get(i).get("courseId"));
+				List<Map> list2 = courseDAO.findBySql(sql2,
+						list.get(i).get("courseId"));
 				if (null != list2 && list2.size() > 0) {
 					String className = "(";
 					for (int j = 0; j < list2.size(); j++) {
@@ -1038,7 +1087,8 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 					}
 					className = className.substring(0, className.length() - 1);
 					className += ")";
-					list.get(i).put("courseName", list.get(i).get("courseName") + className);
+					list.get(i).put("courseName",
+							list.get(i).get("courseName") + className);
 				}
 			}
 		}
@@ -1056,18 +1106,22 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 		if ("1".equals(type)) {
 			sql = "SELECT ci.REPEAT_NUMBER as repeatNumber,ci.START_DAY as startDay,"
 					+ "ci.END_DAY as endDay,ce.LESSON_NUMBER as lessonNumber,"
-					+ "ce.CLASSROOM as classroom,s.VALUE as location" + "FROM t_course_item ci "
+					+ "ce.CLASSROOM as classroom,s.VALUE as location"
+					+ "FROM t_course_item ci "
 					+ "INNER JOIN t_course c ON ci.COURSE_ID = c.COURSE_ID "
 					+ "INNER JOIN t_course_cell ce ON ci.CI_ID = ce.CI_ID "
-					+ "INNER JOIN t_school s ON ce.LOCATION = s.CODE " + "WHERE c.COURSE_ID = ? and ci.REPEAT_TYPE = 1";
+					+ "INNER JOIN t_school s ON ce.LOCATION = s.CODE "
+					+ "WHERE c.COURSE_ID = ? and ci.REPEAT_TYPE = 1";
 		}
 		if ("2".equals(type)) {
 			sql = "SELECT ci.REPEAT_NUMBERas repeatNumber,ci.START_WEEK as startWeek,"
 					+ "ci.END_WEEK as endWeek,ce.WEEKDAY as weekDay,ce.LESSON_NUMBER as lessonNumber,"
-					+ "ce.CLASSROOM as classroom,s.VALUE as location " + "FROM t_course_item ci "
+					+ "ce.CLASSROOM as classroom,s.VALUE as location "
+					+ "FROM t_course_item ci "
 					+ "INNER JOIN t_course c ON ci.COURSE_ID = c.COURSE_ID "
 					+ "INNER JOIN t_course_cell ce ON ci.CI_ID = ce.CI_ID "
-					+ "INNER JOIN t_school s ON ce.LOCATION = s.CODE " + "WHERE c.COURSE_ID = ? and ci.REPEAT_TYPE = 2";
+					+ "INNER JOIN t_school s ON ce.LOCATION = s.CODE "
+					+ "WHERE c.COURSE_ID = ? and ci.REPEAT_TYPE = 2";
 		}
 		List<Map> list = courseDAO.findBySql(sql, courseId);
 		return list;
@@ -1075,33 +1129,46 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 
 	@Override
 	public List<Map> getCourseByTermId(String tpId) {
-		String hql = "select c.courseId as courseId, " + "c.remindTime as remindTime, " + "ci.ciId as ciId, "
-				+ "ci.repeatType as repeatType, " + "ci.repeatNumber as repeatNumber, " + "ci.startWeek as startWeek, "
-				+ "ci.endWeek as endWeek, " + "ci.startDay as startDay, " + "ci.endDay as endDay "
-				+ "from Course c ,CourseItem ci " + "where c.courseId = ci.courseId " + "and c.termId = ? ";
+		String hql = "select c.courseId as courseId, "
+				+ "c.remindTime as remindTime, " + "ci.ciId as ciId, "
+				+ "ci.repeatType as repeatType, "
+				+ "ci.repeatNumber as repeatNumber, "
+				+ "ci.startWeek as startWeek, " + "ci.endWeek as endWeek, "
+				+ "ci.startDay as startDay, " + "ci.endDay as endDay "
+				+ "from Course c ,CourseItem ci "
+				+ "where c.courseId = ci.courseId " + "and c.termId = ? ";
 		List<Map> list = courseDAO.findMap(hql, tpId);
 		return list;
 	}
 
 	@Override
 	public List<Map> getCourseTimebyStuId(String stuId, String termId) {
-		String sql = "SELECT c.COURSE_ID AS courseId, " + "ci.CI_ID AS ciId, " + "ci.REPEAT_TYPE AS repeatType, "
-				+ "ci.REPEAT_NUMBER AS repeatNumber, " + "ci.START_WEEK AS startWeek, " + "ci.END_WEEK AS endWeek, "
-				+ "ci.START_DAY AS startDay, " + "ci.END_DAY AS endDay, " + "ttp.TP_ID AS tpId, "
-				+ "ttp.START_DATE AS termStartDay, " + "ttp.END_DATE AS termEndDay "
+		String sql = "SELECT c.COURSE_ID AS courseId, " + "ci.CI_ID AS ciId, "
+				+ "ci.REPEAT_TYPE AS repeatType, "
+				+ "ci.REPEAT_NUMBER AS repeatNumber, "
+				+ "ci.START_WEEK AS startWeek, " + "ci.END_WEEK AS endWeek, "
+				+ "ci.START_DAY AS startDay, " + "ci.END_DAY AS endDay, "
+				+ "ttp.TP_ID AS tpId, " + "ttp.START_DATE AS termStartDay, "
+				+ "ttp.END_DATE AS termEndDay "
 				+ "FROM t_course c ,t_course_item ci ,t_term_private ttp "
-				+ "WHERE c.COURSE_ID = ci.COURSE_ID AND c.TERM_ID = ttp.TP_ID " + "AND ttp.TREM_ID = ? "
-				+ "AND c.COURSE_ID IN ( " + "SELECT tcc.COURSE_ID " + "FROM t_course_class tcc ,t_student ts "
+				+ "WHERE c.COURSE_ID = ci.COURSE_ID AND c.TERM_ID = ttp.TP_ID "
+				+ "AND ttp.TREM_ID = ? " + "AND c.COURSE_ID IN ( "
+				+ "SELECT tcc.COURSE_ID "
+				+ "FROM t_course_class tcc ,t_student ts "
 				+ "WHERE tcc.CLASS_ID = ts.CLASS_ID " + "AND ts.STU_ID = ? )";
 		return courseDAO.findBySql(sql, termId, stuId);
 	}
 
 	@Override
 	public List<Map> getCourseNameBbyTerm(String userId, String termId) {
-		String sql = "SELECT tc.COURSE_ID AS courseId " + ",tc.COURSE_NAME AS courseName "
-				+ "FROM t_course tc ,t_term_private tp " + "WHERE tp.TP_ID = tc.TERM_ID " + "AND tp.TREM_ID = ? "
-				+ "AND tc.COURSE_ID IN ( " + "SELECT tcc.`COURSE_ID` " + "FROM t_course_class tcc ,t_student ts "
-				+ "WHERE tcc.`CLASS_ID` = ts.`CLASS_ID` " + "AND ts.`STU_ID` = ? )";
+		String sql = "SELECT tc.COURSE_ID AS courseId "
+				+ ",tc.COURSE_NAME AS courseName "
+				+ "FROM t_course tc ,t_term_private tp "
+				+ "WHERE tp.TP_ID = tc.TERM_ID " + "AND tp.TREM_ID = ? "
+				+ "AND tc.COURSE_ID IN ( " + "SELECT tcc.`COURSE_ID` "
+				+ "FROM t_course_class tcc ,t_student ts "
+				+ "WHERE tcc.`CLASS_ID` = ts.`CLASS_ID` "
+				+ "AND ts.`STU_ID` = ? )";
 		return courseDAO.findBySql(sql, termId, userId);
 	}
 
@@ -1111,10 +1178,12 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 				+ "ci.REPEAT_NUMBER as repeatNumber,ci.REPEAT_TYPE as repeatType,"
 				+ "ci.START_DAY as startDay,ci.END_DAY as endDay,"
 				+ "ce.WEEKDAY as weekDay,ce.LESSON_NUMBER as lessonNumber,"
-				+ "ce.CLASSROOM as classroom,s.VALUE as location " + "FROM t_course_item ci "
+				+ "ce.CLASSROOM as classroom,s.VALUE as location "
+				+ "FROM t_course_item ci "
 				+ "INNER JOIN t_course c ON ci.COURSE_ID = c.COURSE_ID "
 				+ "INNER JOIN t_course_cell ce ON ci.CI_ID = ce.CI_ID "
-				+ "INNER JOIN t_school s ON ce.LOCATION = s.CODE " + "WHERE c.COURSE_ID = ? ";
+				+ "INNER JOIN t_school s ON ce.LOCATION = s.CODE "
+				+ "WHERE c.COURSE_ID = ? ";
 		List<Map> list = courseDAO.findBySql(sql, courseId);
 		for (int i = 0; i < list.size(); i++) {
 			if ("01".equals(list.get(i).get("repeatType"))) {
@@ -1134,12 +1203,15 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 		String sql = "SELECT c.COURSE_ID as courseId, c.COURSE_NAME as courseName,"
 				+ "c.USER_ID as teacherId,t.NAME as teacherName,c.CLASS_HOURS as classHours,"
 				+ "c.COURSE_TYPE_ID as courseTypeId,c.EXAMINATION_MODE_ID as examTypeId "
-				+ "FROM t_course c INNER JOIN t_teacher t ON c.USER_ID=t.TEACHER_ID " + "WHERE c.COURSE_ID = ?";
+				+ "FROM t_course c INNER JOIN t_teacher t ON c.USER_ID=t.TEACHER_ID "
+				+ "WHERE c.COURSE_ID = ?";
 		list = courseDAO.findBySql(sql, courseId);
 		// 获取课程类型
-		String hql1 = "select pu.value as courseType " + "from Course c,Dictionary2Public pu "
+		String hql1 = "select pu.value as courseType "
+				+ "from Course c,Dictionary2Public pu "
 				+ "where c.courseTypeId=pu.dictionaryId and c.courseId=?";
-		String hql2 = "select pr.value as courseType " + "from Course c,Dictionary2Private pr "
+		String hql2 = "select pr.value as courseType "
+				+ "from Course c,Dictionary2Private pr "
 				+ "where c.courseTypeId =pr.dpId and c.courseId=?";
 		List<Object> list1 = courseDAO.find(hql1, courseId);
 		List<Object> list2 = courseDAO.find(hql2, courseId);
@@ -1150,9 +1222,11 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 			list.get(0).put("courseType", list1);
 		}
 		// 获取考核类型
-		String hql3 = "select pu.value as examinationMode " + "from Course c,Dictionary2Public pu "
+		String hql3 = "select pu.value as examinationMode "
+				+ "from Course c,Dictionary2Public pu "
 				+ "where c.examinationModeId=pu.dictionaryId and c.courseId=?";
-		String hql4 = "select pr.value as examinationMode " + "from Course c,Dictionary2Private pr "
+		String hql4 = "select pr.value as examinationMode "
+				+ "from Course c,Dictionary2Private pr "
 				+ "where c.examinationModeId =pr.dpId and c.courseId=?";
 		List<Object> list4 = courseDAO.find(hql3, courseId);
 		List<Object> list5 = courseDAO.find(hql4, courseId);
@@ -1177,10 +1251,14 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 
 	@Override
 	public List<Map> getContainDateList(String start, String end) {
-		String sql = "SELECT tc.COURSE_ID AS courseId, " + "tc.REMIND_TIME AS remindTime, " + "tci.CI_ID AS ciId, "
-				+ "tci.REPEAT_TYPE AS repeatType, " + "tci.REPEAT_NUMBER AS repeatNumber, "
-				+ "tci.START_DAY AS startDay, " + "tci.END_DAY AS endDay, " + "tt.SCHOOL_ID AS schoolId "
-				+ "FROM t_course tc ,t_course_item tci ,t_teacher tt " + "WHERE tc.COURSE_ID = tci.COURSE_ID  "
+		String sql = "SELECT tc.COURSE_ID AS courseId, "
+				+ "tc.REMIND_TIME AS remindTime, " + "tci.CI_ID AS ciId, "
+				+ "tci.REPEAT_TYPE AS repeatType, "
+				+ "tci.REPEAT_NUMBER AS repeatNumber, "
+				+ "tci.START_DAY AS startDay, " + "tci.END_DAY AS endDay, "
+				+ "tt.SCHOOL_ID AS schoolId "
+				+ "FROM t_course tc ,t_course_item tci ,t_teacher tt "
+				+ "WHERE tc.COURSE_ID = tci.COURSE_ID  "
 				+ "AND tc.USER_ID = tt.TEACHER_ID " + "AND tci.START_DAY < ?  "
 				+ "AND DATE_ADD(tci.END_DAY,INTERVAL 1 DAY) > ? ";
 		List list = courseDAO.findBySql(sql, start, end);
@@ -1191,18 +1269,18 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	public List<Map> getCourseListByTerm(String userId, String termId) {
 		List<Map> datas = new ArrayList<>();
 		String hql = "from Course tc where tc.termId = ? and tc.userId = ?";
-		List<Course> list = courseDAO.find(hql, termId,userId);
+		List<Course> list = courseDAO.find(hql, termId, userId);
 		if (null != list && list.size() > 0) {
 			for (int i = 0; i < list.size(); i++) {
 				Course temp = list.get(i);
 				Map item = new HashMap<>();
 				item.put("courseId", temp.getCourseId());
 				item.put("courseName", temp.getCourseName());
-				String sql = "SELECT tc.CLASS_ID as classId, "+
-							"tc.CLASS_NAME as className "+
-							"FROM t_course_class tcc, t_class tc "+
-							"where tcc.COURSE_ID = ? "+
-							"and tcc.CLASS_ID = tc.CLASS_ID";
+				String sql = "SELECT tc.CLASS_ID as classId, "
+						+ "tc.CLASS_NAME as className "
+						+ "FROM t_course_class tcc, t_class tc "
+						+ "where tcc.COURSE_ID = ? "
+						+ "and tcc.CLASS_ID = tc.CLASS_ID";
 				List listClass = courseDAO.findBySql(sql, temp.getCourseId());
 				if (null != listClass && listClass.size() > 0) {
 					item.put("classes", listClass);
@@ -1214,7 +1292,7 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 	}
 
 	@Override
-	public ReturnBody saveCourse(HttpServletRequest request,String schoolId) {
+	public ReturnBody saveCourse(HttpServletRequest request, String schoolId) {
 		String termId = request.getParameter("termId");
 		String courseId = request.getParameter("courseId");
 		String courseName = request.getParameter("courseName");// *
@@ -1223,15 +1301,19 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 		String introduction = request.getParameter("introduction");
 		String classes = request.getParameter("classes");// *
 		String scores = request.getParameter("scores");// *
-		if (StringUtil.checkParams(courseName, teachMethodId, examTypeId, classes, scores)) {
+		if (StringUtil.checkParams(courseName, teachMethodId, examTypeId,
+				classes, scores)) {
 			Course course = null;
 			if (StringUtil.isNotEmpty(courseId)) {
 				course = get(courseId);
 			} else {
 				course = new Course();
 			}
-			course.setTermId(termId);
+			if (StringUtil.isNotEmpty(termId)) {
+				course.setTermId(termId);
+			}
 			course.setCourseName(courseName);
+			course.setUserId(request.getParameter("userId"));
 			course.setIntroduction(introduction);
 			course.setTeachingMethodId(teachMethodId);
 			course.setExaminationModeId(examTypeId);
@@ -1245,31 +1327,105 @@ public class CourseServiceImpl extends BaseService<Course> implements ICourseSer
 			}
 			courseId = course.getCourseId();
 			if (StringUtil.isNotEmpty(classes)) {
-				List<Map<String, String>> classesList = (List<Map<String, String>>) JSONUtils.parse(classes);
+				List<Map<String, String>> classesList = (List<Map<String, String>>) JSONUtils
+						.parse(classes);
 				for (int i = 0; i < classesList.size(); i++) {
-					Map<String,String> classTemp =  classesList.get(i);
+					Map<String, String> classTemp = classesList.get(i);
 					String classNum = classTemp.get("classNum");
 					String degree = classTemp.get("degree");
 					String grade = classTemp.get("grade");
 					String majorId = classTemp.get("majorId");
 					String className = classTemp.get("className");
-					classDAO.getClassIdbyFilter(classNum, degree, grade, majorId, className, schoolId);
-					//获取对应的班级Id
+					String classId = classDAO.getClassIdbyFilter(classNum,
+							degree, grade, majorId, className, schoolId);
+					CourseClasses courseClasses = new CourseClasses();
+					courseClasses.setClassId(classId);
+					courseClasses.setCourseId(courseId);
+					courseClassesDAO.save(courseClasses);
 				}
 			}
 			// 增加新数据
-			List<Map<String, String>> scoresList = (List<Map<String, String>>) JSONUtils.parse(scores);
+			List<Map<String, String>> scoresList = (List<Map<String, String>>) JSONUtils
+					.parse(scores);
 			for (int i = 0; i < scoresList.size(); i++) {
 				CourseScorePrivate item = new CourseScorePrivate();
 				item.setCourseId(courseId);
 				item.setScoreName(scoresList.get(i).get("scoreName"));
-				item.setScorePercent(new BigDecimal(scoresList.get(i).get("scorePercent")));
+				item.setScorePercent(new BigDecimal(scoresList.get(i).get(
+						"scorePercent")));
 				courseScorePrivateDAO.save(item);
 			}
 
 			Map<String, String> map = new HashMap();
 			map.put("courseId", course.getCourseId());
 			return new ReturnBody(map);
+		} else {
+			return ReturnBody.getParamError();
+		}
+	}
+
+	@Override
+	public ReturnBody addCourseDate(HttpServletRequest request) {
+		String courseId = request.getParameter("courseId");
+		String schedule = request.getParameter("schedule");
+		if (StringUtil.checkParams(courseId, schedule)) {
+			List<Map<String, Object>> scheduleList =  (List<Map<String, Object>>)JSONUtils.parse(schedule);
+			if (null != scheduleList && scheduleList.size() > 0) {
+				for (int i = 0; i < scheduleList.size(); i++) {
+					Map<String, Object> scheduleItem = scheduleList.get(i); 
+					String repeatType = (String)scheduleItem.get("repeatType");
+					int repeatNumber = (int)scheduleItem.get("repeatNumber");
+					List<Map<String, Object>> dateRepeatList =  (List<Map<String, Object>>)scheduleItem.get("dateRepeat");
+					if (null != dateRepeatList && dateRepeatList.size() > 0) {
+						for (int j = 0; j < dateRepeatList.size(); j++) {
+							Map<String, Object> dateRepeatItem = dateRepeatList.get(j); 
+							CourseItem courseItem = new CourseItem();
+							courseItem.setCourseId(courseId);
+							courseItem.setRepeatType(repeatType);
+							courseItem.setRepeatNumber(repeatNumber);
+							courseItem.setStartDay((String)dateRepeatItem.get("startDate"));
+							courseItem.setEndDay((String)dateRepeatItem.get("endDate"));
+							courseItemDAO.save(courseItem);
+							List<Map<String, Object>> weekRepeatList =  (List<Map<String, Object>>)dateRepeatItem.get("weekRepeat");
+							if (null != weekRepeatList && weekRepeatList.size() > 0) {
+								if (repeatType.equals("01")) {
+									Map<String, Object> weekRepeatItem = weekRepeatList.get(0);
+									List<Map<String, String>> timeRepeatList =  (List<Map<String, String>>)weekRepeatItem.get("timeRepeat");
+									if (null != timeRepeatList && timeRepeatList.size() > 0) {
+										for (int k = 0; k < timeRepeatList.size(); k++) {
+											Map<String, String> timeRepeatItem = (Map<String, String>)timeRepeatList.get(k);
+											CourseCell courseCell = new CourseCell();
+											courseCell.setLocation(timeRepeatItem.get("classRoom"));
+											courseCell.setEndTime(timeRepeatItem.get("endTime"));
+											courseCell.setStartTime(timeRepeatItem.get("classRoom"));
+											courseCell.setCiId(courseItem.getCiId());
+											courseCellDAO.save(courseCell);
+										}
+									}
+								}else{
+									for (int k = 0; k < weekRepeatList.size(); k++) {
+										Map<String, Object> weekRepeatItem = weekRepeatList.get(k);
+										List<Map<String, String>> timeRepeatList =  (List<Map<String, String>>)weekRepeatItem.get("timeRepeat");
+										if (null != timeRepeatList && timeRepeatList.size() > 0) {
+											for (int l = 0; l < timeRepeatList.size(); l++) {
+												Map<String, String> timeRepeatItem = (Map<String, String>)timeRepeatList.get(l);
+												CourseCell courseCell = new CourseCell();
+												courseCell.setLocation(timeRepeatItem.get("classRoom"));
+												courseCell.setEndTime(timeRepeatItem.get("endTime"));
+												courseCell.setStartTime(timeRepeatItem.get("classRoom"));
+												courseCell.setCiId(courseItem.getCiId());
+												courseCellDAO.save(courseCell);
+											}
+										}
+									}
+								}
+								return new ReturnBody("保存成功");
+							}
+						}
+					}
+				}
+			}
+			return ReturnBody.getSystemError();
 		} else {
 			return ReturnBody.getParamError();
 		}

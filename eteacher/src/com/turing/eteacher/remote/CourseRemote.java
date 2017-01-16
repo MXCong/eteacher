@@ -486,26 +486,7 @@ public class CourseRemote extends BaseRemote {
 	 */
 	@RequestMapping(value = "teacher/course/addDate", method = RequestMethod.POST)
 	public ReturnBody addDate(HttpServletRequest request) {
-		String courseId = request.getParameter("courseId");
-		String repeatType = request.getParameter("repeatType");
-		String repeatNumber = request.getParameter("repeatNumber").trim();
-		String start = request.getParameter("start").trim();
-		String end = request.getParameter("end").trim();
-		if (StringUtil.checkParams(courseId, repeatNumber, repeatType, start,
-				end)) {
-			CourseItem item = new CourseItem();
-			item.setCourseId(courseId);
-			item.setRepeatType(repeatType);
-			item.setRepeatNumber(Integer.parseInt(repeatNumber));
-			item.setStartDay(start);
-			item.setEndDay(end);
-			courseItemServiceImpl.save(item);
-			Map<String, String> map = new HashMap<>();
-			map.put("courseItemId", item.getCiId());
-			return new ReturnBody(map);
-		} else {
-			return ReturnBody.getParamError();
-		}
+		return courseServiceImpl.addCourseDate(request);
 	}
 
 	/**

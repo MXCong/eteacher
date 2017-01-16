@@ -190,4 +190,6 @@ public interface ICourseService extends IService<Course> {
 	public List<Map> getCourseListByTerm(String userId,String termId);
 	
 	public ReturnBody saveCourse(HttpServletRequest request,String schoolId);
+	
+	public ReturnBody addCourseDate(HttpServletRequest request);
 }
