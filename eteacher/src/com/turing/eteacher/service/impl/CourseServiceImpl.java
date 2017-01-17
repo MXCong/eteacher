@@ -630,9 +630,14 @@ public class CourseServiceImpl extends BaseService<Course> implements
 	 * @author macong
 	 * @param courseIds
 	 * @return { "courseId":"dsznUBKa2", "courseName":"软件工程", "location":"尚学楼",
+<<<<<<< .mine
+	 *         "classRoom":"316", "startTime":"8:00","endTime":"10:00","classes":"13软工A班，14科技1班"（String类型）, "teacherId":"zhjBY21",
+	 *         "teacherName":"张三" }
+=======
 	 *         "classRoom":"316",
 	 *         "lessonNumber":"8:00-10:00","classes":"13软工A班，14科技1班"（String类型）,
 	 *         "teacherId":"zhjBY21", "teacherName":"张三" }
+>>>>>>> .r334
 	 */
 	@Override
 	public List<Map> getCourseInfo(String courseIds, String targetDate) {

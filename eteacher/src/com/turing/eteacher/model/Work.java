@@ -9,9 +9,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 
+import com.turing.eteacher.base.CreateTimeModel;
+
 @Entity
 @Table(name = "T_WORK")
-public class Work implements Serializable {
+public class Work extends CreateTimeModel implements Serializable {
 
 	private static final long serialVersionUID = 8523575661624181680L;
 	
@@ -20,7 +22,6 @@ public class Work implements Serializable {
 	private String content;
 	private String publishTime;
 	private String endTime;
-	private Date createTime;
 	private String remindTime;
 	private Integer status;  //1：发布/待发布作业； 2：草稿
 	private String title;//作业标题
@@ -49,14 +50,6 @@ public class Work implements Serializable {
 	}
 	public void setContent(String content) {
 		this.content = content;
-	}
-
-	@Column(name = "CREATE_TIME")
-	public Date getCreateTime() {
-		return createTime;
-	};
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
 	}
 	@Column(name = "PUBLISH_TIME")
 //	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")

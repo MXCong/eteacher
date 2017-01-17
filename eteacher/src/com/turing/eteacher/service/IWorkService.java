@@ -62,4 +62,9 @@ public interface IWorkService extends IService<Work> {
 	 * @return
 	 */
 	public List<Map> getClassIdByWorkId(String noticeId);
+	/**
+	 * 关联作业和班级
+	 * @param classList ：该作业作用的班级数组
+	 */
+	public void addWorkClass(String workId , String classList);
 }

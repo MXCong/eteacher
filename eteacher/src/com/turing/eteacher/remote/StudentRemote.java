@@ -91,6 +91,18 @@ public class StudentRemote extends BaseRemote {
 	 * @param stuId
 	 * @return
 	 */
+	//{
+//	result : 'success',//成功success，失败failure
+//	data : {
+//		stuId : 'ID',
+//		picture : '头像', //图片服务访问地址
+//		stuName : '姓名',
+//		sex : '性别',
+//		phone : '手机号',
+//		email : '邮箱'
+//	},
+//	msg : '提示信息XXX'
+//}	
 	@RequestMapping(value = "student/personInfo", method = RequestMethod.POST)
 	public ReturnBody getStudent(HttpServletRequest request){
 		try {

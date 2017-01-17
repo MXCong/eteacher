@@ -53,8 +53,6 @@ public class CourseRemote extends BaseRemote {
 	@Autowired
 	private IMajorService majorServiceImpl;
 
-	@Autowired
-	private ICourseClassService courseClassServiceImpl;
 
 	@Autowired
 	private ICourseScoreService courseScoreServiceImpl;
@@ -69,14 +67,6 @@ public class CourseRemote extends BaseRemote {
 	@Autowired
 	private ICourseCellService courseCellServiceImpl;
 	
-	
-	@Autowired
-	private IFileService fileServiceImpl;
-	
-	@Autowired
-	private SpringTimerTest springTimerTest;
-
-
 	/**
 	 *
 	 *学生端功能：获取指定学期下的课程列表
@@ -278,7 +268,7 @@ public class CourseRemote extends BaseRemote {
 	 * 分割符。以下内容为教师端相关接口
 	 */
 	/**
-	 * 根据课程Id，获取课程的简略信息
+	 * 根据指定日期要进行的课程的Id集合，获取课程的简略信息列表
 	 * @author macong
 	 * @param request
 	 * @return
@@ -287,7 +277,8 @@ public class CourseRemote extends BaseRemote {
 		  "courseName":"软件工程",
 		  "location":"尚学楼",
 		  "classRoom":"316",
-		  "lessonNumber":"8:00-10:00",
+		  "startTime":"8:00",
+		  "endTime":"10:00",
 		  "classes":"13软工A班，14科技1班",（String类型）
 		  "teacherId":"zhjBY21",
 		  "teacherName":"张三"

@@ -2,6 +2,7 @@ package com.turing.eteacher.remote;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartRequest;
 import com.alibaba.druid.support.json.JSONUtils;
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
+import com.turing.eteacher.dao.WorkDAO;
 import com.turing.eteacher.model.CustomFile;
 import com.turing.eteacher.model.TaskModel;
 import com.turing.eteacher.model.Work;
@@ -60,13 +62,11 @@ public class WorkRemote extends BaseRemote {
 
 	@Autowired
 	private IWorkClassService workCourseServiceImpl;
-	
+
 	@Autowired
 	private IFileService fileServiceImpl;
-	
-	@Autowired
-	private SpringTimerTest springTimerTest;
-//  学生端操作
+
+	// 学生端操作
 	/**
 	 * 获取作业列表
 	 * 
@@ -88,13 +88,13 @@ public class WorkRemote extends BaseRemote {
 	// }
 	@RequestMapping(value = "student/works", method = RequestMethod.POST)
 	public ReturnBody studentWorks(HttpServletRequest request) {
-		
+
 		String stuId = getCurrentUser(request).getUserId();
 		String status = request.getParameter("status");
-		String page = (String)request.getParameter("page");
-		if (StringUtil.checkParams(stuId,status, page)) {
+		String page = (String) request.getParameter("page");
+		if (StringUtil.checkParams(stuId, status, page)) {
 			try {
-				List list = workServiceImpl.getListByStuId(stuId, status,Integer.parseInt(page));
+				List list = workServiceImpl.getListByStuId(stuId, status, Integer.parseInt(page));
 				return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -129,13 +129,13 @@ public class WorkRemote extends BaseRemote {
 		try {
 			String workId = request.getParameter("workId");
 			if (StringUtil.checkParams(workId)) {
-				Map work = workServiceImpl.getSWorkDetail(workId,FileUtil.getRequestUrl(request));
+				Map work = workServiceImpl.getSWorkDetail(workId, FileUtil.getRequestUrl(request));
 				if (null != work) {
 					return new ReturnBody(ReturnBody.RESULT_SUCCESS, work);
-				}else{
+				} else {
 					return ReturnBody.getParamError();
 				}
-			}else{
+			} else {
 				return ReturnBody.getParamError();
 			}
 		} catch (Exception e) {
@@ -178,11 +178,11 @@ public class WorkRemote extends BaseRemote {
 	 * @param request
 	 * @return
 	 */
-	
+
 	@RequestMapping(value = "teacher/work/getWorkList", method = RequestMethod.POST)
 	public ReturnBody getListWork(HttpServletRequest request) {
 		String status = (String) request.getParameter("status");
-		String page = request.getParameter("page")==null?"0":(String)request.getParameter("page");
+		String page = request.getParameter("page") == null ? "0" : (String) request.getParameter("page");
 		String userId = getCurrentUser(request).getUserId();
 		String date = request.getParameter("date");
 		if (StringUtil.checkParams(status, userId)) {
@@ -207,15 +207,15 @@ public class WorkRemote extends BaseRemote {
 	@RequestMapping(value = "teacher/work/detail", method = RequestMethod.POST)
 	public ReturnBody getWorkDetail(HttpServletRequest request) {
 		try {
-			String workId = request.getParameter("workId"); 
+			String workId = request.getParameter("workId");
 			if (StringUtil.checkParams(workId)) {
-				Map data = workServiceImpl.getWorkDetail(workId,FileUtil.getRequestUrl(request));
+				Map data = workServiceImpl.getWorkDetail(workId, FileUtil.getRequestUrl(request));
 				if (null != data) {
 					return new ReturnBody(ReturnBody.RESULT_SUCCESS, data);
-				}else{
+				} else {
 					return ReturnBody.getParamError();
 				}
-			}else{
+			} else {
 				return ReturnBody.getParamError();
 			}
 		} catch (Exception e) {
@@ -225,116 +225,75 @@ public class WorkRemote extends BaseRemote {
 	}
 
 	/**
-	 * @author macong
-	 * 新增作业
+	 * @author macong 新增作业
 	 * @param request
 	 * @param work
 	 * @return
-	 */	
+	 */
 	@RequestMapping(value = "teacher/work/addWork", method = RequestMethod.POST)
-	public ReturnBody addWork(HttpServletRequest request){
+	public ReturnBody addWork(HttpServletRequest request) {
+		String courseId = request.getParameter("courseId");
+		String classes = request.getParameter("targetClass");
+		String title = request.getParameter("title");
 		String content = request.getParameter("content");
 		String endTime = request.getParameter("endTime");
 		String publishTime = request.getParameter("publishTime");
-		//String remindTime = request.getParameter("remindTime");
-		String course = request.getParameter("course");
 		String status = request.getParameter("status");
-		String workId = request.getParameter("workId"); 
 		String deleted = request.getParameter("deleted");
-		if (StringUtil.checkParams(course,content,endTime,publishTime,status)) {
-			Work work = null;
-			String wId = null;
-			if (StringUtil.isNotEmpty(workId)) {
-				work = workServiceImpl.get(workId);
-				if (null == work) {
-					return ReturnBody.getParamError();
-				}
-				work.setContent(content);
-				work.setEndTime(endTime);
-				work.setPublishTime(publishTime);
-				//work.setRemindTime(remindTime);
-				work.setStatus(Integer.parseInt(status));
-				workServiceImpl.update(work);
-				workCourseServiceImpl.deleteData(workId);
-				wId = workId;
-			}else{
-				work = new Work();
-				work.setContent(content);
-				work.setEndTime(endTime);
-				work.setPublishTime(publishTime);
-				//work.setRemindTime(remindTime);
-				work.setStatus(Integer.parseInt(status));
-				//作业（除附件之外）的操作
-				workServiceImpl.add(work);
-				wId = work.getWorkId();
-			}
-			try {	
-				//获取该作业作用的班级列表
-				List<Map> list = (List<Map>) JSONUtils.parse(course);
-				for(int n=0;n<list.size();n++){
-					WorkClass workCourse = new WorkClass();
-					workCourse.setWorkId(wId);
-					workCourse.setCourseId((String)list.get(n).get("id"));
-					workCourseServiceImpl.add(workCourse);
-				}
-				//删除已有的附件
-				if (StringUtil.isNotEmpty(deleted)) {
-					List<Map<String, String>> delList = (List<Map<String, String>>)JSONUtils.parse(deleted);
-					if (null != delList && delList.size() > 0) {
-						for (int i = 0; i < delList.size(); i++) {
-							fileServiceImpl.deletebyFileId(delList.get(i).get("fileId"), FileUtil.getUploadPath());
-						}
+		if (StringUtil.checkParams(courseId, content, status)) {
+			Work work = new Work();
+			work.setTitle(title);
+			work.setContent(content);
+			work.setCourseId(courseId);
+			work.setPublishTime(publishTime);
+			work.setEndTime(endTime);
+			work.setStatus(Integer.parseInt(status));
+			String workId = (String) workServiceImpl.save(work);
+			workServiceImpl.addWorkClass(workId , classes);
+			
+			// 删除已有的附件
+			if (StringUtil.isNotEmpty(deleted)) {
+				List<Map<String, String>> delList = (List<Map<String, String>>) JSONUtils.parse(deleted);
+				if (null != delList && delList.size() > 0) {
+					for (int i = 0; i < delList.size(); i++) {
+						fileServiceImpl.deletebyFileId(delList.get(i).get("fileId"), FileUtil.getUploadPath());
 					}
 				}
-				//对新增附件的处理
-				if (request instanceof MultipartRequest) {
-					try {
-						List<MultipartFile> files = null;
-						MultipartRequest multipartRequest = (MultipartRequest) request;
-						files = multipartRequest.getFiles("file");
-						System.out.println("文件的个数："+files.size());
-						if (files != null) {
-							for (MultipartFile file : files) {
-								if (!file.isEmpty()) {
-									String serverName = FileUtil.makeFileName(file
-											.getOriginalFilename());
-									try {
-										FileUtils.copyInputStreamToFile(file.getInputStream(),
-												new File(FileUtil.getUploadPath(), serverName));
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
-									CustomFile customFile = new CustomFile();
-									customFile.setDataId(work.getWorkId());
-									customFile.setFileName(file.getOriginalFilename());
-									customFile.setServerName(serverName);
-									customFile.setIsCourseFile(2);
-									customFile.setFileAuth("02");
-									fileServiceImpl.save(customFile);
+			}
+			// 对新增附件的处理
+			if (request instanceof MultipartRequest) {
+				try {
+					List<MultipartFile> files = null;
+					MultipartRequest multipartRequest = (MultipartRequest) request;
+					files = multipartRequest.getFiles("file");
+					System.out.println("文件的个数：" + files.size());
+					if (files != null) {
+						for (MultipartFile file : files) {
+							if (!file.isEmpty()) {
+								String serverName = FileUtil.makeFileName(file.getOriginalFilename());
+								try {
+									FileUtils.copyInputStreamToFile(file.getInputStream(),
+											new File(FileUtil.getUploadPath(), serverName));
+								} catch (IOException e) {
+									e.printStackTrace();
 								}
+								CustomFile customFile = new CustomFile();
+								customFile.setDataId(work.getWorkId());
+								customFile.setFileName(file.getOriginalFilename());
+								customFile.setServerName(serverName);
+								customFile.setIsCourseFile(2);
+								customFile.setFileAuth("02");
+								fileServiceImpl.save(customFile);
 							}
 						}
-					} catch (Exception e) {
-						e.printStackTrace();
-						return new ReturnBody(ReturnBody.RESULT_FAILURE,ReturnBody.ERROR_MSG);
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 				}
-				if (status.equals("1")) {
-					if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
-						TaskModel model = new TaskModel();
-						model.setId(work.getWorkId());
-						model.setDate(publishTime);
-						model.setType(TaskModel.UTYPE_STUDENT);
-						model.setType(TaskModel.TYPE_HOMEWORK_PUBLISH);
-						springTimerTest.addTask(model);
-					}
-				}
-				return new ReturnBody("保存成功！");
-			}catch (Exception e) {
-				e.printStackTrace();
-				return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 			}
-		}else{
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS);
+		} else {
 			return ReturnBody.getParamError();
 		}
 	}
@@ -360,22 +319,23 @@ public class WorkRemote extends BaseRemote {
 			workServiceImpl.saveOrUpdate(work);// 更新“作业表”信息
 			// 获取该作业作用的班级列表
 			String list = request.getParameter("courseIds");
-			List<Map<String,String>> wcl = (List<Map<String,String>>) JSONUtils.parse(list);
-//			if (list != null) {// 作业的接受对象发生变化，更新"作业-课程"关联表。
-//				String lists = list.replace("[", "").replace("]", "").replace("\"", "");
-//				String[] cIds = lists.split(",");
-				// 更新“作业-课程”关联表
-				workCourseServiceImpl.deleteData(wId);// 删除原有数据
-				for (int n = 0; n < wcl.size(); n++) {
-					String courseId = wcl.get(n).get("id");
-					// 生成作业表主键（uuid）
-					String wcId = CustomIdGenerator.generateShortUuid();
-					workCourse.setWcId(wcId);
-					workCourse.setWorkId(wId);
-					workCourse.setCourseId(courseId);
-					workCourseServiceImpl.add(workCourse);
-				}
-//			}
+			List<Map<String, String>> wcl = (List<Map<String, String>>) JSONUtils.parse(list);
+			// if (list != null) {// 作业的接受对象发生变化，更新"作业-课程"关联表。
+			// String lists = list.replace("[", "").replace("]",
+			// "").replace("\"", "");
+			// String[] cIds = lists.split(",");
+			// 更新“作业-课程”关联表
+			workCourseServiceImpl.deleteData(wId);// 删除原有数据
+			for (int n = 0; n < wcl.size(); n++) {
+				String courseId = wcl.get(n).get("id");
+				// 生成作业表主键（uuid）
+				String wcId = CustomIdGenerator.generateShortUuid();
+				workCourse.setWcId(wcId);
+				workCourse.setWorkId(wId);
+				workCourse.setCourseId(courseId);
+				workCourseServiceImpl.add(workCourse);
+			}
+			// }
 			// 对作业附件的处理
 			if (null != request.getParameter("file")) {
 				// ..
@@ -406,7 +366,7 @@ public class WorkRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 		}
 	}
-	
+
 	/**
 	 * 1.2.16 获取指定月份有课程的日期
 	 * 
@@ -418,10 +378,11 @@ public class WorkRemote extends BaseRemote {
 		if (StringUtil.checkParams(ym)) {
 			List list = workServiceImpl.getWorkEndDateByMonth(ym, getCurrentUserId(request));
 			return new ReturnBody(list);
-		}else{
+		} else {
 			return ReturnBody.getParamError();
 		}
 	}
+
 	/**
 	 * 1.2.16 学生端获取指定月份有课程的日期
 	 * 
@@ -433,7 +394,7 @@ public class WorkRemote extends BaseRemote {
 		if (StringUtil.checkParams(ym)) {
 			List list = workServiceImpl.stugetWorkEndDateByMonth(ym, getCurrentUserId(request));
 			return new ReturnBody(list);
-		}else{
+		} else {
 			return ReturnBody.getParamError();
 		}
 	}

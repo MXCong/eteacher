@@ -47,6 +47,7 @@ public class WorkClassServiceImpl extends BaseService<WorkClass> implements IWor
 				 "t_course.COURSE_NAME AS courseName FROM "+
 			 	 "t_work_class LEFT JOIN t_course ON t_work_class.COURSE_ID = t_course.COURSE_ID "+ 
 			 	 "WHERE t_work_class.WORK_ID = ?";
+
 		List<Map> list = workCourseDAO.findBySql(sql, wId);
 		if (null != list && list.size() > 0) {
 			for (int i = 0; i < list.size(); i++) {
@@ -65,5 +66,4 @@ public class WorkClassServiceImpl extends BaseService<WorkClass> implements IWor
 		}
 		return list;
 	}
-	
 }
