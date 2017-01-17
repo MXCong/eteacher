@@ -154,7 +154,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 					+ "w.content as content "
 					+ "from Work w , Course c "
 					+ "where w.courseId = c.courseId "
-					+ "and w.status=1 and c.userId = ? "
+					+ "and w.status = 1 and c.userId = ? "
 					+ "and w.endTime < now() order by w.endTime desc";
 			list = workDAO.findMapByPage(hql, page * 20, 20, userId);
 		}
@@ -164,8 +164,8 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 					+ "w.content as content "
 					+ "from Work w , Course c "
 					+ "where w.courseId = c.courseId and w.status=1 "
-					+ "and c.userId=? "
-					+ "and w.publishTime<now() and w.endTime>now() "
+					+ "and c.userId = ? "
+					+ "and w.publishTime < now() and w.endTime > now() "
 					+ "order by w.publishTime desc";
 			list = workDAO.findMapByPage(hql, page * 20, 20, userId);
 		}
@@ -173,8 +173,8 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 			hql += "w.publishTime as publishTime , w.content as content , "
 					+ "w.status as status , w.endTime as endTime "
 					+ "from Work w , Course c "
-					+ "where w.courseId = c.courseId and w.status=1 "
-					+ "and c.userId = ? "
+					+ "where w.courseId = c.courseId and ( w.status=1 "
+					+ "or w.status = 2 ) and c.userId = ? "
 					+ "and (w.publishTime > now() or w.publishTime is null ) "
 					+ "order by w.publishTime asc";
 			list = workDAO.findMapByPage(hql, page * 20, 20, userId);
@@ -183,19 +183,20 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 			hql += "w.publishTime as publishTime , w.content as content , "
 					+ "w.status as status , w.endTime as endTime "
 					+ "from Work w , Course c "
-					+ "where w.courseId = c.courseId and w.status=1 "
-					+ "and c.userId = ? "
+					+ "where w.courseId = c.courseId and ( w.status = 1 "
+					+ "or w.status = 2 ) and c.userId = ? "
 					+ "order by w.publishTime asc";
 			list = workDAO.findMapByPage(hql, page * 20, 20, userId);
 			String nowDate = DateUtil.getCurrentDateStr("yyyy-MM-dd");
 			for (int i = 0; i < list.size(); i++) {
 				String publishTime = (String) list.get(i).get("publishTime");
 				String endTime = (String) list.get(i).get("endTime");
-				if(publishTime.compareTo(nowDate) > 0){
+				int st = (int) list.get(i).get("status");
+				if(publishTime.compareTo(nowDate) > 0 && st == 1){
 					list.get(i).put("period", "待发布");
-				}else if(endTime.compareTo(nowDate) < 0){
+				}else if(endTime.compareTo(nowDate) < 0 && st == 1){
 					list.get(i).put("period", "已到期");
-				}else if(publishTime.compareTo(nowDate) <= 0 && endTime.compareTo(nowDate) >= 0){
+				}else if(publishTime.compareTo(nowDate) <= 0 && endTime.compareTo(nowDate) >= 0 && st == 1){
 					list.get(i).put("period", "已发布");
 				}else{
 					list.get(i).put("period", "草稿");
@@ -203,8 +204,8 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 			}
 		}
 		if ("3".equals(status)) {// 获取指定截止日期的作业
-			hql += "w.content as content, wc.wcId as wcId from Work w, Course c, WorkClass wc "
-					+ "where w.courseId = c.courseId and w.workId = wc.workId "
+			hql += "w.content as content from Work w, Course c "
+					+ "where w.courseId = c.courseId "
 					+ "and c.userId = ? and  w.endTime like CONCAT(?,'%') "
 					+ "and w.status = 1 and w.publishTime < now() and w.publishTime is not null " 
 					+ "order by w.publishTime asc";
@@ -266,7 +267,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		// 第一步，根据作业ID查询该作业的内容，开始时间，结束时间（ＷＯＲＫ）
 		String wi = "select w.workId as workId , w.title as title , "
 				+ "w.publishTime as publishTime, c.courseName as courseName ,"
-				+ "w.endTime as endTime, w.content as content , "
+				+ "w.endTime as endTime, w.content as content "
 				+ "from Work w , Course c where w.workId = ? and w.courseId = c.courseId";
 		List<Map> list = workDAO.findMap(wi, workId);
 		if (null != list && list.size() > 0) {
@@ -277,7 +278,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 			}
 			//获取作业的接收班级信息
 			String hq = "select cls.className as className , "
-					+ "wc.workId , cls.classId as classId" 
+					+ "wc.workId , cls.classId as classId " 
 					+ "from Classes cls , WorkClass wc "
 					+ "where cls.classId = wc.classId and wc.workId = ?";
 			List<Map> cnlist = workDAO.findMap(hq , (String)data.get("workId"));
@@ -299,6 +300,8 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		work.setStatus(Integer.parseInt(status.trim()));
 		if ("1".equals(status)) {// （未发布作业->立即发布）
 			work.setPublishTime(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM));
+		}else if ("0".equals(status)) {// 删除作业操作
+			work.setStatus(0);
 		}
 		workDAO.update(work);
 		switch (Integer.parseInt(status)) {
@@ -383,19 +386,25 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	@Override
 	public List<Map> getClassIdByWorkId(String noticeId) {
 		String sql = "SELECT DISTINCT tcc.CLASS_ID AS classId "
-				+ "FROM t_course_class tcc, t_course tc, t_work tw ,t_work_course twc "
+				+ "FROM t_course_class tcc, t_course tc, t_work tw ,t_work_class twc "
 				+ "WHERE tcc.COURSE_ID = twc.COURSE_ID " + "AND tw.WORK_ID = twc.WORK_ID " + "AND tw.WORK_ID = ? ";
 		return workDAO.findBySql(sql, noticeId);
 	}
 
 	@Override
 	public void addWorkClass(String workId , String classes) {
-		String c = classes.substring(1, classes.length()-1);
-		String[] cls = c.split(",");
-		String sql = "INSERT INTO t_work_class (WC_ID , WORK_ID , CLASS_ID) values (? , ? , ?)";
-		for(int i=0;i<cls.length;i++){
-			System.out.println(cls[i]);
-			workDAO.executeBySql(sql, CustomIdGenerator.generateShortUuid() , workId , cls[i].substring(1 , cls[i].length()-1));
+		//查询workId是否存在对应数据，若有，则删除原数据。
+		String ql = "delete WorkClass wc where wc.workId = ?";
+		workDAO.executeHql(ql, workId);
+		//重新插入关联数据
+		if(null != classes && classes.length()>0){
+			String c = classes.substring(1, classes.length()-1);
+			String [] cls = c.split(",");
+			String sql = "INSERT INTO t_work_class (WC_ID , WORK_ID , CLASS_ID) values (? , ? , ?)";
+			for(int i=0;i<cls.length;i++){
+				workDAO.executeBySql(sql, CustomIdGenerator.generateShortUuid() , workId , cls[i].substring(1 , cls[i].length()-1));
+			}
 		}
+		
 	}
 }

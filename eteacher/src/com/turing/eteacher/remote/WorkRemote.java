@@ -240,17 +240,32 @@ public class WorkRemote extends BaseRemote {
 		String publishTime = request.getParameter("publishTime");
 		String status = request.getParameter("status");
 		String deleted = request.getParameter("deleted");
+		String workId = request.getParameter("workId");
+		
 		if (StringUtil.checkParams(courseId, content, status)) {
-			Work work = new Work();
-			work.setTitle(title);
-			work.setContent(content);
-			work.setCourseId(courseId);
-			work.setPublishTime(publishTime);
-			work.setEndTime(endTime);
-			work.setStatus(Integer.parseInt(status));
-			String workId = (String) workServiceImpl.save(work);
-			workServiceImpl.addWorkClass(workId , classes);
-			
+			if(null == workId){
+				Work work = new Work();
+				work.setTitle(title);
+				work.setContent(content);
+				work.setCourseId(courseId);
+				work.setPublishTime(publishTime);
+				work.setEndTime(endTime);
+				work.setStatus(Integer.parseInt(status));
+				workId = (String) workServiceImpl.save(work);
+				//作业班级关联表的处理。
+				workServiceImpl.addWorkClass(workId , classes);
+			}else{
+				Work w = workServiceImpl.get(workId);
+				w.setContent(content);
+				w.setTitle(title);
+				w.setCourseId(courseId);
+				w.setPublishTime(publishTime);
+				w.setEndTime(endTime);
+				w.setStatus(1);
+				workServiceImpl.update(w);
+				//作业班级关联表的处理。
+				workServiceImpl.addWorkClass(workId , classes);
+			}
 			// 删除已有的附件
 			if (StringUtil.isNotEmpty(deleted)) {
 				List<Map<String, String>> delList = (List<Map<String, String>>) JSONUtils.parse(deleted);
@@ -278,7 +293,7 @@ public class WorkRemote extends BaseRemote {
 									e.printStackTrace();
 								}
 								CustomFile customFile = new CustomFile();
-								customFile.setDataId(work.getWorkId());
+								customFile.setDataId(workId);
 								customFile.setFileName(file.getOriginalFilename());
 								customFile.setServerName(serverName);
 								customFile.setIsCourseFile(2);
@@ -303,7 +318,7 @@ public class WorkRemote extends BaseRemote {
 	 * 
 	 * @return
 	 */
-	@RequestMapping(value = "teacher/work/editWork", method = RequestMethod.POST)
+	/*@RequestMapping(value = "teacher/work/editWork", method = RequestMethod.POST)
 	public ReturnBody editWork(HttpServletRequest request, Work work, WorkClass workCourse) {
 		try {
 			// String file = request.getParameter("fileURL");
@@ -345,7 +360,7 @@ public class WorkRemote extends BaseRemote {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 		}
-	}
+	}*/
 
 	/**
 	 * 更新作业状态信息
