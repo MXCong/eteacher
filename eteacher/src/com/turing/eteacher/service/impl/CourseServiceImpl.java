@@ -1379,10 +1379,11 @@ public class CourseServiceImpl extends BaseService<Course> implements
 				for (int i = 0; i < scheduleList.size(); i++) {
 					Map<String, Object> scheduleItem = scheduleList.get(i); 
 					String repeatType = (String)scheduleItem.get("repeatType");
-					int repeatNumber = (int)scheduleItem.get("repeatNumber");
+					int repeatNumber = Integer.parseInt((String)scheduleItem.get("repeatNumber"));
 					List<Map<String, Object>> dateRepeatList =  (List<Map<String, Object>>)scheduleItem.get("dateRepeat");
 					if (null != dateRepeatList && dateRepeatList.size() > 0) {
 						for (int j = 0; j < dateRepeatList.size(); j++) {
+							System.out.println("dateRepeatList.size:"+dateRepeatList.size());
 							Map<String, Object> dateRepeatItem = dateRepeatList.get(j); 
 							CourseItem courseItem = new CourseItem();
 							courseItem.setCourseId(courseId);
@@ -1402,7 +1403,7 @@ public class CourseServiceImpl extends BaseService<Course> implements
 											CourseCell courseCell = new CourseCell();
 											courseCell.setLocation(timeRepeatItem.get("classRoom"));
 											courseCell.setEndTime(timeRepeatItem.get("endTime"));
-											courseCell.setStartTime(timeRepeatItem.get("classRoom"));
+											courseCell.setStartTime(timeRepeatItem.get("startTime"));
 											courseCell.setCiId(courseItem.getCiId());
 											courseCellDAO.save(courseCell);
 										}
@@ -1410,6 +1411,7 @@ public class CourseServiceImpl extends BaseService<Course> implements
 								}else{
 									for (int k = 0; k < weekRepeatList.size(); k++) {
 										Map<String, Object> weekRepeatItem = weekRepeatList.get(k);
+										String week = (String)weekRepeatItem.get("week"); 
 										List<Map<String, String>> timeRepeatList =  (List<Map<String, String>>)weekRepeatItem.get("timeRepeat");
 										if (null != timeRepeatList && timeRepeatList.size() > 0) {
 											for (int l = 0; l < timeRepeatList.size(); l++) {
@@ -1417,18 +1419,19 @@ public class CourseServiceImpl extends BaseService<Course> implements
 												CourseCell courseCell = new CourseCell();
 												courseCell.setLocation(timeRepeatItem.get("classRoom"));
 												courseCell.setEndTime(timeRepeatItem.get("endTime"));
-												courseCell.setStartTime(timeRepeatItem.get("classRoom"));
+												courseCell.setStartTime(timeRepeatItem.get("startTime"));
 												courseCell.setCiId(courseItem.getCiId());
+												courseCell.setWeekDay(week);
 												courseCellDAO.save(courseCell);
 											}
 										}
 									}
 								}
-								return new ReturnBody("保存成功");
 							}
 						}
 					}
 				}
+				return new ReturnBody("保存成功");
 			}
 			return ReturnBody.getSystemError();
 		} else {

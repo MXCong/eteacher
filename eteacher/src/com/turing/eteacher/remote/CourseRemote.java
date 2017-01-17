@@ -19,23 +19,19 @@ import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.Course;
 import com.turing.eteacher.model.CourseCell;
-import com.turing.eteacher.model.CourseItem;
 import com.turing.eteacher.model.CourseScorePrivate;
 import com.turing.eteacher.model.Teacher;
 import com.turing.eteacher.model.TermPrivate;
 import com.turing.eteacher.model.Textbook;
 import com.turing.eteacher.service.ICourseCellService;
-import com.turing.eteacher.service.ICourseClassService;
 import com.turing.eteacher.service.ICourseItemService;
 import com.turing.eteacher.service.ICourseScoreService;
 import com.turing.eteacher.service.ICourseService;
-import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.IMajorService;
 import com.turing.eteacher.service.ITermPrivateService;
 import com.turing.eteacher.service.ITextbookService;
 import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.FileUtil;
-import com.turing.eteacher.util.SpringTimerTest;
 import com.turing.eteacher.util.StringUtil;
 
 @RestController
