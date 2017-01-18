@@ -549,8 +549,7 @@ public class CourseRemote extends BaseRemote {
 	}
 
 	/**
-	 * 查看当前时间正在进行的课程
-	 * 
+	 * 查看当前时间正在允许学生签到的课程
 	 * @author macong
 	 * @param request
 	 * @return
@@ -558,19 +557,16 @@ public class CourseRemote extends BaseRemote {
 	@RequestMapping(value = "course/currentCourse", method = RequestMethod.POST)
 	public ReturnBody getCurrentCourse(HttpServletRequest request) {
 		try {
-			String time = DateUtil.getCurrentDateStr("yyyy-MM-dd HH:mm");
-			String courseIds = request.getParameter("courseIds");
-			String schoolId = (String) getCurrentSchool(request).get("schoolId");
-			if (StringUtil.checkParams(time, schoolId, courseIds)) {
-				Map currentCourse = courseServiceImpl.getCurrentCourse(time, schoolId, courseIds);
-				if (currentCourse != null) {
-					return new ReturnBody(ReturnBody.RESULT_SUCCESS,currentCourse);
-				} else {
-					System.out.println("没课");
-					return new ReturnBody(ReturnBody.RESULT_SUCCESS, null);
-				}
+			String userId = getCurrentUser(request).getUserId();
+			String termId = request.getParameter("termId");
+			System.out.println("******:" + termId);
+			Map currentCourse = courseServiceImpl.getCurrentCourse(userId , termId);
+			if (currentCourse != null) {
+				return new ReturnBody(ReturnBody.RESULT_SUCCESS,currentCourse);
+			} else {
+				System.out.println("没课");
+				return new ReturnBody(ReturnBody.RESULT_SUCCESS, null);
 			}
-			return null;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE,

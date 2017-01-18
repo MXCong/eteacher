@@ -542,7 +542,7 @@ public class CourseServiceImpl extends BaseService<Course> implements
 		String time = t[1];
 		// 查询出给学生的今日课表。根据今日课表，及课程的教师信息。根据教师信息，查询出该教师设定的课程的签到时间。对当前时间进行处理，
 		// 获取签到时间。签到时间与上课时间进行对比，得出是否为签到时间。
-		Map currentCourse = getCurrentCourse(times, schoolId, courseIds);
+		Map currentCourse = null;//getCurrentCourse(times, schoolId, courseIds);
 		// 根据正在进行的课程，查询出教师信息(teacherId)，及该教师设定的签到时间信息
 		String hql = "select r.before as before, r.after as after, r.distance as distance "
 				+ "from RegistConfig r where r.userId = ? and r.status = 1";
@@ -630,14 +630,8 @@ public class CourseServiceImpl extends BaseService<Course> implements
 	 * @author macong
 	 * @param courseIds
 	 * @return { "courseId":"dsznUBKa2", "courseName":"软件工程", "location":"尚学楼",
-<<<<<<< .mine
 	 *         "classRoom":"316", "startTime":"8:00","endTime":"10:00","classes":"13软工A班，14科技1班"（String类型）, "teacherId":"zhjBY21",
 	 *         "teacherName":"张三" }
-=======
-	 *         "classRoom":"316",
-	 *         "lessonNumber":"8:00-10:00","classes":"13软工A班，14科技1班"（String类型）,
-	 *         "teacherId":"zhjBY21", "teacherName":"张三" }
->>>>>>> .r334
 	 */
 	@Override
 	public List<Map> getCourseInfo(String courseIds, String targetDate) {
@@ -966,50 +960,40 @@ public class CourseServiceImpl extends BaseService<Course> implements
 
 	/**
 	 * 获取当前时间正在进行的课程（判断当前时间是否为教师的授课时间）
-	 * 
 	 * @author macong
 	 * @param userId
-	 * @param time
-	 *            "2016-11-13 10:21"
-	 * @param courseIds
-	 *            今日课程ID的集合
+	 * @return
 	 */
-	public Map getCurrentCourse(String times, String schoolId, String courseIds) {
-		// 1.时间数据的处理 {times："2016-11-13
-		// 10:21"-->date:2016-11-13,time:10:21}
-		String[] t = times.split(" ");
-		String date = t[0];
-		String time = t[1];
-		// 2.查询当前time对应的是第几节课
-		String hql = "select tt.timetableId as timetableId, tt.lessonNumber as lessonNumber "
-				+ "from TimeTable tt where tt.endTime >= ? and tt.startTime <= ? and tt.schoolId=?";
-		List<Map> timeTable = courseScoreDAO.findMap(hql, time, time, schoolId);
-		if (timeTable.size() > 0 && timeTable.get(0) != null) {
-			String cids = courseIds.substring(1, courseIds.length() - 1);
-			String[] courseId = cids.split(",");
-			String hql2 = "select c.courseId as courseId, c.courseName as courseName, "
-					+ "cc.location as location, cc.classRoom as classRoom , "
-					+ "cc.lessonNumber as lessonNumber, t.name as teacherName, t.teacherId as teacherId "
-					+ "from Course c, CourseItem ci, CourseCell cc, Teacher t "
-					+ "where c.courseId = ci.courseId and ci.ciId = cc.ciId "
-					+ "and t.teacherId = c.userId and c.courseId = ?";
-			for (int i = 0; i < courseId.length; i++) {
-				String cid = courseId[i].substring(1, courseId[i].length() - 1);
-				List<Map> m = courseDAO.findMap(hql2, cid);
-				if (null != m && m.size() > 0) {
-					// 获取该课程的上课时间
-					String lessons = (String) m.get(0).get("lessonNumber");
-					String[] lns = lessons.split(",|，");
-					for (int a = 0; a < lns.length; a++) {
-						if (lns[a].equals(timeTable.get(0).get("lessonNumber"))) {
-							m.get(0).put("lessonNumber",
-									timeTable.get(0).get("lessonNumber"));
-							return m.get(0);
-						}
-					}
-
-				}
-			}
+	public Map getCurrentCourse(String userId , String termId) {
+		String currentDate = DateUtil.getCurrentDateStr("yyyy-MM-dd");
+		String currentTime = DateUtil.getCurrentDateStr("HH:mm");
+		String weekDay = Integer.toString(DateUtil.getWeekNum(currentDate));
+		//根据用户的签到设置，获取有效的时间范围
+		String hql1 = "select rf.before as before , rf.after as after "
+				+ "from RegistConfig rf where "
+				+ "rf.userId = ? and rf.status = 1";
+		String hql2 = "select rf.before as before , rf.after as after "
+				+ "from RegistConfig rf where "
+				+ "rf.status = 0";
+		List<Map> c = null;
+		c = courseDAO.findMap(hql1, userId);
+		if (c == null || c.size() == 0) {
+			c = courseDAO.findMap(hql2);
+		}
+		int before = (int)c.get(0).get("before");
+		//若“课程开始时间 - 用户设置的课程开始前的签到时间 > 当前时间” ，则符合条件。
+		String resutlTime = DateUtil.timeSubtraction(currentTime, "-" , before);
+		//查询符合条件的课程
+		String hql = "select c.courseName as courseName , c.courseId as courseId , "
+				+ "cc.startTime as startTime , cc.endTime as endTime "
+				+ "from Course c , CourseItem ci , CourseCell cc "
+				+ "where c.userId = ? and c.courseId = ci.courseId "
+				+ "and ci.ciId = cc.ciId and ci.startDay < ? "
+				+ "and ci.endDay > ? and cc.startTime < ? and c.termId = ? "
+				+ "and (cc.weekDay like ? or cc.weekDay = null )";
+		List<Map> course = courseDAO.findMap(hql, userId,currentDate,currentDate,resutlTime,termId,"%"+weekDay+"%");
+		if(null != course && course.size() > 0){
+			return course.get(0);
 		}
 		return null;
 	}

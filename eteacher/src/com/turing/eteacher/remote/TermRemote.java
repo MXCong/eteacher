@@ -44,7 +44,6 @@ public class TermRemote extends BaseRemote {
 	}
 	/**
 	 * 添加新学期信息
-	 * 
 	 * @param request
 	 * @param term
 	 * @return
@@ -111,6 +110,18 @@ public class TermRemote extends BaseRemote {
 		String userId = getCurrentUserId(request);
 		return termPrivateServiceImpl.getListTerms(userId);
 	}
-	
+	/**
+	 * 获取当前学期信息
+	 * @author macong
+	 * @creatTime 2017-01-17
+	 * @param request
+	 * @param term
+	 * @return
+	 */
+	@RequestMapping(value = "teacher/term/getCurrentTerm", method = RequestMethod.POST)
+	public ReturnBody getNowTerm(HttpServletRequest request) {
+		Map term = getCurrentTerm(request);
+		return new ReturnBody(ReturnBody.RESULT_SUCCESS,term);
+	}
 	
 }

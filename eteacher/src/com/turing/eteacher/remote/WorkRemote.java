@@ -185,9 +185,10 @@ public class WorkRemote extends BaseRemote {
 		String page = request.getParameter("page") == null ? "0" : (String) request.getParameter("page");
 		String userId = getCurrentUser(request).getUserId();
 		String date = request.getParameter("date");
+		String courseId = request.getParameter("courseId");//查看某门课程下的作业列表。
 		if (StringUtil.checkParams(status, userId)) {
 			try {
-				List<Map> list = workServiceImpl.getListWork(userId, status, date, Integer.parseInt(page));
+				List<Map> list = workServiceImpl.getListWork(userId, status, date, Integer.parseInt(page) ,courseId);
 				return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
 			} catch (Exception e) {
 				e.printStackTrace();

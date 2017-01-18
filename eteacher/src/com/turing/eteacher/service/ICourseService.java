@@ -95,8 +95,9 @@ public interface ICourseService extends IService<Course> {
 	 * 获取当前时间正在进行的课程（判断当前时间是否为教师的授课时间）
 	 * @author macong
 	 * @param time  "2016-11-13 10:21:51"
+	 * edid by mxc  time:2017年1月18日14:15:36
 	 */
-	public Map getCurrentCourse(String time,String schoolId,String courseIds);
+	public Map getCurrentCourse(String userId , String termId);
 	
 	/**
 	 * 获取课程课表

@@ -144,7 +144,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	 * 
 	 */
 	@Override
-	public List<Map> getListWork(String userId, String status, String date, int page) {
+	public List<Map> getListWork(String userId, String status, String date, int page , String courseId) {
 		String hql = "select distinct w.workId as workId , c.courseId as courseId , "
 				+ "c.courseName as courseName , w.title as title , ";
 		List<Map> list = null;
@@ -180,13 +180,23 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 			list = workDAO.findMapByPage(hql, page * 20, 20, userId);
 		}
 		if ("4".equals(status)) {// 获取全部作业
-			hql += "w.publishTime as publishTime , w.content as content , "
-					+ "w.status as status , w.endTime as endTime "
-					+ "from Work w , Course c "
-					+ "where w.courseId = c.courseId and ( w.status = 1 "
-					+ "or w.status = 2 ) and c.userId = ? "
-					+ "order by w.publishTime asc";
-			list = workDAO.findMapByPage(hql, page * 20, 20, userId);
+			if(null != courseId){
+				hql += "w.publishTime as publishTime , w.content as content , "
+						+ "w.status as status , w.endTime as endTime "
+						+ "from Work w , Course c "
+						+ "where w.courseId = c.courseId and ( w.status = 1 "
+						+ "or w.status = 2 ) and c.userId = ? and w.courseId = ? "
+						+ "order by w.publishTime asc";
+				list = workDAO.findMapByPage(hql, page * 20, 20, userId , courseId);
+			}else if(null == courseId){
+				hql += "w.publishTime as publishTime , w.content as content , "
+						+ "w.status as status , w.endTime as endTime "
+						+ "from Work w , Course c "
+						+ "where w.courseId = c.courseId and ( w.status = 1 "
+						+ "or w.status = 2 ) and c.userId = ? "
+						+ "order by w.publishTime asc";
+				list = workDAO.findMapByPage(hql, page * 20, 20, userId);
+			}
 			String nowDate = DateUtil.getCurrentDateStr("yyyy-MM-dd");
 			for (int i = 0; i < list.size(); i++) {
 				String publishTime = (String) list.get(i).get("publishTime");
@@ -265,7 +275,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	@Override
 	public Map getWorkDetail(String workId, String url) {
 		// 第一步，根据作业ID查询该作业的内容，开始时间，结束时间（ＷＯＲＫ）
-		String wi = "select w.workId as workId , w.title as title , "
+		String wi = "select w.workId as workId , w.title as title , w.courseId as courseId , "
 				+ "w.publishTime as publishTime, c.courseName as courseName ,"
 				+ "w.endTime as endTime, w.content as content "
 				+ "from Work w , Course c where w.workId = ? and w.courseId = c.courseId";
