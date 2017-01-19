@@ -29,8 +29,9 @@ public class WorkClassServiceImpl extends BaseService<WorkClass> implements IWor
 
 	@Override
 	public void deleteData(String wId){
-		String hql = "delete from WorkCourse wc where wc.workId = ?";
+		String hql = "DELETE FROM WorkClass WHERE workId = ?";
 		workCourseDAO.executeHql(hql, wId);
+		
 	}
 
 	@Override
@@ -66,4 +67,5 @@ public class WorkClassServiceImpl extends BaseService<WorkClass> implements IWor
 		}
 		return list;
 	}
+	
 }
