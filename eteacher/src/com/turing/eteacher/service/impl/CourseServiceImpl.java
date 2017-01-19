@@ -821,12 +821,10 @@ public class CourseServiceImpl extends BaseService<Course> implements
 		Map detail = null;
 		// 获取基本信息
 		String hql = "select c.courseId as courseId,c.courseName as courseName,"
-				+ "c.introduction as introduction,c.classHours as classHours,"
-				+ "m.majorName as major,m.majorId as majorId ,c.formula as formula,"
-				+ "c.teachingMethodId as teachingMethodId ,c.courseTypeId as courseTypeId ,"
-				+ "c.examinationModeId as examinationModeId,c.remindTime as remindTime "
-				+ "from Course c ,Major m "
-				+ "where c.majorId = m.majorId and c.courseId=?";
+				+ "c.introduction as introduction,"
+				+ "c.teachingMethodId as teachMethodId ,"
+				+ "c.examinationModeId as examTypeId "
+				+ "from Course c where c.courseId=?";
 		List<Map> list = courseDAO.findMap(hql, courseId);
 		if (null != list && list.size() > 0) {
 			detail = list.get(0);
@@ -841,73 +839,23 @@ public class CourseServiceImpl extends BaseService<Course> implements
 		}
 		// 授课方式
 		Map mteachMethod = dictionary2PrivateServiceImpl
-				.getValueById((String) detail.get("teachingMethodId"));
+				.getValueById((String) detail.get("teachMethodId"));
 		if (null != mteachMethod) {
-			detail.put("teachingMethod", mteachMethod.get("value"));
-		}
-		// 课程类型
-		Map mCourseType = dictionary2PrivateServiceImpl
-				.getValueById((String) detail.get("courseTypeId"));
-		if (null != mCourseType) {
-			detail.put("courseType", mCourseType.get("value"));
+			detail.put("teachMethodName", mteachMethod.get("value"));
 		}
 		// 获取考核类型
 		Map mExam = dictionary2PrivateServiceImpl.getValueById((String) detail
-				.get("examinationModeId"));
+				.get("examTypeId"));
 		if (null != mExam) {
-			detail.put("examinationMode", mExam.get("value"));
+			detail.put("examTypeName", mExam.get("value"));
 		}
 		// 获取成绩组成信息
 		String hql2 = "from CourseScorePrivate csp where csp.courseId=?";
 		List listScore = courseScoreDAO.find(hql2, courseId);
 		if (null != listScore) {
-			detail.put("score", listScore);
-		}
-		// 获取主教材信息
-		String hql3 = "from Textbook t where t.courseId=? and t.textbookType='01'";
-		List listJc = textbookDAO.find(hql3, courseId);
-		if (null != listJc && listJc.size() > 0) {
-			detail.put("textbookjc", listJc.get(0));
-		}
-		// 获取辅助教材信息
-		String hql4 = "from Textbook t where t.courseId=? and t.textbookType='02'";
-		List listJf = textbookDAO.find(hql4, courseId);
-		if (null != listJf && listJf.size() > 0) {
-			detail.put("textbookjf", listJf);
-		}
-
-		// List listFile = fileServiceImpl.getFileList(courseId, url);
-		// if (null != listFile && listFile.size() > 0) {
-		// detail.put("files", listFile);
-		// }
-		// // 获取资源信息
-		// hql1 = "select fileName as fileName,f.vocabularyId as vocabularyId
-		// from CustomFile f where f.dataId=?";
-		// list2 = courseDAO.findMap(hql1, courseId);
-		// if (list2 == null || list2.size() == 0) {
-		// list.get(0).put("customFile", null);
-		// } else {
-		// list.get(0).put("customFile", list2);
-		// }
-		// 获取上课信息
-		String hql5 = "select cc.ctId as ctId,cc.weekDay as weekDay,cc.lessonNumber as lessonNumber,"
-				+ "s.value as location,cc.classRoom as classRoom "
-				+ "from Course c,CourseItem ci,CourseCell cc,School s "
-				+ "where c.courseId=ci.courseId and ci.ciId=cc.ciId and cc.location=s.code and c.courseId=?";
-		List<Map> listTime = courseDAO.findMap(hql5, courseId);
-		if (null != listTime && listTime.size() > 0) {
-			String courseTable = listTime.get(0).get("lessonNumber") + "节   周"
-					+ listTime.get(0).get("weekDay") + "  "
-					+ listTime.get(0).get("location") + "#"
-					+ listTime.get(0).get("classRoom");
-			// System.out.println((String)
-			// list2.get(0).get("lessonNumber")+"节
-			// 周"+list2.get(0).get("weekDay")+"
-			// "+list2.get(0).get("location")+"#"+list2.get(0).get("classRoom"));
-			detail.put("courseTable", courseTable);
+			detail.put("courseScore", listScore);
 		}
 		return detail;
-
 	}
 
 	// 修改教材教辅信息

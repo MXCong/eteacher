@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,36 +30,6 @@ public class FileRemote extends BaseRemote {
 
 	@Autowired
 	private IFileService fileServiceImpl;
-	/**
-	 * 根据数据ID获取文件列表
-	 * 
-	 * @param request
-	 * @param dataId
-	 * @return
-	 */
-	// {
-	// result : 'success',//成功success，失败failure
-	// data : [
-	// {
-	// fileId : '文件ID'
-	// dataId : '数据ID',
-	// fileName : '文件名称'
-	// }
-	// ],
-	// msg : '提示信息XXX'
-	// }
-	@RequestMapping(value = "data/{dataId}/files", method = RequestMethod.GET)
-	public ReturnBody getFiles(HttpServletRequest request,
-			@PathVariable String dataId) {
-		try {
-			List<Map> list = fileServiceImpl.getFileList(dataId,FileUtil.getRequestUrl(request));
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ReturnBody(ReturnBody.RESULT_FAILURE,
-					ReturnBody.ERROR_MSG);
-		}
-	}
 
 	/**
 	 * 获取指定课程下的教学资源(学生端)
@@ -79,6 +48,72 @@ public class FileRemote extends BaseRemote {
 		}else{
 			return ReturnBody.getParamError();
 		}
+	}
+	/**
+	 * 删除指定文件(教师端)
+	 * 
+	 * @author lifei
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "file/delFile", method = RequestMethod.POST)
+	public ReturnBody delFile(HttpServletRequest request) {
+		String fileId = request.getParameter("fileId");
+		if (StringUtil.checkParams(fileId)) {
+			CustomFile file = fileServiceImpl.get(fileId);
+			String filePath = FileUtil.getUploadPath() + "/"+file.getServerName();
+			File localFile = new File(filePath);
+			fileServiceImpl.deleteById(fileId);
+			System.out.println("filePath:"+filePath);
+			if (localFile.exists()) {
+				localFile.delete();
+			}
+			return new ReturnBody("删除成功");
+		}else{
+			return ReturnBody.getParamError();
+		}
+	}
+	/**
+	 * 修改文件公开情况(教师端)
+	 * 
+	 * @author lifei
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "file/changgeFileAuth", method = RequestMethod.POST)
+	public ReturnBody changgeFileAuth(HttpServletRequest request) {
+		String fileId = request.getParameter("fileId");
+		String fileAuth = request.getParameter("fileAuth");
+		if (StringUtil.checkParams(fileId,fileAuth)) {
+			CustomFile file = fileServiceImpl.get(fileId);
+			file.setFileAuth(fileAuth);
+			fileServiceImpl.update(file);
+			return new ReturnBody("修改成功");
+		}else{
+			return ReturnBody.getParamError();
+		}
+	}
+	/**
+	 * 获取指定课程下的教学资源(教师端)
+	 * 
+	 * @author lifei
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "teacher/course/getFileList", method = RequestMethod.POST)
+	public ReturnBody getFileList(HttpServletRequest request) {
+		String courseId = request.getParameter("courseId");
+		String page = request.getParameter("page");
+		if (StringUtil.checkParams(courseId, page)) {
+			List list = fileServiceImpl.getAllListByCourse(courseId, Integer.parseInt(page),FileUtil.getRequestUrl(request));
+			return new ReturnBody(list);
+		}else{
+			return ReturnBody.getParamError();
+		}
+	}
+	@RequestMapping(value = "teacher/course/addFile", method = RequestMethod.POST)
+	public ReturnBody addFile(HttpServletRequest request) {
+		return fileServiceImpl.addFile(request);
 	}
 
 	@RequestMapping(value = "files/{fileId}", method = RequestMethod.GET)

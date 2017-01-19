@@ -2,7 +2,6 @@ package com.turing.eteacher.remote;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,19 +19,13 @@ import org.springframework.web.multipart.MultipartRequest;
 import com.alibaba.druid.support.json.JSONUtils;
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
-import com.turing.eteacher.dao.WorkDAO;
 import com.turing.eteacher.model.CustomFile;
-import com.turing.eteacher.model.TaskModel;
 import com.turing.eteacher.model.Work;
-import com.turing.eteacher.model.WorkClass;
 import com.turing.eteacher.model.WorkStatus;
 import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.IWorkClassService;
 import com.turing.eteacher.service.IWorkService;
-import com.turing.eteacher.util.CustomIdGenerator;
-import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.FileUtil;
-import com.turing.eteacher.util.SpringTimerTest;
 import com.turing.eteacher.util.StringUtil;
 
 /**
