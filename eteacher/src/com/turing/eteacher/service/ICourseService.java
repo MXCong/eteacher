@@ -97,7 +97,7 @@ public interface ICourseService extends IService<Course> {
 	 * @param time  "2016-11-13 10:21:51"
 	 * edid by mxc  time:2017年1月18日14:15:36
 	 */
-	public Map getCurrentCourse(String userId , String termId);
+	public List<Map> getCurrentCourse(String userId , String termId);
 	
 	/**
 	 * 获取课程课表

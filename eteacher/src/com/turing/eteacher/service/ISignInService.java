@@ -41,7 +41,7 @@ public interface ISignInService extends IService<SignIn> {
 	 * @param courseId
 	 * @return
 	 */
-	public List<Map> getRegistSituation(String courseId, String lessonNum, int status);
+	public List<Map> getRegistSituation(String courseId);
 	/**
 	 * 教师端接口：获取教师的签到设置
 	 * @author macong

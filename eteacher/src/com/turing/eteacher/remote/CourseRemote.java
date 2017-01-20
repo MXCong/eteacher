@@ -559,8 +559,7 @@ public class CourseRemote extends BaseRemote {
 		try {
 			String userId = getCurrentUser(request).getUserId();
 			String termId = request.getParameter("termId");
-			System.out.println("******:" + termId);
-			Map currentCourse = courseServiceImpl.getCurrentCourse(userId , termId);
+			List<Map> currentCourse = courseServiceImpl.getCurrentCourse(userId , termId);
 			if (currentCourse != null) {
 				return new ReturnBody(ReturnBody.RESULT_SUCCESS,currentCourse);
 			} else {

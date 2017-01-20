@@ -159,7 +159,6 @@ public class SignInRemote extends BaseRemote {
 
 	/**
 	 * 获取本堂课程学生的签到情况
-	 * 
 	 * @author macong
 	 * @param request
 	 * @return
@@ -168,13 +167,9 @@ public class SignInRemote extends BaseRemote {
 	public ReturnBody getRegistSituation(HttpServletRequest request) {
 		try {
 			String courseId = request.getParameter("courseId");
-//			String currentWeek = request.getParameter("currentWeek");
-			String lessonNum = request.getParameter("lessonNum");
-			String status = request.getParameter("status");
-
 			List<Map> student = null;
-			if (StringUtil.checkParams(courseId, lessonNum, status)) {
-				student = signInServiceImpl.getRegistSituation(courseId, lessonNum,Integer.parseInt(status));
+			if (StringUtil.checkParams(courseId)) {
+				student = signInServiceImpl.getRegistSituation(courseId);
 			}
 			if (null != student && student.size() > 0) {
 				return new ReturnBody(ReturnBody.RESULT_SUCCESS, student);

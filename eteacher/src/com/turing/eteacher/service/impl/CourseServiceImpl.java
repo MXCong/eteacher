@@ -49,6 +49,7 @@ import com.turing.eteacher.model.Textbook;
 import com.turing.eteacher.model.User;
 import com.turing.eteacher.service.ICourseService;
 import com.turing.eteacher.service.IDictionary2PrivateService;
+import com.turing.eteacher.service.ISignInService;
 import com.turing.eteacher.util.BeanUtils;
 import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.StringUtil;
@@ -98,6 +99,8 @@ public class CourseServiceImpl extends BaseService<Course> implements
 		return courseDAO;
 	}
 	
+	@Autowired
+	private ISignInService signInServiceImpl;
 	
 
 	// 获取学期下的课程数据，判断该学期下是否含有课程数据
@@ -912,7 +915,7 @@ public class CourseServiceImpl extends BaseService<Course> implements
 	 * @param userId
 	 * @return
 	 */
-	public Map getCurrentCourse(String userId , String termId) {
+	public List<Map> getCurrentCourse(String userId , String termId) {
 		String currentDate = DateUtil.getCurrentDateStr("yyyy-MM-dd");
 		String currentTime = DateUtil.getCurrentDateStr("HH:mm");
 		String weekDay = Integer.toString(DateUtil.getWeekNum(currentDate));
@@ -931,17 +934,18 @@ public class CourseServiceImpl extends BaseService<Course> implements
 		int before = (int)c.get(0).get("before");
 		//若“课程开始时间 - 用户设置的课程开始前的签到时间 > 当前时间” ，则符合条件。
 		String resutlTime = DateUtil.timeSubtraction(currentTime, "-" , before);
+		String endTime = DateUtil.timeSubtraction(currentTime, "-" , 5);//课程结束后五分钟仍可见
 		//查询符合条件的课程
 		String hql = "select c.courseName as courseName , c.courseId as courseId , "
 				+ "cc.startTime as startTime , cc.endTime as endTime "
 				+ "from Course c , CourseItem ci , CourseCell cc "
 				+ "where c.userId = ? and c.courseId = ci.courseId "
 				+ "and ci.ciId = cc.ciId and ci.startDay < ? "
-				+ "and ci.endDay > ? and cc.startTime < ? and c.termId = ? "
+				+ "and ci.endDay > ? and cc.startTime < ? and cc.endTime > ? and c.termId = ? "
 				+ "and (cc.weekDay like ? or cc.weekDay = null )";
-		List<Map> course = courseDAO.findMap(hql, userId,currentDate,currentDate,resutlTime,termId,"%"+weekDay+"%");
+		List<Map> course = courseDAO.findMap(hql, userId,currentDate,currentDate,resutlTime,endTime,termId,"%"+weekDay+"%");
 		if(null != course && course.size() > 0){
-			return course.get(0);
+			return course;
 		}
 		return null;
 	}
