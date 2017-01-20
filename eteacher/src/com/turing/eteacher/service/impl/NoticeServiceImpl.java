@@ -213,7 +213,7 @@ public class NoticeServiceImpl extends BaseService<Notice> implements INoticeSer
 		default:
 			sql += "FROM t_student stu WHERE stu.CLASS_ID IN ( "+
 					"SELECT DISTINCT  cc.CLASS_ID FROM t_course_class cc WHERE cc.COURSE_ID IN ( "+
-					"SELECT DISTINCT wc.COURSE_ID FROM t_work_course wc WHERE wc.WORK_ID = ?)) "+
+					"SELECT DISTINCT wc.COURSE_ID FROM t_work_class wc WHERE wc.WORK_ID = ?)) "+
 					"AND "+
 					"stu.STU_ID NOT IN (SELECT sta.STU_ID FROM t_log sta WHERE sta.NOTICE_ID = ?)";
 			params.add(noticeId);

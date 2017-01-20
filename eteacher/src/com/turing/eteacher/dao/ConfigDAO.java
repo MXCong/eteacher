@@ -9,12 +9,12 @@ import com.turing.eteacher.model.Config;
 @Repository
 public class ConfigDAO extends BaseDAO<Config> {
 
-	public String getValue(String key){
-		try{
-			return get(key).getValue();
-		}
-		catch (Exception e) {
-			return ConfigContants.configMap.get(key);
-		}
-	}
+//	public String getValue(String key){
+//		try{
+//			return get(key).getValue();
+//		}
+//		catch (Exception e) {
+//			return ConfigContants.configMap.get(key);
+//		}
+//	}
 }
