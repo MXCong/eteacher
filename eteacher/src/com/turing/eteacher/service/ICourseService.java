@@ -189,8 +189,25 @@ public interface ICourseService extends IService<Course> {
 	 * @return
 	 */
 	public List<Map> getCourseListByTerm(String userId,String termId);
-	
+	/**
+	 * 保存课程
+	 * @param request
+	 * @param schoolId
+	 * @return
+	 */
 	public ReturnBody saveCourse(HttpServletRequest request,String schoolId);
-	
+	/**
+	 * 添加课程附件
+	 * @param request
+	 * @return
+	 */
 	public ReturnBody addCourseDate(HttpServletRequest request);
+	
+	/**
+	 * 通过时间段获取课程列表
+	 * @author lifei
+	 * @param request
+	 * @return
+	 */
+	public ReturnBody getlistByDate(HttpServletRequest request);
 }

@@ -3,7 +3,10 @@ package com.turing.eteacher.service;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.turing.eteacher.base.IService;
+import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.Classes;
 
 public interface IClassService extends IService<Classes> {
@@ -66,4 +69,5 @@ public interface IClassService extends IService<Classes> {
 	 * @return
 	 */
 	public boolean classAdd(Classes clas);
+
 }

@@ -25,28 +25,13 @@ public class CourseTimetableRemote extends BaseRemote {
 	 * 获取班级课表(班级)
 	 * @return
 	 */
-//{
-//	result : '200',
-//	data : [
-//		{
-//			courseName : '课程名称',
-//			weekDay : '星期几',
-//			lessonNumber : '第几节课',
-//			location : '地点'
-//			classRoom : '教室',	
-//		}
-//	],
-//	msg : '提示信息XXX'
-//}
 	@RequestMapping(value="teacher/course/classCourseTable", method=RequestMethod.POST)
 	public ReturnBody getClassCourseTable(HttpServletRequest request){
 		try{
 			String classId = request.getParameter("classId");
 			String tpId=getCurrentTerm(request)==null?null:(String)getCurrentTerm(request).get("termId");
 			String page =  (String)request.getParameter("page");
-			System.out.println("****:"+classId);
 			List<Map> list = courseServiceImpl.getClassCourseTable(classId,tpId,Integer.parseInt(page));
-//			System.out.println("结果："+list.get(0).toString());
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
 		}
 		catch(Exception e){
@@ -65,7 +50,6 @@ public class CourseTimetableRemote extends BaseRemote {
 		try{
 			String courseId = request.getParameter("courseId");
 			String page =  (String)request.getParameter("page");
-			System.out.println("****:"+courseId);
 			List<Map> list = courseServiceImpl.getCourseTableList(courseId,Integer.parseInt(page));
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
 		}
@@ -103,12 +87,19 @@ public class CourseTimetableRemote extends BaseRemote {
 			String tpId = request.getParameter("tpId");
 			String page =  (String)request.getParameter("page");
 			List<Map> list = courseServiceImpl.getTermCourseTable(userId,tpId,Integer.parseInt(page));
-//			System.out.println("结果："+list.get(0).toString());
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
 		}
 		catch(Exception e){
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE,ReturnBody.ERROR_MSG);
 		}
+	}
+	/**
+	 * 获取教师个人周课表
+	 * @return
+	 */
+	@RequestMapping(value="teacher/Course/getlistByDate", method=RequestMethod.POST)
+	public ReturnBody getlistByDate(HttpServletRequest request){
+		return courseServiceImpl.getlistByDate(request);
 	}
 }

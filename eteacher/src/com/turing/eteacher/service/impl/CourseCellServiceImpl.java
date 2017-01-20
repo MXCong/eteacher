@@ -24,9 +24,7 @@ public class CourseCellServiceImpl extends BaseService<CourseCell> implements IC
 
 	@Override
 	public List<CourseCell> getCells(String ciId) {
-		String hql = "from CourseCell cc where cc.ciId = ?";
-		List list = courseCellDAO.find(hql, ciId);
-		return list;
+		return courseCellDAO.getCells(ciId);
 	}
 
 

@@ -642,10 +642,6 @@ public class CourseRemote extends BaseRemote {
 		String majorId = request.getParameter("majorId");// *
 		String introduction = request.getParameter("introduction");
 		String formula = request.getParameter("formula");
-		// String classes = request.getParameter("classes");// *
-		// String scores = request.getParameter("scores");// *
-		// String book = request.getParameter("book");
-		// String books = request.getParameter("books");
 		if (StringUtil.checkParams(courseName, courseHours, teachMethodId,
 				courseTypeId, examTypeId, majorId)) {
 			Course course = null;
@@ -687,39 +683,6 @@ public class CourseRemote extends BaseRemote {
 					ReturnBody.ERROR_MSG);
 		}
 	}
-
-//	/**
-//	 * 修改成绩组成
-//	 * 
-//	 */
-//	@RequestMapping(value = "teacher/course/updateScoreZc", method = RequestMethod.POST)
-//	public ReturnBody updateScoreZc(HttpServletRequest request) {
-//		try {
-//			String courseId = request.getParameter("courseId");
-//			String scores = request.getParameter("scores");
-//			System.out.println("courseId :" + courseId + "    scores: "
-//					+ scores);
-//			courseScoreServiceImpl.delScoresByCourseId(courseId);
-//			List<Map<String, String>> scoresList = (List<Map<String, String>>) JSONUtils
-//					.parse(scores);
-//			for (int i = 0; i < scoresList.size(); i++) {
-//				CourseScorePrivate item = new CourseScorePrivate();
-//				item.setCourseId(courseId);
-//				item.setScoreName(scoresList.get(i).get("scoreName"));
-//				item.setScorePercent(new BigDecimal(scoresList.get(i).get(
-//						"scorePercent")));
-//				item.setScorePointId(scoresList.get(i).get("scorePointId"));
-//				item.setStatus(Integer
-//						.parseInt(scoresList.get(i).get("status")));
-//				courseScoreServiceImpl.save(item);
-//			}
-//			return new ReturnBody("保存成功！");
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ReturnBody(ReturnBody.RESULT_FAILURE,
-//					ReturnBody.ERROR_MSG);
-//		}
-//	}
 
 	/**
 	 * 修改教材教辅信息

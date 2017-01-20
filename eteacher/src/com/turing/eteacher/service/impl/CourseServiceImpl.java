@@ -16,8 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.druid.support.json.JSONUtils;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
 import com.turing.eteacher.component.ReturnBody;
@@ -835,7 +833,13 @@ public class CourseServiceImpl extends BaseService<Course> implements
 			return null;
 		}
 		// 获取课程对应的班级信息
-		String hql1 = "select cl.className as className,cl.classId as classId from Classes cl,CourseClasses cc where cc.classId=cl.classId and cc.courseId=?";
+		String hql1 = "select cl.grade as grade, " +
+				"cl.className as className, " +
+				"cl.majorId as majorId, " +
+				"cl.classType as degree, " +
+				"cl.classType as degree, " +
+				"cl.classId as classId from Classes cl, " +
+				"CourseClasses cc where cc.classId=cl.classId and cc.courseId=?";
 		List<Map> listClass = courseDAO.findMap(hql1, courseId);
 		if (listClass != null && listClass.size() > 0) {
 			detail.put("classes", listClass);
@@ -1070,7 +1074,7 @@ public class CourseServiceImpl extends BaseService<Course> implements
 
 	@Override
 	public List<Map> getCourseByTermId(String tpId) {
-		String hql = "select c.courseId as courseId, "
+		String hql = "select c.courseId as courseId, c.courseName as courseName, "
 				+ "c.remindTime as remindTime, " + "ci.ciId as ciId, "
 				+ "ci.repeatType as repeatType, "
 				+ "ci.repeatNumber as repeatNumber, "
@@ -1242,19 +1246,18 @@ public class CourseServiceImpl extends BaseService<Course> implements
 		String introduction = request.getParameter("introduction");
 		String classes = request.getParameter("classes");// *
 		String scores = request.getParameter("scores");// *
-		if (StringUtil.checkParams(courseName, teachMethodId, examTypeId,
-				classes, scores)) {
+		if (StringUtil.checkParams(courseName, teachMethodId, examTypeId, classes, scores)) {
 			Course course = null;
 			if (StringUtil.isNotEmpty(courseId)) {
 				course = get(courseId);
 			} else {
 				course = new Course();
+				course.setUserId(request.getParameter("userId"));
 			}
 			if (StringUtil.isNotEmpty(termId)) {
 				course.setTermId(termId);
 			}
 			course.setCourseName(courseName);
-			course.setUserId(request.getParameter("userId"));
 			course.setIntroduction(introduction);
 			course.setTeachingMethodId(teachMethodId);
 			course.setExaminationModeId(examTypeId);
@@ -1272,12 +1275,11 @@ public class CourseServiceImpl extends BaseService<Course> implements
 						.parse(classes);
 				for (int i = 0; i < classesList.size(); i++) {
 					Map<String, String> classTemp = classesList.get(i);
-					String classNum = classTemp.get("classNum");
 					String degree = classTemp.get("degree");
 					String grade = classTemp.get("grade");
 					String majorId = classTemp.get("majorId");
 					String className = classTemp.get("className");
-					String classId = classDAO.getClassIdbyFilter(classNum,
+					String classId = classDAO.getClassIdbyFilter(
 							degree, grade, majorId, className, schoolId);
 					CourseClasses courseClasses = new CourseClasses();
 					courseClasses.setClassId(classId);
@@ -1375,4 +1377,109 @@ public class CourseServiceImpl extends BaseService<Course> implements
 		}
 	}
 
+
+
+	@Override
+	public ReturnBody getlistByDate(HttpServletRequest request) {
+		String termId = request.getParameter("termId");
+		String cLastDay = request.getParameter("endDate");
+		String cFirstDay = request.getParameter("startDate");
+		if (StringUtil.checkParams(termId,cLastDay,cFirstDay)) {
+			TermPrivate item = termPrivateDAO.get(termId);
+			//最后的结果
+			List<String> dateList = new ArrayList<>(); 
+			List<Map<String,Object>> courseList = new ArrayList<>();
+			if (null != item) {
+				// 查看指定月是否与所创建的学期有交集
+				if (DateUtil.isOverlap(cFirstDay, cLastDay, item.getStartDate(), item.getEndDate())) {
+					// 如果有则查找本学学期内的课程
+					List<Map> list2 = getCourseByTermId(item.getTpId());
+					if (null != list2) {
+						for (int j = 0; j < list2.size(); j++) {
+							Map map = list2.get(j);
+							//天循环的课程
+							if (map.get("repeatType").equals("01")) {
+								//判断课程的开始结束时间是否与本月有交集
+								if (DateUtil.isOverlap(cFirstDay, cLastDay, (String)map.get("startDay"), (String)map.get("endDay"))) {
+									//课程重复天数
+									int repeatNumber = (int)map.get("repeatNumber");
+									//该课程一共有多少天
+									int distance = DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay"));
+									//一共上几次课
+									int repeat = distance / repeatNumber;
+									for (int k = 0; k <= repeat; k++) {
+										//每次上课的具体日期
+										String date = DateUtil.addDays((String)map.get("startDay"), k*repeatNumber);
+										//判断是否上课时间在指定月份里
+										if (DateUtil.isInRange(date, cFirstDay, cLastDay)) {
+											if (!dateList.contains(date)) {
+												dateList.add(date);
+											}
+											Map<String,Object> courseMap = new HashMap<>();
+											courseMap.put("courseId", (String)map.get("courseId"));
+											courseMap.put("courseName", (String)map.get("courseName"));
+											courseMap.put("classes", courseClassesDAO.getClassesByCourseId((String)map.get("courseId")));
+											if (!courseList.contains(courseMap)) {
+												courseList.add(courseMap);
+											}
+									   }
+									}
+								}
+							}else{
+								//获取周重复课程的开始时间
+								String start = (String)map.get("startDay");
+								//获取周重复课程结束周的周一
+								String end = (String)map.get("endDay");
+								//查看课程是否与指定的月份有交集
+								if (DateUtil.isOverlap(cFirstDay, cLastDay, start, end)) {
+									//获取课程的重复规律
+									List<CourseCell> list3 = courseCellDAO.getCells((String)map.get("ciId"));
+									if (null != list3) {
+										for (int k = 0; k < list3.size(); k++) {
+											CourseCell cell = list3.get(k);
+											if (null != cell.getWeekDay()) {
+												//查看具体课程在周几上课
+												String[] week = cell.getWeekDay().split(",");
+												for (int l = 0; l < week.length; l++) {
+													//课程的间隔周期
+													int repeatNumber = (int)map.get("repeatNumber");
+													//课程一共上几周
+													int repeatCount = (DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay")))/(repeatNumber*7);
+													for (int m = 0; m <= repeatCount; m++) {
+														//获取课程具体在指定星期的上课时间
+														String dateStr = DateUtil.getWeek(start, m*repeatNumber, Integer.parseInt(week[l]));
+														if (null != dateStr) {
+															//如果上课时间在学期内&&在所指定的月份内
+															if (DateUtil.isBefore(dateStr,item.getEndDate(),DateUtil.YYYYMMDD) && DateUtil.isInRange(dateStr, cFirstDay, cLastDay)) {
+																if (!dateList.contains(dateStr)) {
+																	dateList.add(dateStr);
+																}
+																Map<String,Object> courseMap = new HashMap<>();
+																courseMap.put("courseId", (String)map.get("courseId"));
+																courseMap.put("courseName", (String)map.get("courseName"));
+																courseMap.put("classes", courseClassesDAO.getClassesByCourseId((String)map.get("courseId")));
+																if (!courseList.contains(courseMap)) {
+																	courseList.add(courseMap);
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			Map<String, Object> result = new HashMap<>();
+			result.put("dateList", dateList);
+			result.put("courseList", courseList);
+			return new ReturnBody(result);
+		}else{
+			return ReturnBody.getParamError();
+		}
+	 }
 }
