@@ -158,23 +158,64 @@ public class SignInRemote extends BaseRemote {
 	}
 
 	/**
-	 * 获取本堂课程学生的签到情况
+	 * 获取正在进行的课程的学生出勤率
 	 * @author macong
 	 * @param request
 	 * @return
 	 */
-	@RequestMapping(value = "course/registSituation", method = RequestMethod.POST)
-	public ReturnBody getRegistSituation(HttpServletRequest request) {
+	@RequestMapping(value = "course/registDetail", method = RequestMethod.POST)
+	public ReturnBody getRegistDetail(HttpServletRequest request) {
 		try {
 			String courseId = request.getParameter("courseId");
+			String status = request.getParameter("status");
 			List<Map> student = null;
-			if (StringUtil.checkParams(courseId)) {
-				student = signInServiceImpl.getRegistSituation(courseId);
+			if (StringUtil.checkParams(courseId,status)) {
+				student = signInServiceImpl.getRegistDetail(courseId,status);
 			}
 			if (null != student && student.size() > 0) {
 				return new ReturnBody(ReturnBody.RESULT_SUCCESS, student);
 			}
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS,null);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
+		}
+	}
+	/**
+	 * 获取某门课程的整体出勤率
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "course/totalAttendence", method = RequestMethod.POST)
+	public ReturnBody getEntiretyRegistSituation(HttpServletRequest request) {
+		try {
+			String courseId = request.getParameter("courseId");
+			float result = 0;
+			if (StringUtil.checkParams(courseId)) {
+				result = signInServiceImpl.getEntiretyRegistSituation(courseId);
+			}
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS,result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
+		}
+	}
+	/**
+	 * 获取正在进行的课程的出勤率
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "course/currentAttendence", method = RequestMethod.POST)
+	public ReturnBody getCurrentRegistSituation(HttpServletRequest request) {
+		try {
+			String courseId = request.getParameter("courseId");
+			float result = 0;
+			if (StringUtil.checkParams(courseId)) {
+				result = signInServiceImpl.getCurrentRegistSituation(courseId);
+			}
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS,result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);

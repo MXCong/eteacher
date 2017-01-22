@@ -27,34 +27,7 @@ public class SignInServiceImpl extends BaseService<SignIn> implements ISignInSer
 		return signInDAO;
 	}
 	
-	/**
-	 * 教师端功能：获取当前课程的出勤情况列表
-	 * @author macong
-	 * @param courseId
-	 * @return
-	 */
-	@Override
-	public List<Map> getRegistSituation(String courseId) {
-		// 1.获取当前正在进行的课程信息(course_Id)，并查询出该课程对应的班级列表（t_course_class）。
-		// 2.在t_student表中，根据class_Id,查询出学生列表。
-		// 3.t_sign_in表中，根据本次课程信息（courseId），查询出状态为“1”的学生列表
-		// 4.返回学生列表的studentNo,studentName，以及出勤人数和课程人数。
-		String cd = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD);
-		String hql = "select si.courseNum as courseNum , s.stuName as stuName , "
-				+ "s.stuNo as stuNo , s.classId as classId from SignIn si , Student s "
-				+ "where si.courseId = ? and si.studentId = s.stuId "
-				+ "and si.signTime = ? and si.status = ?"; 
-		String hq = "SELECT COUNT(*) as NUM FROM Student s WHERE s.classId = ? ";
-		List<Map> regist = signInDAO.findMap(hql, courseId , cd , 1);// 签到人员列表
-		if (null != regist && regist.size() > 0) {
-			Map e = signInDAO.findMap(hq, (String)regist.get(0).get("classId")).get(0);
-			float scale = regist.size() / Integer.getInteger((String)e.get("NUM"));	
-			e.put("scale", scale);
-			regist.add(e);
-			return regist;
-		}
-		return null;
-	}
+	
 	/**
 	 * 获取某课程的签到位置信息（所在市，学校，教学楼）
 	 * @param userId
@@ -226,5 +199,103 @@ public class SignInServiceImpl extends BaseService<SignIn> implements ISignInSer
 					+ "where s.courseId = ? and s.status = 0 ";
 			signInDAO.executeHql(hql3, courseId);
 		}
+	}
+	/**
+	 * 教师端功能：获取当前课程的出勤情况列表、获取某课程的全部同学的出勤情况
+	 * @author macong
+	 * @param courseId
+	 * @return
+	 */
+	@Override
+	public List<Map> getRegistDetail(String courseId,String status) {
+		// 1.获取当前正在进行的课程信息(course_Id)，并查询出该课程对应的班级列表（t_course_class）。
+		// 2.在t_student表中，根据class_Id,查询出学生列表。
+		// 3.t_sign_in表中，根据本次课程信息（courseId），查询出状态为“1”的学生列表
+		// 4.返回学生列表的studentNo,studentName，以及出勤人数和课程人数。
+		String cd = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD);
+		//获取课程的签到人员
+		String hql = "select distinct s.stuName as studentName , "
+				+ "s.stuNo as studentNo , s.classId as classId , s.stuId as studentId "
+				+ "from SignIn si , Student s "
+				+ "where si.courseId = ? and si.studentId = s.stuId "
+				+ "and si.status = 1 ";
+		//查询该课程的上课次数
+		String hql3 = "select s.courseNum as courseNum from SignIn s "
+				+ "where s.status = 0 and s.courseId = ? and s.studentId = null";
+		
+		//查询语句：查看某个学生在某门课程的签到次数
+		String hql2 = "SELECT COUNT(*) as signInNum FROM SignIn s WHERE s.courseId = ? "
+				+ "AND s.studentId = ?";
+		List<Map> regist = null;
+		if(status.equals("0")){
+			hql += "and si.signTime = ?";
+			regist = signInDAO.findMap(hql, courseId,cd);// 签到人员列表
+		}else if(status.equals("1")){
+			regist = signInDAO.findMap(hql, courseId);// 课程全部学生列表
+		}
+		if (null != regist && regist.size() > 0) {
+			//获取课程的上课次数
+			Map cn = signInDAO.findMap(hql3, courseId).get(0);
+			int courseNum = (int) cn.get("courseNum");
+			//获取某位同学的出勤次数
+			for (int i = 0; i < regist.size(); i++) {
+				Map m = signInDAO.findMap(hql2, courseId,regist.get(i).get("studentId")).get(0);
+				regist.get(i).put("signInNum", m.get("signInNum"));
+				regist.get(i).put("courseNum", courseNum);
+			}
+			return regist;
+		}
+		return null;
+	}
+	
+	//获取某课程的整体出勤率
+	@Override
+	public float getEntiretyRegistSituation(String courseId) {
+		try{
+			//某门课程总的签到次数
+			String hql = "select COUNT(*) as totalSignIn from SignIn si "
+					+ "where si.courseId = ? and si.status = 1";
+			//查询该课程的上课次数
+			String hql2 = "select s.courseNum as courseNum from SignIn s "
+					+ "where s.status = 0 and s.courseId = ?";
+			//查询语句：查看某门课程的授课人数
+			String hql3 = "SELECT COUNT(*) as studentNum "
+					+ "FROM Student s , CourseClasses ccl "
+					+  "WHERE s.classId = ccl.classId and ccl.courseId = ?";
+			
+			Map r = signInDAO.findMap(hql,courseId).get(0);
+			Map r2 = signInDAO.findMap(hql2, courseId).get(0);
+			Map r3 = signInDAO.findMap(hql3, courseId).get(0);
+			float result = 0;
+			if(r2.get("courseNum").toString().equals("0")){
+				result =  1;
+			}else{
+				result = Float.parseFloat(r.get("totalSignIn").toString()) / (Integer.parseInt(r2.get("courseNum").toString())*Integer.parseInt(r3.get("studentNum").toString()));			
+			}
+			return result;
+		} catch (Exception e) {
+			return 1;
+		}
+	}
+	//获取正在进行的课程的出勤率
+	@Override
+	public float getCurrentRegistSituation(String courseId) {
+		//获取本堂课的签到人数
+		String hql = "SELECT COUNT(*) as cNum FROM SignIn si "
+				+ "where si.signTime = ? and si.courseId = ?";
+		//查询语句：查看某门课程的授课人数
+		String hq = "SELECT COUNT(*) as studentNum "
+				+ "FROM Student s , CourseClasses ccl "
+				+  "WHERE s.classId = ccl.classId and ccl.courseId = ?";
+		String cd = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD);
+		Map a = signInDAO.findMap(hql, cd , courseId).get(0);
+		Map b = signInDAO.findMap(hq, courseId).get(0);
+		float result = 0;
+		if(b.get("studentNum").toString().equals("0")){
+			result =  0;
+		}else{
+			result = Float.parseFloat(a.get("cNum").toString()) / Float.parseFloat(b.get("studentNum").toString());
+		}
+		return result;
 	}
 }

@@ -35,13 +35,7 @@ public interface ISignInService extends IService<SignIn> {
 	 * @return
 	 */
 	public List<Map> SignInCount(String studentId);
-	/**
-	 * 教师端功能：获取当前课程的出勤情况列表
-	 * @author macong
-	 * @param courseId
-	 * @return
-	 */
-	public List<Map> getRegistSituation(String courseId);
+	
 	/**
 	 * 教师端接口：获取教师的签到设置
 	 * @author macong
@@ -55,4 +49,23 @@ public interface ISignInService extends IService<SignIn> {
 	 * @param  courseId
 	 */
 	public void updateCourseNum(String courseId);
+	/**
+	 * 获取某门课程整体出勤情况
+	 * @param courseId
+	 * @return
+	 */
+	public float getEntiretyRegistSituation(String courseId);
+	/**
+	 * 获取正在进行的课程的出勤情况、获取某课程的全部同学的出勤情况
+	 * @param courseId
+	 * @return
+	 */
+	public float getCurrentRegistSituation(String courseId);
+	/**
+	 * 教师端功能：获取当前课程的出勤情况列表、获取课程的全体学生出勤详情
+	 * @author macong
+	 * @param courseId
+	 * @return
+	 */
+	public List<Map> getRegistDetail(String courseId,String status);
 }
