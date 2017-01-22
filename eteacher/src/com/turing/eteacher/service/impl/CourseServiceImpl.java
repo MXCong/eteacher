@@ -29,9 +29,12 @@ import com.turing.eteacher.dao.CourseItemDAO;
 import com.turing.eteacher.dao.CourseScoreDAO;
 import com.turing.eteacher.dao.CourseScorePrivateDAO;
 import com.turing.eteacher.dao.CourseTableDAO;
+import com.turing.eteacher.dao.FileDAO;
 import com.turing.eteacher.dao.MajorDAO;
 import com.turing.eteacher.dao.TermPrivateDAO;
 import com.turing.eteacher.dao.TextbookDAO;
+import com.turing.eteacher.dao.WorkCourseDAO;
+import com.turing.eteacher.dao.WorkDAO;
 import com.turing.eteacher.model.Course;
 import com.turing.eteacher.model.CourseCell;
 import com.turing.eteacher.model.CourseClasses;
@@ -91,6 +94,15 @@ public class CourseServiceImpl extends BaseService<Course> implements
 	
 	@Autowired
 	private CourseCellDAO courseCellDAO;
+	
+	@Autowired
+	private FileDAO fileDAO;
+	
+	@Autowired
+	private WorkDAO workDao;
+	
+	@Autowired
+	private WorkCourseDAO workCourseDAO;
 	
 	@Override
 	public BaseDAO<Course> getDAO() {
@@ -1482,4 +1494,28 @@ public class CourseServiceImpl extends BaseService<Course> implements
 			return ReturnBody.getParamError();
 		}
 	 }
+
+	@Override
+	public ReturnBody delCourse(HttpServletRequest request) {
+		String courseId = request.getParameter("courseId");
+		if (StringUtil.checkParams(courseId)) {
+			//删除课程
+			deleteById(courseId);
+			//删除附件
+			fileDAO.delByDataId(courseId);
+			//删除课程班级关联
+			courseClassesDAO.delByCourseId(courseId);
+			//删除作业
+			workDao.delByCourseId(courseId);
+			//删除课程作业
+			workCourseDAO.delByCourseId(courseId);
+			//删除课程时间表
+			courseItemDAO.delByCourseId(courseId);
+			//删除成绩组成
+			courseScoreDAO.delByCourseId(courseId);
+			return new ReturnBody("删除成功！");
+		}else {
+			return ReturnBody.getParamError();
+		}
+	}
 }

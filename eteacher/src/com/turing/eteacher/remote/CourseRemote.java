@@ -753,4 +753,14 @@ public class CourseRemote extends BaseRemote {
 		}
 		return ReturnBody.getParamError();
 	}
+	/**
+	 * 教师端—获取指定学期下的课程信息
+	 * @param userId
+	 * @param termId
+	 * @return
+	 */
+	@RequestMapping(value = "teacher/delCourse", method = RequestMethod.POST)
+	public ReturnBody delCourse(HttpServletRequest request) {
+		return courseServiceImpl.delCourse(request);
+	}
 }

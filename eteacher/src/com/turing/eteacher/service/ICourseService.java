@@ -210,4 +210,11 @@ public interface ICourseService extends IService<Course> {
 	 * @return
 	 */
 	public ReturnBody getlistByDate(HttpServletRequest request);
+	/**
+	 * 删除课程
+	 * @author lifei
+	 * @param request
+	 * @return
+	 */
+	public ReturnBody delCourse(HttpServletRequest request);
 }
