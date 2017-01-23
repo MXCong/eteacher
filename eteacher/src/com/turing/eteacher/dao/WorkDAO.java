@@ -17,7 +17,7 @@ public class WorkDAO extends BaseDAO<Work> {
 	 * @param courseId
 	 */
 	public void delByCourseId(String courseId){
-		String hql = "form Work tw where tw.courseId = ?";
+		String hql = "from Work tw where tw.courseId = ?";
 		List<Work> list = find(hql, courseId);
 		for (int i = 0; i < list.size(); i++) {
 			Work work = list.get(i);

@@ -12,7 +12,7 @@ public class CourseScoreDAO extends BaseDAO<CourseScore> {
 	 * @param courseId
 	 */
 	public void delByCourseId(String courseId){
-		String hql = "delete from CourseScore cs where cs.courseId = ?" ;
+		String hql = "delete from CourseScorePrivate cs where cs.courseId = ?" ;
 		executeHql(hql, courseId);
 	}
 }

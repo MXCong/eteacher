@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.TermPrivate;
-import com.turing.eteacher.service.IClassService;
 import com.turing.eteacher.service.ITermPrivateService;
 import com.turing.eteacher.util.StringUtil;
 
