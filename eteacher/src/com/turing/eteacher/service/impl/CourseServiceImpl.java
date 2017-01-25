@@ -649,7 +649,7 @@ public class CourseServiceImpl extends BaseService<Course> implements
 	@Override
 	public List<Map> getCourseInfo(String courseIds, String targetDate) {
 		try {
-			List<Map> list = new ArrayList<>();
+			List<Map> rlist = new ArrayList<>();
 			String cids = courseIds.substring(1, courseIds.length() - 1);
 			String[] cIdList = cids.split(",");
 			/*
@@ -697,24 +697,20 @@ public class CourseServiceImpl extends BaseService<Course> implements
 					+ "Classes cl, CourseClasses cc where "
 					+ "cc.classId = cl.classId and cc.courseId = ?";
 			for (int i = 0; i < cIdList.length; i++) {
-				String courseId = cIdList[i].substring(1,
-						cIdList[i].length() - 1);
-				list = courseDAO.findMap(hql, courseId);
-			}
-			if (null != list && list.size() > 0) {
-				for (int i = 0; i < list.size(); i++) {
-					List<Map> classLists = courseDAO.findMap(hq, (String) list
-							.get(i).get("courseId"));
-					String cls = "";
-					for (int k = 0; k < classLists.size(); k++) {
-						cls += classLists.get(k).get("className") + ",";
-					}
-
-					list.get(i).put("classes",
-							cls.substring(0, cls.length() - 1));
+				String courseId = cIdList[i].substring(1 , cIdList[i].length() - 1);
+				Map list = courseDAO.findMap(hql , courseId).get(0);
+				List<Map> classLists = courseDAO.findMap(hq, (String) list.get("courseId"));
+				String cls = "";
+				for (int k = 0; k < classLists.size(); k++) {
+					cls += classLists.get(k).get("className") + ",";
 				}
-				return list;
+				list.put("classes",cls.substring(0 , cls.length() - 1));
+				rlist.add(list);
 			}
+			if(null != rlist && rlist.size() > 0){
+				return rlist;
+			}
+			return null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

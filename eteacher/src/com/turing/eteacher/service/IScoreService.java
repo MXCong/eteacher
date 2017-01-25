@@ -17,6 +17,14 @@ public interface IScoreService extends IService<Score> {
 	public void importScore(String courseId, List<Map> datas);
 
 	public String addAverageScore(String courseId,String studentId,int score);
+	/**
+	 * 获取某门课程的类型为均值的成绩列表
+	 * @author macong
+	 * @param userId
+	 * @param courseId
+	 * @return
+	 */
+	public List<Map> getScoreType(String courseId);
 	
 	
 }

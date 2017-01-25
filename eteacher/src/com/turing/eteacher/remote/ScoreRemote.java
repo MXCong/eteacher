@@ -19,9 +19,9 @@ import com.turing.eteacher.util.StringUtil;
 @RestController
 @RequestMapping("remote")
 public class ScoreRemote extends BaseRemote {
-
-		@Autowired
-		private IScoreService scoreServiceImpl;
+	
+	@Autowired
+	private IScoreService scoreServiceImpl;
 
 	/**
 	 * 课程活动-单人单次成绩录入
@@ -37,6 +37,28 @@ public class ScoreRemote extends BaseRemote {
 				String courseId = request.getParameter("courseId");
 				if(StringUtil.checkParams(score,studentId,courseId)){
 					String result = scoreServiceImpl.addAverageScore(courseId, studentId, Integer.parseInt(score));
+					return new ReturnBody(result);
+				}
+				return new ReturnBody(ReturnBody.RESULT_SUCCESS,null);
+			}
+			catch(Exception e){
+				e.printStackTrace();
+				return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
+			}
+		}
+		
+		/**
+		 * 获取某门课程的类型为均值的成绩列表
+		 * @author macong
+		 * @param request
+		 * @return
+		 */
+		@RequestMapping(value="score/getScoreType", method=RequestMethod.POST)
+		public ReturnBody getScoreType(HttpServletRequest request){
+			try{
+				String courseId = request.getParameter("courseId");
+				if(StringUtil.checkParams(courseId)){
+					List<Map> result = scoreServiceImpl.getScoreType(courseId);
 					return new ReturnBody(result);
 				}
 				return new ReturnBody(ReturnBody.RESULT_SUCCESS,null);

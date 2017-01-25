@@ -415,7 +415,6 @@ public class CourseRemote extends BaseRemote {
 			String courseId = request.getParameter("courseId");
 			if(StringUtil.checkParams(courseId)){
 				Map detail = courseServiceImpl.getCourseDetail(courseId,FileUtil.getRequestUrl(request));
-				System.out.println("detail:"+detail.toString());
 				if (null != detail ) {
 					return new ReturnBody(detail);
 				}else {

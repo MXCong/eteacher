@@ -224,5 +224,23 @@ public class ScoreServiceImpl extends BaseService<Score> implements IScoreServic
 		
 		return null;
 	}
+	/**
+	 * 获取某门课程的类型为均值的成绩列表
+	 * @author macong
+	 * @param userId
+	 * @param courseId
+	 * @return
+	 */
+	@Override
+	public List<Map> getScoreType(String courseId) {
+		String hql = "select c.cspId as scoreId , c.scoreName as scoreName "
+				+ "from CourseScorePrivate c "
+				+ "where c.courseId = ? and c.status = 1";
+		List<Map> cl = scoreDAO.findMap(hql, courseId);
+		if(null != cl && cl.size() > 0){
+			return cl;
+		}
+		return null;
+	}
 
 }
