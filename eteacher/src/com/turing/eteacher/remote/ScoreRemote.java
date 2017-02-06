@@ -35,8 +35,9 @@ public class ScoreRemote extends BaseRemote {
 				String score = request.getParameter("score");
 				String studentId = request.getParameter("studentId");
 				String courseId = request.getParameter("courseId");
-				if(StringUtil.checkParams(score,studentId,courseId)){
-					String result = scoreServiceImpl.addAverageScore(courseId, studentId, Integer.parseInt(score));
+				String scoreId = request.getParameter("scoreId");
+				if(StringUtil.checkParams(score,studentId,courseId,scoreId)){
+					String result = scoreServiceImpl.addAverageScore(courseId, studentId, Integer.parseInt(score),scoreId);
 					return new ReturnBody(result);
 				}
 				return new ReturnBody(ReturnBody.RESULT_SUCCESS,null);

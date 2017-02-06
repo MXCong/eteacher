@@ -54,9 +54,6 @@ public class WorkRemote extends BaseRemote {
 	private IWorkService workServiceImpl;
 
 	@Autowired
-	private IWorkClassService workCourseServiceImpl;
-
-	@Autowired
 	private IFileService fileServiceImpl;
 
 	// 学生端操作

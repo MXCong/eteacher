@@ -222,7 +222,11 @@ public class SignInServiceImpl extends BaseService<SignIn> implements ISignInSer
 		//查询该课程的上课次数
 		String hql3 = "select s.courseNum as courseNum from SignIn s "
 				+ "where s.status = 0 and s.courseId = ? and s.studentId = null";
-		
+		//查询语句：查看某门课程的授课人数
+		String hql4 = "SELECT COUNT(*) as studentNum "
+				+ "FROM Student s , CourseClasses ccl "
+				+ "WHERE s.classId = ccl.classId and ccl.courseId = ?";
+		Map sn = signInDAO.findMap(hql4, courseId).get(0);
 		//查询语句：查看某个学生在某门课程的签到次数
 		String hql2 = "SELECT COUNT(*) as signInNum FROM SignIn s WHERE s.courseId = ? "
 				+ "AND s.studentId = ?";
@@ -242,6 +246,7 @@ public class SignInServiceImpl extends BaseService<SignIn> implements ISignInSer
 				Map m = signInDAO.findMap(hql2, courseId,regist.get(i).get("studentId")).get(0);
 				regist.get(i).put("signInNum", m.get("signInNum"));
 				regist.get(i).put("courseNum", courseNum);
+				regist.get(i).put("studentNum", sn.get("studentNum"));
 			}
 			return regist;
 		}
