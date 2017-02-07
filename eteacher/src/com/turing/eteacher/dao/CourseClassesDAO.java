@@ -22,7 +22,7 @@ public class CourseClassesDAO extends BaseDAO<CourseClasses> {
 	 * @return
 	 */
 	public List<Map> getClassesByCourseId(String courseId){
-		String hql = "find tc.classId as classId, tc.className as className from Classes tc ,CourseClasses tcc where tc.classId = tcc.classId and  tcc.courseId = ?";
+		String hql = "select tc.classId as classId, concat(tc.grade,'级', tc.className) as className from Classes tc ,CourseClasses tcc where tc.classId = tcc.classId and  tcc.courseId = ?";
 		return findMap(hql, courseId);
 	}
 	
