@@ -1230,7 +1230,7 @@ public class CourseServiceImpl extends BaseService<Course> implements
 				item.put("courseId", temp.getCourseId());
 				item.put("courseName", temp.getCourseName());
 				String sql = "SELECT tc.CLASS_ID as classId, "
-						+ "tc.CLASS_NAME as className "
+						+ "CONCAT(tc.GRADE ,'级', tc.CLASS_NAME) as className "
 						+ "FROM t_course_class tcc, t_class tc "
 						+ "where tcc.COURSE_ID = ? "
 						+ "and tcc.CLASS_ID = tc.CLASS_ID";
@@ -1296,14 +1296,15 @@ public class CourseServiceImpl extends BaseService<Course> implements
 				}
 			}
 			// 增加新数据
-			List<Map<String, String>> scoresList = (List<Map<String, String>>) JSONUtils
+			List<Map<String, Object>> scoresList = (List<Map<String, Object>>) JSONUtils
 					.parse(scores);
 			for (int i = 0; i < scoresList.size(); i++) {
 				CourseScorePrivate item = new CourseScorePrivate();
 				item.setCourseId(courseId);
-				item.setScoreName(scoresList.get(i).get("scoreName"));
-				item.setScorePercent(new BigDecimal(scoresList.get(i).get(
+				item.setScoreName((String)scoresList.get(i).get("scoreName"));
+				item.setScorePercent(new BigDecimal((String)scoresList.get(i).get(
 						"scorePercent")));
+				item.setStatus(Integer.parseInt((String)scoresList.get(i).get("status")));
 				courseScorePrivateDAO.save(item);
 			}
 

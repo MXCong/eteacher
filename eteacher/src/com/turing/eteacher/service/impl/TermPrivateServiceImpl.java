@@ -123,7 +123,6 @@ public class TermPrivateServiceImpl extends BaseService<TermPrivate> implements
 
 	@Override
 	public Map getCurrentTerm(String userId) {
-		// TODO Auto-generated method stub
 		String hql = "select tp.tpId as termId , tp.termName as termName "
 				+ "from TermPrivate tp "
 				+ "where tp.userId = ? and tp.status = 1 "

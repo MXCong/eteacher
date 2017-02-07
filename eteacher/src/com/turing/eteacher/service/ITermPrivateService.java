@@ -43,6 +43,7 @@ public interface ITermPrivateService  extends IService<TermPrivate>{
 	 * @date 20170105
 	 */
 	public Map getAllTerms(String userId);	
+	
 	public ReturnBody getListTerms(String userId);
 
 	/**
