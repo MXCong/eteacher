@@ -357,15 +357,7 @@ public class DateUtil {
 		} catch (ParseException e) {
 			return false;
 		}
-		if (end1.getTime() <= start2.getTime()) {
-		}
-		if (end2.getTime() < start1.getTime()) {
-			System.out.println("end2"+end2.getTime());
-			System.out.println("start1");
-			System.out.println("asssdfdss");
-		}
-		return !(((end1.getTime() <= start2.getTime()) || end2.getTime() < start1
-				.getTime()));
+		return !(((end1.getTime() < start2.getTime()) || end2.getTime() < start1.getTime()));
 	}
 	public static boolean isOverlap2(String startdate1, String enddate1,
 			String startdate2, String enddate2) {
@@ -407,8 +399,7 @@ public class DateUtil {
 		} catch (ParseException e) {
 			return false;
 		}
-		return (_date.getTime() >= _start.getTime())
-				&& (_date.getTime() <= _end.getTime());
+		return (_date.getTime() >= _start.getTime()) && (_date.getTime() <= _end.getTime());
 	}
 	
 	/**
