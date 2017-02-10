@@ -172,27 +172,32 @@ public class TeacherServiceImpl extends BaseService<Teacher> implements
 			// 获取用户的职称、职务信息
 			String titlelId = (String) map.get("titleId");
 			// 职称
-			String titleHql = "select d.value as titleName from Dictionary2Private d where d.dpId = ?";
-			List<Map> title = null;
-			title = dictionary2PrivateDAO.findMap(titleHql, titlelId);
-			if (title.size() <= 0) {
-				String titleHql2 = "select d.value as titleName from Dictionary2Public d where d.dictionaryId = ?";
-				title = dictionary2PrivateDAO.findMap(titleHql2, titlelId);
+			if(titlelId != null){
+				String titleHql = "select d.value as titleName from Dictionary2Private d where d.dpId = ?";
+				List<Map> title = null;
+				title = dictionary2PrivateDAO.findMap(titleHql, titlelId);
+				if (title.size() <= 0) {
+					String titleHql2 = "select d.value as titleName from Dictionary2Public d where d.dictionaryId = ?";
+					title = dictionary2PrivateDAO.findMap(titleHql2, titlelId);
+				}
+				if (title.size() > 0) {
+					map.putAll(title.get(0));
+				}
 			}
-			if (title.size() > 0) {
-				map.putAll(title.get(0));
-			}
+			
 			// 职务
 			String postId = (String) map.get("postId");
-			String postHql = "select d.value as postName from Dictionary2Private d where d.dpId = ?";
-			List<Map> post = null;
-			post = dictionary2PrivateDAO.findMap(postHql, postId);
-			if (post.size() <= 0) {
-				String postHql2 = "select d.value as postName from Dictionary2Public d where d.dictionaryId = ?";
-				post = dictionary2PrivateDAO.findMap(postHql2, postId);
-			}
-			if (post.size() > 0) {
-				map.putAll(post.get(0));
+			if(postId != null){
+				String postHql = "select d.value as postName from Dictionary2Private d where d.dpId = ?";
+				List<Map> post = null;
+				post = dictionary2PrivateDAO.findMap(postHql, postId);
+				if (post.size() <= 0) {
+					String postHql2 = "select d.value as postName from Dictionary2Public d where d.dictionaryId = ?";
+					post = dictionary2PrivateDAO.findMap(postHql2, postId);
+				}
+				if (post.size() > 0) {
+					map.putAll(post.get(0));
+				}
 			}
 			// 学校信息
 			String schoolId = map.get("schoolId");
