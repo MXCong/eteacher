@@ -69,4 +69,8 @@ public class ScoreRemote extends BaseRemote {
 				return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 			}
 		}
+		@RequestMapping(value="teacher/classes/getScoreList")
+		public ReturnBody getScoreList(HttpServletRequest request){
+			return scoreServiceImpl.getScoreList(request);
+		}
 }

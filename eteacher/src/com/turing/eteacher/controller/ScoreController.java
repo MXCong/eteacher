@@ -58,7 +58,7 @@ public class ScoreController extends BaseController {
 	@ResponseBody
 	public Object getScoreListData(HttpServletRequest request){
 		String courseId = request.getParameter("courseId");
-		List list = scoreServiceImpl.getScoreList(courseId);
+		List list = scoreServiceImpl.getScoreList2(courseId);
 		Map result = new HashMap();
 		result.put("data", list);
 		return result;
@@ -92,7 +92,7 @@ public class ScoreController extends BaseController {
 	public String exportScore(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException{
 		String courseId = request.getParameter("courseId");
 		List<CourseScorePrivate> CourseScoreList = courseServiceImpl.getCoureScoreByCourseId(courseId);
-		List<Map> scoreList = scoreServiceImpl.getScoreList(courseId);
+		List<Map> scoreList = scoreServiceImpl.getScoreList2(courseId);
 		Course course = courseServiceImpl.get(courseId);
 		response.setContentType("application/octet-stream");  
 		response.setHeader("Content-disposition", "attachment; filename="  
