@@ -743,7 +743,7 @@ public class CourseRemote extends BaseRemote {
 	@RequestMapping(value = "teacher/course/getCourseByTerm", method = RequestMethod.POST)
 	public ReturnBody teacherGetCourseByTerm(HttpServletRequest request) {
 		String termId = request.getParameter("termId");
-		if(null == termId){
+		if(termId == null){
 			termId = (String) getCurrentTerm(request).get("termId");
 		}
 		if (StringUtil.checkParams(termId)) {

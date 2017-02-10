@@ -116,8 +116,10 @@ public class TermPrivateServiceImpl extends BaseService<TermPrivate> implements
 
 	@Override
 	public ReturnBody getListTerms(String userId) {
-		String hql = "from TermPrivate tp where tp.userId = ? and tp.status = 1";
-		List list = termPrivateDAO.find(hql, userId);
+		String hql = "select tp.tpId as termId , tp.termName as value from TermPrivate tp where tp.userId = ? and tp.status = 1";
+		List<Map> list = termPrivateDAO.findMap(hql, userId);
+//		String hql = "from TermPrivate tp where tp.userId = ? and tp.status = 1";
+//		List list = termPrivateDAO.find(hql, userId);
 		return new ReturnBody(list);
 	}
 
