@@ -52,7 +52,7 @@ public class WorkClassServiceImpl extends BaseService<WorkClass> implements IWor
 		List<Map> list = workCourseDAO.findBySql(sql, wId);
 		if (null != list && list.size() > 0) {
 			for (int i = 0; i < list.size(); i++) {
-				String sql2 = "SELECT c.CLASS_NAME AS className  FROM t_class c WHERE c.CLASS_ID IN (SELECT cc.CLASS_ID FROM t_course_class cc WHERE cc.COURSE_ID = ?)";
+				String sql2 = "SELECT CONCAT(c.GRADE,'级',c.CLASS_NAME) AS className  FROM t_class c WHERE c.CLASS_ID IN (SELECT cc.CLASS_ID FROM t_course_class cc WHERE cc.COURSE_ID = ?)";
 				List<Map> list2 = courseDAO.findBySql(sql2,list.get(i).get("courseId"));
 				if (null != list2 && list2.size() > 0) {
 					String className = "(";

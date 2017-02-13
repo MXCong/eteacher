@@ -230,7 +230,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		 * 
 		 * 修改：拼接作业的授课班级列表
 		 */
-		String hq = "select cls.className as className , wc.workId " 
+		String hq = "select concat(cls.grade,'级',cls.className) as className , wc.workId " 
 					+ "from Classes cls , WorkClass wc "
 					+ "where cls.classId = wc.classId and wc.workId = ?";
 		for (int a = 0; a < list.size(); a++) {
@@ -287,7 +287,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 				data.put("files", fileList);
 			}
 			//获取作业的接收班级信息
-			String hq = "select cls.className as className , "
+			String hq = "select concat(cls.grade,'级', cls.className) as className , "
 					+ "wc.workId , cls.classId as classId " 
 					+ "from Classes cls , WorkClass wc "
 					+ "where cls.classId = wc.classId and wc.workId = ?";
