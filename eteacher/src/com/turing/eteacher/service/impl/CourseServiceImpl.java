@@ -693,7 +693,7 @@ public class CourseServiceImpl extends BaseService<Course> implements
 					+ "where c.courseId = ? and ci.courseId = c.courseId "
 					// + "and ccl.classId = cl.classId "
 					+ "and cc.ciId = ci.ciId and c.userId = t.teacherId ";
-			String hq = "select cl.className as className from "
+			String hq = "select concat(cl.grade,'级',cl.className) as className from "
 					+ "Classes cl, CourseClasses cc where "
 					+ "cc.classId = cl.classId and cc.courseId = ?";
 			for (int i = 0; i < cIdList.length; i++) {
