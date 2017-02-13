@@ -100,12 +100,13 @@ public class NoticeServiceImpl extends BaseService<Notice> implements INoticeSer
 	public List<Map> getListNotice(String userId,String status,String date,int page) {
 		List<Map> list=null;
 		String hql="select n.noticeId as noticeId,n.title as titile,n.publishTime as publishTime,SUBSTRING(n.content,1,20) as content ";
+		String now = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM);
 		if("0".equals(status)){//待发布通知
-			hql+="from Notice n where n.userId=? and n.publishTime > now() and n.status=1 order by n.publishTime asc";
-			list=noticeDAO.findMapByPage(hql, page*20, 20, userId);
+			hql+="from Notice n where n.userId=? and n.publishTime > ? and n.status=1 order by n.publishTime asc";
+			list=noticeDAO.findMapByPage(hql, page*20, 20, userId,now);
 		}else if("1".equals(status)){//已发布通知
-			hql+="from Notice n where n.userId=? and n.publishTime < now() and n.status=1 order by n.publishTime asc";
-			list=noticeDAO.findMapByPage(hql, page*20, 20, userId);
+			hql+="from Notice n where n.userId=? and n.publishTime < ? and n.status=1 order by n.publishTime asc";
+			list=noticeDAO.findMapByPage(hql, page*20, 20, userId,now);
 			if (null != list) {
 				for (int i = 0; i < list.size(); i++) {
 					int all = workCourseServiceImpl.getStudentCountByWId((String)list.get(i).get("noticeId"));
