@@ -95,7 +95,7 @@ public class SignCodeRemote extends BaseRemote {
 					SignCodeServiceImpl.update(sc);
 					return new ReturnBody("结束签到");
 				} else {
-					return new ReturnBody("已经结束签到");
+					return new ReturnBody("结束签到");
 				} 
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
