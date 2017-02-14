@@ -25,9 +25,8 @@ public class TermRemote extends BaseRemote {
 
 	/**
 	 * 删除指定的学期
-	 * 
 	 * @param request
-	 * @param termId
+	 * @param termId teacher/editPersonInfo
 	 * @return
 	 */
 	@RequestMapping(value = "teacher/term/delTerm", method = RequestMethod.POST)

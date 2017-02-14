@@ -133,6 +133,7 @@ public class TeacherRemote extends BaseRemote {
 			String postId = request.getParameter("postId");
 			String schoolId = request.getParameter("schoolId");
 			String introduction = request.getParameter("introduction");
+			String department = request.getParameter("department");
 			if (StringUtil.checkParams(name,teacherNo,schoolId)) {
 				Teacher teacher = getCurrentTeacher(request);
 				teacher.setName(name);
@@ -142,6 +143,7 @@ public class TeacherRemote extends BaseRemote {
 				teacher.setPostId(postId);
 				teacher.setSchoolId(schoolId);
 				teacher.setIntroduction(introduction);
+				teacher.setDepartment(department);
 				if (request instanceof MultipartRequest) {
 					MultipartRequest multipartRequest = (MultipartRequest)request;
 					MultipartFile file = multipartRequest.getFile("icon");
