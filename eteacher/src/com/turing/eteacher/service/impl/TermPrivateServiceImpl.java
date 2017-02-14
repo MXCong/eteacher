@@ -10,7 +10,18 @@ import org.springframework.stereotype.Service;
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
 import com.turing.eteacher.component.ReturnBody;
+import com.turing.eteacher.dao.ClassDAO;
+import com.turing.eteacher.dao.CourseCellDAO;
+import com.turing.eteacher.dao.CourseClassesDAO;
+import com.turing.eteacher.dao.CourseDAO;
+import com.turing.eteacher.dao.CourseItemDAO;
+import com.turing.eteacher.dao.CourseScoreDAO;
+import com.turing.eteacher.dao.CourseScorePrivateDAO;
+import com.turing.eteacher.dao.FileDAO;
 import com.turing.eteacher.dao.TermPrivateDAO;
+import com.turing.eteacher.dao.WorkCourseDAO;
+import com.turing.eteacher.dao.WorkDAO;
+import com.turing.eteacher.model.Course;
 import com.turing.eteacher.model.TermPrivate;
 import com.turing.eteacher.service.ITermPrivateService;
 
@@ -21,6 +32,27 @@ public class TermPrivateServiceImpl extends BaseService<TermPrivate> implements
 	@Autowired
 	private TermPrivateDAO termPrivateDAO;
 
+	@Autowired
+	private CourseDAO courseDAO;
+	
+	@Autowired
+	private CourseClassesDAO courseClassesDAO;
+
+	@Autowired
+	private CourseItemDAO courseItemDAO;
+	
+	@Autowired
+	private FileDAO fileDAO;
+	
+	@Autowired
+	private WorkDAO workDao;
+	
+	@Autowired
+	private WorkCourseDAO workCourseDAO;
+	
+	@Autowired
+	private CourseScoreDAO courseScoreDAO;
+	
 	@Override
 	public BaseDAO<TermPrivate> getDAO() {
 		// TODO Auto-generated method stub
@@ -37,6 +69,26 @@ public class TermPrivateServiceImpl extends BaseService<TermPrivate> implements
 	// 删除学期
 	@Override
 	public void deleteById(String tpId) {
+		List<Course> courseList = courseDAO.getListByTermId(tpId);
+		if (null != courseList) {
+			for (int i = 0; i < courseList.size(); i++) {
+				String courseId = courseList.get(i).getCourseId();
+				//删除课程
+				courseDAO.deleteById(courseId);
+				//删除附件
+				fileDAO.delByDataId(courseId);
+				//删除课程班级关联
+				courseClassesDAO.delByCourseId(courseId);
+				//删除作业
+				workDao.delByCourseId(courseId);
+				//删除课程作业
+				workCourseDAO.delByCourseId(courseId);
+				//删除课程时间表
+				courseItemDAO.delByCourseId(courseId);
+				//删除成绩组成
+				courseScoreDAO.delByCourseId(courseId);
+			}
+		}
 		String hql = "update TermPrivate tp set tp.status = 2 where tp.tpId = ?";
 		termPrivateDAO.executeHql(hql, tpId);
 	}
