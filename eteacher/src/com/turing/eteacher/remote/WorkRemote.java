@@ -390,7 +390,7 @@ public class WorkRemote extends BaseRemote {
 	}
 
 	/**
-	 * 1.2.16 学生端获取指定月份有课程的日期
+	 * 1.2.16 学生端获取指定月份有作业的日期
 	 * 
 	 * @author lifei
 	 */

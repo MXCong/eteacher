@@ -157,7 +157,7 @@ public interface ICourseService extends IService<Course> {
 	 * @param termId
 	 * @return
 	 */
-	public List<Map> getCourseTimebyStuId(String stuId,String termId);
+	public List<Map> getCourseTimebyStuId(String stuId);
 	/**
 	 * 学生端获取本学期的课程名字和Id
 	 * @return
