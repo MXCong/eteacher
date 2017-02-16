@@ -650,40 +650,12 @@ public class CourseServiceImpl extends BaseService<Course> implements
 	public List<Map> getCourseInfo(String courseIds, String targetDate) {
 		try {
 			List<Map> rlist = new ArrayList<>();
+			List<Map> cclist = new ArrayList<>();
+			List<Map> tcclist = new ArrayList<>();
 			String cids = courseIds.substring(1, courseIds.length() - 1);
 			String[] cIdList = cids.split(",");
-			/*
-			 * String hql =
-			 * "select c.courseId as courseId, c.courseName as courseName, " +
-			 * "cc.location as location, cc.weekDay as weekDay , " +
-			 * "cc.classRoom as classRoom, cc.lessonNumber as lessonNumber, " +
-			 * "t.name as teacherName, t.teacherId as teacherId " +
-			 * "from Course c, CourseItem ci, CourseCell cc, Teacher t " +
-			 * "where c.courseId = ? and ci.courseId = c.courseId " +
-			 * "and cc.ciId = ci.ciId and c.userId = t.teacherId "; //当前日期时周几。
-			 * String cw = Integer.toString(DateUtil.getWeekNum(targetDate));
-			 * for (int i = 0; i < cIdList.length; i++) { String courseId =
-			 * cIdList[i].substring(1, cIdList[i].length() - 1); List<Map> m =
-			 * courseDAO.findMap(hql, courseId); if (null != m && m.size() > 0)
-			 * { // 1.课程名称与授课班级的拼接--->软件工程（13软工A班） String hq =
-			 * "select cl.className as className from " +
-			 * "Classes cl, CourseClasses cc where " +
-			 * "cc.classId = cl.classId and cc.courseId = ?"; for (int j = 0; j
-			 * < m.size(); j++) { String newName = "";
-			 * //一门课程，一天内有多个授课时间段。即一天内该课程上课多次。
-			 * //一门课程，一周内有多个授课时间，且每个上课时间的授课时间段不同。
-			 * if(m.get(j).get("weekDay").equals(cw) ||
-			 * m.get(j).get("weekDay").equals("0")){ List<Map> cls =
-			 * courseDAO.findMap(hq, (String) m.get(j).get("courseId")); String
-			 * courseName = (String) m.get(j).get("courseName") + "("; newName =
-			 * (String) m.get(j).get("courseName"); if (null != cls &&
-			 * cls.size() > 0) { for (int k = 0; k < cls.size(); k++) {
-			 * courseName += cls.get(k).get("className") + ","; } newName =
-			 * courseName.substring(0, courseName.length() - 1); newName =
-			 * newName + ")"; } m.get(j).put("courseName", newName);
-			 * list.add(m.get(j)); } } } }
-			 */
-			String hql = "select distinct c.courseId as courseId, c.courseName as courseName, "
+			
+			/*String hql = "select distinct c.courseId as courseId, c.courseName as courseName, "
 					+ "cc.location as location, cc.endTime as endTime , "
 					+ "cc.classRoom as classRoom, cc.startTime as startTime , "
 					+ "t.name as teacherName, t.teacherId as teacherId "
@@ -692,21 +664,61 @@ public class CourseServiceImpl extends BaseService<Course> implements
 					// + "Classes cl, CourseClasses ccl "
 					+ "where c.courseId = ? and ci.courseId = c.courseId "
 					// + "and ccl.classId = cl.classId "
-					+ "and cc.ciId = ci.ciId and c.userId = t.teacherId ";
-			String hq = "select concat(cl.grade,'级',cl.className) as className from "
+					+ "and cc.ciId = ci.ciId and c.userId = t.teacherId ";*/
+			//查询特定课程的授课时间
+			//1. 查询该教师创建的，当前时间在开始结束时间内的课程。
+			String hql = "select distinct c.courseName as courseName , ci.ciId as ciId "
+					+ "from Course c , CourseItem ci "
+					+ "where c.courseId = ci.courseId and c.courseId = ? "
+					+ "and ci.startDay <= ? and ci.endDay >= ?";
+			//2. 查询每个课程单元下，有多少个上课时间段
+			String hql2 = "select distinct cc.startTime as startTime , "
+					+ "cc.endTime as endTime , cc.location as location , "
+					+ "cc.classRoom as classRoom , cc.weekDay as weekDay "
+					+ "from CourseCell cc where cc.ciId = ? ";
+					
+			//查询课程的授课班级信息
+			String hq = "select distinct concat(cl.grade,'级',cl.className) as className from "
 					+ "Classes cl, CourseClasses cc where "
 					+ "cc.classId = cl.classId and cc.courseId = ?";
+			String weekDay = Integer.toString(DateUtil.getWeekNum(targetDate));
+			
 			for (int i = 0; i < cIdList.length; i++) {
 				String courseId = cIdList[i].substring(1 , cIdList[i].length() - 1);
-				Map list = courseDAO.findMap(hql , courseId).get(0);
-				List<Map> classLists = courseDAO.findMap(hq, (String) list.get("courseId"));
-				String cls = "";
-				for (int k = 0; k < classLists.size(); k++) {
-					cls += classLists.get(k).get("className") + ",";
+				List<Map> cilist = courseDAO.findMap(hql , courseId , targetDate , targetDate);
+				System.out.println("-----ciId-----"+cilist.toString());
+				if(null != cilist && cilist.size()>0){
+					//每个课程单元下，有多少个课程节
+					for (int j = 0; j < cilist.size(); j++) {
+						String ciId = (String) cilist.get(j).get("ciId");
+						String courseName = (String) cilist.get(j).get("courseName");
+						cclist = courseDAO.findMap(hql2, ciId);
+						System.out.println("******ccId*******"+cclist.toString());
+						for (int k = 0; k < cclist.size(); k++) {
+							String wd = (String) cclist.get(k).get("weekDay");//周几上课
+							cclist.get(k).put("courseName", courseName);
+							cclist.get(k).put("courseId", courseId);
+							if(null == wd || wd.contains(weekDay)){
+								tcclist.add(cclist.get(k));
+							}
+						}
+						System.out.println("正确的数据："+tcclist.toString());
+						if(null != tcclist && tcclist.size() > 0){
+							String cid = (String) tcclist.get(0).get("courseId");
+							List<Map> classLists = courseDAO.findMap(hq, cid);
+							String cls = "";
+							for (int a = 0; a < classLists.size(); a++) {
+								cls += classLists.get(a).get("className") + ",";
+							}
+							for (int k = 0; k < tcclist.size(); k++) {
+								tcclist.get(k).put("classes",cls.substring(0 , cls.length() - 1));
+							}
+							rlist.addAll(tcclist);
+						}
+					}
 				}
-				list.put("classes",cls.substring(0 , cls.length() - 1));
-				rlist.add(list);
 			}
+			
 			if(null != rlist && rlist.size() > 0){
 				return rlist;
 			}
