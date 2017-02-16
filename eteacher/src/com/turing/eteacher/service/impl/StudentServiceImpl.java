@@ -1,14 +1,22 @@
 package com.turing.eteacher.service.impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartRequest;
 
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
+import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.constants.EteacherConstants;
 import com.turing.eteacher.dao.ClassDAO;
 import com.turing.eteacher.dao.SchoolDAO;
@@ -17,6 +25,7 @@ import com.turing.eteacher.model.Classes;
 import com.turing.eteacher.model.School;
 import com.turing.eteacher.model.Student;
 import com.turing.eteacher.service.IStudentService;
+import com.turing.eteacher.util.FileUtil;
 import com.turing.eteacher.util.StringUtil;
 
 @Service
@@ -114,6 +123,63 @@ public class StudentServiceImpl extends BaseService<Student> implements IStudent
 			}
 		}
 		return map;
+	}
+
+	@Override
+	public ReturnBody saveInfo(HttpServletRequest request) {
+
+		String userId = request.getParameter("userId");
+		String stuName = request.getParameter("stuName");
+		String stuNo = request.getParameter("stuNo");
+		String sex = request.getParameter("sex");
+		String schoolId = request.getParameter("schoolId");
+		String faculty = request.getParameter("faculty");
+		String className = request.getParameter("className");
+		String degree = request.getParameter("degree");
+		String grade = request.getParameter("grade");
+		String majorId = request.getParameter("majorId");
+	
+
+		if (StringUtil.checkParams(stuName,stuNo,schoolId,className,degree,grade,majorId)) {
+			Student student = get(userId);
+			if(null != student){
+				student.setStuName(stuName);
+				student.setStuNo(stuNo);
+				if(StringUtil.isNotEmpty(sex)){
+					student.setSex(sex);
+				}else{
+					student.setSex("男");
+				}
+				student.setSchoolId(schoolId);
+				student.setFaculty(faculty);
+				String classId = classDAO.getClassIdbyFilter(degree, grade, majorId, className, schoolId);
+				student.setClassId(classId);
+				if (request instanceof MultipartRequest) {
+					MultipartRequest multipartRequest = (MultipartRequest)request;
+					MultipartFile file = multipartRequest.getFile("icon");
+					if (!file.isEmpty()) {
+						String serverName = FileUtil.makeFileName(file.getOriginalFilename());
+						try {
+							FileUtils.copyInputStreamToFile(file.getInputStream(),
+									new File(FileUtil.getUploadPath(), serverName));
+							student.setPicture(serverName);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				update(student);
+				Map<String, String> map = new HashMap<>();
+				map.put("classId", classId);
+				map.put("name", student.getStuName());
+				map.put("icon", FileUtil.getRequestUrl(request)+student.getPicture());
+				return new ReturnBody(map);
+			}else{
+				return ReturnBody.getParamError();
+			}
+		} else {
+			return ReturnBody.getParamError();
+		}
 	}
 
 }

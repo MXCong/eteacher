@@ -37,7 +37,6 @@ public class StudentRemote extends BaseRemote {
 	@Autowired
 	private ICourseService courseServiceImpl;
 	
-
 	
 	/**
 	 * 获取当前学期的课程列表
@@ -208,47 +207,6 @@ public class StudentRemote extends BaseRemote {
 	 */
 	@RequestMapping(value = "student/saveInfo", method = RequestMethod.POST)
 	public ReturnBody saveCourse(HttpServletRequest request) {
-		String userId = request.getParameter("userId");
-		String stuName = request.getParameter("stuName");
-		String stuNo = request.getParameter("stuNo");
-		String sex = request.getParameter("sex");
-		String schoolId = request.getParameter("schoolId");
-		String faculty = request.getParameter("faculty");
-		String classId = request.getParameter("classId");
-
-		if (StringUtil.checkParams(stuName,stuNo,sex,schoolId,faculty,classId)) {
-			Student student = studentServiceImpl.get(userId);
-			if(null != student){
-				student.setStuName(stuName);
-				student.setStuNo(stuNo);
-				student.setSex(sex);
-				student.setSchoolId(schoolId);
-				student.setFaculty(faculty);
-				student.setClassId(classId);
-				if (request instanceof MultipartRequest) {
-					MultipartRequest multipartRequest = (MultipartRequest)request;
-					MultipartFile file = multipartRequest.getFile("icon");
-					if (!file.isEmpty()) {
-						String serverName = FileUtil.makeFileName(file.getOriginalFilename());
-						try {
-							FileUtils.copyInputStreamToFile(file.getInputStream(),
-									new File(FileUtil.getUploadPath(), serverName));
-							student.setPicture(serverName);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-				studentServiceImpl.update(student);
-				Map<String, String> map = new HashMap<>();
-				map.put("name", student.getStuName());
-				map.put("icon", FileUtil.getRequestUrl(request)+student.getPicture());
-				return new ReturnBody(map);
-			}else{
-				return ReturnBody.getParamError();
-			}
-		} else {
-			return ReturnBody.getParamError();
-		}
+		return studentServiceImpl.saveInfo(request);
 	}
 }
