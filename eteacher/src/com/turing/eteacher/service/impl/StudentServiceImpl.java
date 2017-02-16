@@ -29,17 +29,18 @@ import com.turing.eteacher.util.FileUtil;
 import com.turing.eteacher.util.StringUtil;
 
 @Service
-public class StudentServiceImpl extends BaseService<Student> implements IStudentService {
+public class StudentServiceImpl extends BaseService<Student> implements
+		IStudentService {
 
 	@Autowired
 	private StudentDAO studentDAO;
-	
+
 	@Autowired
 	private ClassDAO classDAO;
-	
+
 	@Autowired
 	private SchoolDAO schoolDAO;
-	
+
 	@Override
 	public BaseDAO<Student> getDAO() {
 		return studentDAO;
@@ -47,12 +48,13 @@ public class StudentServiceImpl extends BaseService<Student> implements IStudent
 
 	@Override
 	public List<Map> getListForTable(String courseId) {
-		String hql = "select s.stuId as stuId," +
-				"s.stuNo as stuNo," +
-				"s.stuName as stuName," +
-				"(select count(sc.scoreId) from Score sc where sc.courseId = cc.courseId and sc.stuId = s.stuId and sc.scoreType = ?) as normalScoreCount " + 
-				"from Student s,CourseClasses cc where s.classId = cc.classId and cc.courseId = ?";
-		List<Map> list = studentDAO.findMap(hql, EteacherConstants.SCORE_TYPE_COURSE, courseId);
+		String hql = "select s.stuId as stuId,"
+				+ "s.stuNo as stuNo,"
+				+ "s.stuName as stuName,"
+				+ "(select count(sc.scoreId) from Score sc where sc.courseId = cc.courseId and sc.stuId = s.stuId and sc.scoreType = ?) as normalScoreCount "
+				+ "from Student s,CourseClasses cc where s.classId = cc.classId and cc.courseId = ?";
+		List<Map> list = studentDAO.findMap(hql,
+				EteacherConstants.SCORE_TYPE_COURSE, courseId);
 		return list;
 	}
 
@@ -60,7 +62,7 @@ public class StudentServiceImpl extends BaseService<Student> implements IStudent
 	public Student getByStuNo(String stuNo) {
 		String hql = "from Student where stuNo = ?";
 		List<Student> list = studentDAO.find(hql, stuNo);
-		if(list!=null&&list.size()>0){
+		if (list != null && list.size() > 0) {
 			return list.get(0);
 		}
 		return null;
@@ -68,15 +70,14 @@ public class StudentServiceImpl extends BaseService<Student> implements IStudent
 
 	@Override
 	public Map getStudentSchoolInfo(String stuId) {
-		String hql = "select s.stuId as stuId,s.school as school," +
-				"s.faculty as faculty,m.majorName as major," +
-				"c.className as className,s.stuNo as stuNo " +
-				"from Student s,Classes c,Major m " +
-				"where s.classId = c.classId " +
-				"and c.majorId = m.majorId " +
-				"and s.stuId = ?";
+		String hql = "select s.stuId as stuId,s.school as school,"
+				+ "s.faculty as faculty,m.majorName as major,"
+				+ "c.className as className,s.stuNo as stuNo "
+				+ "from Student s,Classes c,Major m "
+				+ "where s.classId = c.classId " + "and c.majorId = m.majorId "
+				+ "and s.stuId = ?";
 		List<Map> list = studentDAO.findMap(hql, stuId);
-		if(list!=null&&list.size()>0){
+		if (list != null && list.size() > 0) {
 			return list.get(0);
 		}
 		return null;
@@ -86,19 +87,20 @@ public class StudentServiceImpl extends BaseService<Student> implements IStudent
 	public Student getById(String id) {
 		String hql = "from Student where stuId = ?";
 		List<Student> list = studentDAO.find(hql, id);
-		if(list!=null&&list.size()>0){
+		if (list != null && list.size() > 0) {
 			return list.get(0);
 		}
 		return null;
 	}
+
 	/**
-	 * 查看用户个人信息   stuName : '姓名', stuNO : '学号', sex : '性别', 
-	 * schoolId : '学校Id', schoolName : '学校名称' faculty : '院系',
-	 *  classId : '班级Id' , className : '班级名称',
+	 * 查看用户个人信息 stuName : '姓名', stuNO : '学号', sex : '性别', schoolId : '学校Id',
+	 * schoolName : '学校名称' faculty : '院系', classId : '班级Id' , className :
+	 * '班级名称',
 	 */
 	@Override
-	public Map getUserInfo(String userId,String url) {
-		Map<String ,String> map = new HashMap(); 
+	public Map getUserInfo(String userId, String url) {
+		Map<String, String> map = new HashMap();
 		Student student = studentDAO.get(userId);
 		if (null != student) {
 			map.put("stuName", student.getStuName());
@@ -107,12 +109,21 @@ public class StudentServiceImpl extends BaseService<Student> implements IStudent
 			map.put("schoolId", student.getSchoolId());
 			map.put("faculty", student.getFaculty());
 			map.put("classId", student.getClassId());
-			//FIXME 
-			map.put("icon", url+student.getPicture());
+			map.put("icon", url + student.getPicture());
 			if (StringUtil.isNotEmpty(student.getClassId())) {
 				Classes classes = classDAO.get(student.getClassId());
 				if (null != classes) {
-					map.put("className", classes.getClassName());
+					map.put("className",
+							classes.getClassName().substring(0,
+									classes.getClassName().length() - 2));
+					map.put("degree", classes.getClassType());
+					map.put("grade", classes.getGrade());
+					map.put("majorId", classes.getMajorId());
+					map.put("classNum",
+							classes.getClassName().substring(
+									classes.getClassName().length() - 2,
+									classes.getClassName().length() - 1));
+
 				}
 			}
 			if (StringUtil.isNotEmpty(student.getSchoolId())) {
@@ -138,30 +149,34 @@ public class StudentServiceImpl extends BaseService<Student> implements IStudent
 		String degree = request.getParameter("degree");
 		String grade = request.getParameter("grade");
 		String majorId = request.getParameter("majorId");
-	
 
-		if (StringUtil.checkParams(stuName,stuNo,schoolId,className,degree,grade,majorId)) {
+		if (StringUtil.checkParams(stuName, stuNo, schoolId, className, degree,
+				grade, majorId)) {
 			Student student = get(userId);
-			if(null != student){
+			if (null != student) {
 				student.setStuName(stuName);
 				student.setStuNo(stuNo);
-				if(StringUtil.isNotEmpty(sex)){
+				if (StringUtil.isNotEmpty(sex)) {
 					student.setSex(sex);
-				}else{
+				} else {
 					student.setSex("男");
 				}
 				student.setSchoolId(schoolId);
 				student.setFaculty(faculty);
-				String classId = classDAO.getClassIdbyFilter(degree, grade, majorId, className, schoolId);
+				String classId = classDAO.getClassIdbyFilter(degree, grade,
+						majorId, className, schoolId);
 				student.setClassId(classId);
 				if (request instanceof MultipartRequest) {
-					MultipartRequest multipartRequest = (MultipartRequest)request;
+					MultipartRequest multipartRequest = (MultipartRequest) request;
 					MultipartFile file = multipartRequest.getFile("icon");
 					if (!file.isEmpty()) {
-						String serverName = FileUtil.makeFileName(file.getOriginalFilename());
+						String serverName = FileUtil.makeFileName(file
+								.getOriginalFilename());
 						try {
-							FileUtils.copyInputStreamToFile(file.getInputStream(),
-									new File(FileUtil.getUploadPath(), serverName));
+							FileUtils.copyInputStreamToFile(file
+									.getInputStream(),
+									new File(FileUtil.getUploadPath(),
+											serverName));
 							student.setPicture(serverName);
 						} catch (IOException e) {
 							e.printStackTrace();
@@ -172,9 +187,10 @@ public class StudentServiceImpl extends BaseService<Student> implements IStudent
 				Map<String, String> map = new HashMap<>();
 				map.put("classId", classId);
 				map.put("name", student.getStuName());
-				map.put("icon", FileUtil.getRequestUrl(request)+student.getPicture());
+				map.put("icon",
+						FileUtil.getRequestUrl(request) + student.getPicture());
 				return new ReturnBody(map);
-			}else{
+			} else {
 				return ReturnBody.getParamError();
 			}
 		} else {
