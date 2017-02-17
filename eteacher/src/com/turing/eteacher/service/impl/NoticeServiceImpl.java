@@ -247,28 +247,30 @@ public class NoticeServiceImpl extends BaseService<Notice> implements INoticeSer
         c.add(Calendar.DATE, - 15);  
         Date monday = c.getTime();
         String preDays = sdf.format(monday);
-		String hql = "select distinct n.noticeId as noticeId, n.title as title, "
-				+ "substring(n.content,1,30) as content, n.publishTime as publishTime, te.name as author "
-				+ "from Notice n, CourseClasses cc, WorkCourse wc, "
-				+ "Student s, Teacher te ";
+		
 		List<Map> list = null;
-		if(status.equals("01")){//未读通知
-			String hql1 = hql + "where s.classId = cc.classId and cc.courseId = wc.courseId "
-					+ "and n.noticeId = wc.workId and n.userId = te.teacherId "
-					+ "and s.stuId = ? and n.publishTime > ? and n.publishTime < ? and n.status=1 "
-					+" and n.noticeId NOT IN(select log.noticeId from Log log "
-					+ "where log.stuId = ? and log.type = 1 )";
-			System.out.println("hql1:"+hql1);
-			list = noticeDAO.findMapByPage(hql1, page*10, 10,userId,preDays,currentDay,userId); 
+		
+		String sql = "SELECT DISTINCT n.NOTICE_ID AS noticeId, n.TITLE AS title,"
+				+ "SUBSTRING(n.CONTENT, 1, 30) AS content,  n.PUBLISH_TIME AS publishTime,  te.NAME AS author, '未读'  AS see "
+				+ "FROM t_notice n, t_course_class cc, t_work_class wc, t_student s,"
+				+ " t_teacher te WHERE s.CLASS_ID = cc.CLASS_ID  AND cc.COURSE_ID = wc.COURSE_ID "
+				+ " AND n.NOTICE_ID = wc.WORK_ID AND n.USER_ID = te.TEACHER_ID  AND s.STU_ID = ? "
+				+ "AND n.PUBLISH_TIME > ? AND n.PUBLISH_TIME < ? AND n.STATUS = 1 "
+				+ "  AND n.NOTICE_ID NOT IN "
+				+ "  (SELECT 	t_log.NOTICE_ID  FROM	 t_log	WHERE t_log.STU_ID = ?	 AND t_log.TYPE = 1) "
+				+ " UNION	 ALL  SELECT DISTINCT  n.NOTICE_ID AS noticeId, n.TITLE AS title,"
+				+ " SUBSTRING(n.CONTENT, 1, 30) AS content,  n.PUBLISH_TIME AS publishTime,"
+				+ "  te.NAME AS author , '已读'  AS see   FROM  t_notice n,  t_course_class cc, t_work_class wc,"
+				+ "  t_student s, t_teacher te, t_log l  WHERE s.CLASS_ID = cc.CLASS_ID "
+				+ "  AND cc.COURSE_ID = wc.COURSE_ID  AND n.NOTICE_ID = wc.WORK_ID "
+				+ " AND n.USER_ID = te.TEACHER_ID AND s.STU_ID = ? AND n.PUBLISH_TIME > ? "
+				+ " AND n.PUBLISH_TIME < ? AND n.STATUS = 1  AND l.NOTICE_ID = n.NOTICE_ID "
+				+ "  AND l.STU_ID = ? AND l.TYPE = 1  ORDER BY publishTime DESC ";
+
+			list = noticeDAO.findBySqlAndPage(sql, page*10, 10, userId,preDays,currentDay,userId,userId,preDays,currentDay,userId);
+
 			
-		}else if(status.equals("02")){//已读通知
-			String hql2 = hql + ", Log l where s.classId = cc.classId and cc.courseId = wc.courseId "
-					+ "and n.noticeId = wc.workId and n.userId = te.teacherId "
-					+ "and s.stuId = ? and n.publishTime > ? and n.publishTime < ? and n.status=1 "
-					+ "and l.noticeId = n.noticeId and l.stuId = ? and l.type=1 ";
-			System.out.println("hql2:"+hql2);
-			list = noticeDAO.findMapByPage(hql2, page*10, 10,userId,preDays,currentDay,userId);
-		}
+		
 		if(null != list && list.size() > 0){
 			//查询通知是否有附件
 			for (int i = 0; i < list.size(); i++) {
