@@ -67,7 +67,7 @@ public class CourseRemote extends BaseRemote {
 	 *
 	 *学生端功能：获取指定学期下的课程列表
 	 * 
-	 */
+	 
 	@RequestMapping(value = "student/Course/getCourseByTerm", method = RequestMethod.POST)
 	public ReturnBody getCourseByTerm(HttpServletRequest request) {
 		String termId = request.getParameter("termId");
@@ -78,7 +78,7 @@ public class CourseRemote extends BaseRemote {
 		} else {
 			return ReturnBody.getParamError();
 		}
-	}
+	}*/
 	/**
 	 * 学生端功能：判断当前时间是否为签到时间（获取当前处于签到时间的课程信息）/ 获取某课程的签到信息（学校，教学楼，签到有效范围）
 	 * 

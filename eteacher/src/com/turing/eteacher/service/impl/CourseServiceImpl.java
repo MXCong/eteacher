@@ -31,6 +31,7 @@ import com.turing.eteacher.dao.CourseScorePrivateDAO;
 import com.turing.eteacher.dao.CourseTableDAO;
 import com.turing.eteacher.dao.FileDAO;
 import com.turing.eteacher.dao.MajorDAO;
+import com.turing.eteacher.dao.StudentDAO;
 import com.turing.eteacher.dao.TermPrivateDAO;
 import com.turing.eteacher.dao.TextbookDAO;
 import com.turing.eteacher.dao.WorkCourseDAO;
@@ -103,6 +104,9 @@ public class CourseServiceImpl extends BaseService<Course> implements
 	
 	@Autowired
 	private WorkCourseDAO workCourseDAO;
+	
+	@Autowired
+	private StudentDAO studentDAO;
 	
 	@Override
 	public BaseDAO<Course> getDAO() {
@@ -1140,16 +1144,15 @@ public class CourseServiceImpl extends BaseService<Course> implements
 	}
 
 	@Override
-	public List<Map> getCourseNameBbyTerm(String userId, String termId) {
-		String sql = "SELECT tc.COURSE_ID AS courseId "
-				+ ",tc.COURSE_NAME AS courseName "
-				+ "FROM t_course tc ,t_term_private tp "
-				+ "WHERE tp.TP_ID = tc.TERM_ID " + "AND tp.TREM_ID = ? "
-				+ "AND tc.COURSE_ID IN ( " + "SELECT tcc.`COURSE_ID` "
-				+ "FROM t_course_class tcc ,t_student ts "
-				+ "WHERE tcc.`CLASS_ID` = ts.`CLASS_ID` "
-				+ "AND ts.`STU_ID` = ? )";
-		return courseDAO.findBySql(sql, termId, userId);
+	public List<Map> getCourseList(String userId) {
+		String sql = "SELECT CONCAT(ttp.TERM_NAME,tc.COURSE_NAME) AS courseName, "+
+				"tc.COURSE_ID AS courseId "+
+				"FROM t_course tc,t_term_private ttp "+
+				"WHERE tc.TERM_ID = ttp.TP_ID "+
+				"AND tc.COURSE_ID IN ( "+
+				"SELECT tcc.COURSE_ID FROM t_course_class tcc WHERE tcc.CLASS_ID = ( "+
+				"SELECT ts.CLASS_ID FROM t_student ts WHERE ts.STU_ID = ?))";
+		return courseDAO.findBySql(sql, userId);
 	}
 
 	@Override

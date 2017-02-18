@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.multipart.MultipartRequest;
 
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
@@ -25,7 +24,6 @@ import com.turing.eteacher.service.ICourseService;
 import com.turing.eteacher.service.IStudentService;
 import com.turing.eteacher.util.BeanUtils;
 import com.turing.eteacher.util.FileUtil;
-import com.turing.eteacher.util.StringUtil;
 
 @RestController
 @RequestMapping("remote")
@@ -43,13 +41,9 @@ public class StudentRemote extends BaseRemote {
 	 * @param request
 	 * @return
 	 */
-	@RequestMapping(value="student/Course/getCurrentTermList",method = RequestMethod.POST)
+	@RequestMapping(value="student/course/getCourseList",method = RequestMethod.POST)
 	public ReturnBody getCurrentTermList(HttpServletRequest request){
-		Map map = getThisTerm(request);
-		if (null == map) {
-			return ReturnBody.getUserInfoError();
-		}
-		List list = courseServiceImpl.getCourseNameBbyTerm(getCurrentUserId(request),(String)map.get("termId"));
+		List list = courseServiceImpl.getCourseList(getCurrentUserId(request));
 		return new ReturnBody(list);
 	}
 	
