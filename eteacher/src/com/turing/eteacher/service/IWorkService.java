@@ -10,7 +10,7 @@ public interface IWorkService extends IService<Work> {
 
 	public List<Map> getListForTable(String termId, String courseId);
 	//学生端获取作业列表
-	public List<Map> getListByStuId(String stuId, String status,int page);
+	public List<Map> getListByStuId(String stuId, String status,int page,String date);
 	//学生端查看作业详情
 	public Map getSWorkDetail(String workId,String url);
 	

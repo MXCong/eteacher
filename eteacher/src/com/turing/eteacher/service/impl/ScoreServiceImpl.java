@@ -46,7 +46,7 @@ public class ScoreServiceImpl extends BaseService<Score> implements
 
 	@Autowired
 	private IStudentService studentServiceImpl;
-
+	
 	@Override
 	public BaseDAO<Score> getDAO() {
 		return scoreDAO;
@@ -262,6 +262,39 @@ public class ScoreServiceImpl extends BaseService<Score> implements
 		} else {
 			return ReturnBody.getParamError();
 		}
+	}
+	/**
+	 * 获取特定同学，特定课程的得分（成绩类型为均值）
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	@Override
+	public List<Map> getScore(String courseId, String stuId) {
+		List<Map> list = new ArrayList<>();
+		String hql = "select c.cspId as scoreId , c.scoreName as scoreName "
+				+ "from CourseScorePrivate c "
+				+ "where c.courseId = ? and c.status = 2";
+		List<Map> cl = scoreDAO.findMap(hql, courseId);
+		if (null != cl && cl.size() > 0) {
+			for (int i = 0; i < cl.size(); i++) {
+				String  scoreId = (String) cl.get(i).get("scoreId");
+				String  scoreName = (String) cl.get(i).get("scoreName");
+				String hql2 = "SELECT AVG(t_score.SCORE) as score "
+						+ "FROM t_score WHERE t_score.CS_ID = ? AND t_score.STU_ID = ? "
+						+ "AND t_score.COURSE_ID = ? ";
+				Map m = scoreDAO.findBySql(hql2,scoreId,stuId,courseId).get(0);
+				if(null == m.get("score")){
+					m.put("score", 0);
+				}
+				m.put("scoreName", scoreName);
+				list.add(m);
+			}
+		}
+		if(null != list && list.size()>0){
+			return list;
+		}
+		return null;
 	}
 
 }

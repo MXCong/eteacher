@@ -82,9 +82,13 @@ public class WorkRemote extends BaseRemote {
 		String stuId = getCurrentUser(request).getUserId();
 		String status = request.getParameter("status");
 		String page = (String) request.getParameter("page");
+		String date = null;
+		if(status.equals("3")){
+			date = request.getParameter("date");
+		}
 		if (StringUtil.checkParams(stuId, status, page)) {
 			try {
-				List list = workServiceImpl.getListByStuId(stuId, status, Integer.parseInt(page));
+				List list = workServiceImpl.getListByStuId(stuId, status, Integer.parseInt(page), date);
 				return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
 			} catch (Exception e) {
 				e.printStackTrace();

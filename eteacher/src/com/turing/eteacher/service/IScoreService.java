@@ -31,6 +31,14 @@ public interface IScoreService extends IService<Score> {
 	 * @return
 	 */
 	public List<Map> getScoreType(String courseId);
+	
+	/**
+	 * 获取特定同学，特定课程的得分（成绩类型为均值）
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	public List<Map> getScore(String courseId,String stuId);
 
 	/**
 	 * 教师获取学生成绩列表

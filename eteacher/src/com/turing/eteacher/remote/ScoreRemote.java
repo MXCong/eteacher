@@ -69,6 +69,28 @@ public class ScoreRemote extends BaseRemote {
 				return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 			}
 		}
+		/**
+		 * 获取特定同学，特定课程的得分（成绩类型为均值）
+		 * @author macong
+		 * @param request
+		 * @return
+		 */
+		@RequestMapping(value="score/getScore", method=RequestMethod.POST)
+		public ReturnBody getScore(HttpServletRequest request){
+			try{
+				String courseId = request.getParameter("courseId");
+				String stuId = request.getParameter("userId");
+				if(StringUtil.checkParams(courseId)){
+					List<Map> result = scoreServiceImpl.getScore(courseId,stuId);
+					return new ReturnBody(result);
+				}
+				return new ReturnBody(ReturnBody.RESULT_SUCCESS,null);
+			}
+			catch(Exception e){
+				e.printStackTrace();
+				return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
+			}
+		}
 		@RequestMapping(value="teacher/classes/getScoreList")
 		public ReturnBody getScoreList(HttpServletRequest request){
 			return scoreServiceImpl.getScoreList(request);

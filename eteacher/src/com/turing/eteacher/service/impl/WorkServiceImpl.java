@@ -65,10 +65,11 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	 * 
 	 */
 	@Override
-	public List<Map> getListByStuId(String stuId, String status, int page) {
+	public List<Map> getListByStuId(String stuId, String status, int page,String date) {
 		// String hql = "select distinct w.workId as workId,c.courseName as
 		// courseName," ;
 		String hql = "";
+		System.out.println("-------------------------------");
 		List<Map> list = null;
 		if ("0".equals(status)) {// 获取未完成作业列表
 			hql = "select distinct w.WORK_ID as workId,c.COURSE_NAME as courseName, "
@@ -99,6 +100,15 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 					+ "and c.courseId =cc.courseId and cc.classId = s.classId "
 					+ "and w.status = 1 and w.publishTime <= now() " + "and s.stuId = ? order by w.publishTime desc";
 			list = workDAO.findMapByPage(hql, page * 20, 20, stuId);
+		}
+		if ("3".equals(status)) {// 获取指定日期截止的作业
+			hql = "select distinct w.workId as workId , w.title as title ,"
+					+ "w.content as content , wc.classId as classId , s.stuId as stuid "
+					+ "from Work w , WorkClass wc , Student s "
+					+ "where w.workId = wc.workId and wc.classId = s.classId "
+					+ "and s.stuId = ? and w.endTime like ? "
+					+ "and w.status = 1 and w.publishTime <= now() order by w.publishTime desc";
+			list = workDAO.findMap(hql, stuId , date+"%");
 		}
 		if (null != list && list.size() > 0) {
 			// 查询作业是否有附件
@@ -365,12 +375,13 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	@Override
 	public List<Map> stugetWorkEndDateByMonth(String ym, String userId) {
 		String cLastDay = DateUtil.getLastDayOfMonth(ym);
-		cLastDay = DateUtil.addDays(cLastDay, 1);
-		String cFirstDay = ym + "-01";
-		String sql = "SELECT DISTINCT SUBSTRING(tw.END_TIME,1,10) AS date FROM t_work tw WHERE tw.WORK_ID IN ( "
-				+ "SELECT twc.WORK_ID FROM t_work_course twc WHERE twc.COURSE_ID IN ( "
-				+ "SELECT tcc.COURSE_ID FROM t_course_class tcc WHERE tcc.CLASS_ID = ( "
-				+ "SELECT st.CLASS_ID FROM t_student st WHERE st.STU_ID = ?) " + ")) AND  tw.END_TIME BETWEEN ? AND ?";
+		cLastDay = DateUtil.addDays(cLastDay, 1)+"-00:00";
+		String cFirstDay = ym + "-01" +"-23:99";
+		String sql = "SELECT DISTINCT SUBSTRING(tw.END_TIME,1,10) AS date FROM t_work tw "
+				+ "WHERE tw.WORK_ID IN "
+				+ "(SELECT twc.WORK_ID FROM t_work_class twc , t_student st "
+				+ "WHERE twc.ClASS_ID = st.CLASS_ID AND st.STU_ID = ?) "
+				+ "AND  tw.END_TIME BETWEEN ? AND ?";
 		List list = workDAO.findBySql(sql, userId, cFirstDay, cLastDay);
 		return list;
 	}
