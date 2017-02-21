@@ -280,4 +280,45 @@ public class NoteRemote extends BaseRemote {
 			return ReturnBody.getParamError();
 		}
 	}
+	
+	@RequestMapping(value = "student/note/resoucesList", method = RequestMethod.POST)
+	public ReturnBody resoucesList(HttpServletRequest request) {
+		String userId=request.getParameter("userId");            		 		
+		try {
+			if (StringUtil.checkParams(userId)) {
+//				userId="CbgKtMhaUr";
+				List<Map> map=noteServiceImpl.searchCourseResouces(userId);
+				return new ReturnBody(map);				
+			} else {
+				return ReturnBody.getParamError();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE,
+					ReturnBody.ERROR_MSG);
+		}
+	}
+	
+	
+	@RequestMapping(value = "student/note/resoucedetail", method = RequestMethod.POST)
+	public ReturnBody resoucedetail(HttpServletRequest request) {
+		String couserId=request.getParameter("couserId");            		 		
+		try {
+			if (StringUtil.checkParams(couserId)) {
+//				couserId="Jgy85iccNG";
+				List<Map> map=noteServiceImpl.searchCourseDetail(couserId,request);
+				return new ReturnBody(map);				
+			} else {
+				return ReturnBody.getParamError();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE,
+					ReturnBody.ERROR_MSG);
+		}
+	}
+	
+	
+	
+	
 }

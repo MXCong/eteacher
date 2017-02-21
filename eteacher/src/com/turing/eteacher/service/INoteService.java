@@ -3,6 +3,8 @@ package com.turing.eteacher.service;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.turing.eteacher.base.IService;
@@ -39,4 +41,12 @@ public interface INoteService extends IService<Note> {
 	 * @param noteId
 	 */
 	public void deleteNote(String noteId,String path);
+    /**
+     * 课程资料查询
+     * @param userId
+     * @return
+     */
+	public List<Map> searchCourseResouces(String userId);
+
+	public List<Map> searchCourseDetail(String couserId,HttpServletRequest request);
 }

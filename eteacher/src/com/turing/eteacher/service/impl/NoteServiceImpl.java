@@ -2,8 +2,11 @@ package com.turing.eteacher.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,4 +132,39 @@ public class NoteServiceImpl extends BaseService<Note> implements INoteService {
 		String sql = "DELETE FROM t_note  WHERE t_note.NOTE_ID = ?";
 		noteDAO.executeBySql(sql, noteId);
 	}
+
+	@Override
+	public List<Map> searchCourseResouces(String userId) {
+
+		String sql = "SELECT   t_course.COURSE_NAME,  t_course.`COURSE_ID`,  t_term_private.`TERM_NAME` "
+				+ "FROM  t_course   LEFT JOIN t_term_private     ON t_course.`TERM_ID` = t_term_private.`TP_ID` WHERE t_course.COURSE_ID IN"
+				+ "  (SELECT     COURSE_ID   FROM    t_course_class   WHERE CLASS_ID IN     (SELECT       CLASS_ID    FROM     t_student    WHERE t_student.STU_ID = ?))";
+	
+		List<Map> m=noteDAO.findBySql(sql, userId);
+		return m;
+	}
+
+	@Override
+	public List<Map> searchCourseDetail(String couserId,HttpServletRequest request ) {
+		String fileUrl=FileUtil.getRequestUrl(request);
+		String sql ="SELECT  t_dictionary2_public.`DICTIONARY_ID`,    t_dictionary2_public.`VALUE`   FROM    t_dictionary2_public   WHERE t_dictionary2_public.DICTIONARY_ID IN "
+				+ "    (SELECT DISTINCT     (VOCABULARY_ID)    FROM     t_file     WHERE DATA_ID = ?)";		
+		List<Map> list=noteDAO.findBySql(sql, couserId);
+		
+		String sql2="SELECT	 FILE_NAME, CONCAT(?,SERVER_NAME) AS url   FROM  t_file  WHERE  t_file.VOCABULARY_ID=? AND IS_COURSE_FILE=1 AND DATA_ID=?";
+
+		for(int i=0;i<list.size();i++){
+			String VOCABULARY_ID=(String) list.get(i).get("DICTIONARY_ID");
+			List<Map> listFile=noteDAO.findBySql(sql2, fileUrl,VOCABULARY_ID,couserId);
+			list.get(i).put("listFile", listFile);
+		}
+		
+		return list;
+	}
+	
+	
+	
+	
+	
+	
 }
