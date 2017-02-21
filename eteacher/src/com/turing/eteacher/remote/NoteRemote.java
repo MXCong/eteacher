@@ -318,7 +318,24 @@ public class NoteRemote extends BaseRemote {
 		}
 	}
 	
-	
+	@RequestMapping(value = "student/note/resoucedetailMore", method = RequestMethod.POST)
+	public ReturnBody resoucedetailMore(HttpServletRequest request) {
+		String couserId=request.getParameter("couserId"); 
+		String typeId=request.getParameter("typeId");
+		try {
+			if (StringUtil.checkParams(couserId)) {
+//				couserId="Jgy85iccNG";
+				List<Map> map=noteServiceImpl.searchCourseDetailMore(couserId,typeId,request);
+				return new ReturnBody(map);				
+			} else {
+				return ReturnBody.getParamError();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE,
+					ReturnBody.ERROR_MSG);
+		}
+	}
 	
 	
 }

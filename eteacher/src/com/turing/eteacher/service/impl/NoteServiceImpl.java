@@ -151,18 +151,26 @@ public class NoteServiceImpl extends BaseService<Note> implements INoteService {
 				+ "    (SELECT DISTINCT     (VOCABULARY_ID)    FROM     t_file     WHERE DATA_ID = ?)";		
 		List<Map> list=noteDAO.findBySql(sql, couserId);
 		
-		String sql2="SELECT	 FILE_NAME, CONCAT(?,SERVER_NAME) AS url   FROM  t_file  WHERE  t_file.VOCABULARY_ID=? AND IS_COURSE_FILE=1 AND DATA_ID=?";
+		String sql2="SELECT	 VOCABULARY_ID,DATA_ID,FILE_NAME, CONCAT(?,SERVER_NAME) AS url   FROM  t_file  WHERE  t_file.VOCABULARY_ID=? AND IS_COURSE_FILE=1 AND DATA_ID=? limit 0,3";
 
 		for(int i=0;i<list.size();i++){
 			String VOCABULARY_ID=(String) list.get(i).get("DICTIONARY_ID");
 			List<Map> listFile=noteDAO.findBySql(sql2, fileUrl,VOCABULARY_ID,couserId);
 			list.get(i).put("listFile", listFile);
 		}
-		
 		return list;
 	}
 	
 	
+	public List<Map> searchCourseDetailMore(String couserId,String TypeId,HttpServletRequest request ) {
+		String fileUrl=FileUtil.getRequestUrl(request);
+		
+		String sql2="SELECT	 FILE_NAME, CONCAT(?,SERVER_NAME) AS url   FROM  t_file  WHERE  t_file.VOCABULARY_ID=? AND IS_COURSE_FILE=1 AND DATA_ID=? limit 3,1000";
+
+		List<Map> listFile=noteDAO.findBySql(sql2,fileUrl,TypeId,couserId);
+		
+		return listFile;
+	}
 	
 	
 	

@@ -49,4 +49,6 @@ public interface INoteService extends IService<Note> {
 	public List<Map> searchCourseResouces(String userId);
 
 	public List<Map> searchCourseDetail(String couserId,HttpServletRequest request);
+
+	public List<Map> searchCourseDetailMore(String couserId, String typeId, HttpServletRequest request);
 }
