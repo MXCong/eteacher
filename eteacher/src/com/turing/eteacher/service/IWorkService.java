@@ -12,7 +12,7 @@ public interface IWorkService extends IService<Work> {
 	//学生端获取作业列表
 	public List<Map> getListByStuId(String stuId, String status,int page,String date);
 	//学生端查看作业详情
-	public Map getSWorkDetail(String workId,String url);
+	public Map getSWorkDetail(String workId,String url,String userId);
 	
 	/**
 	 * 教师相关接口

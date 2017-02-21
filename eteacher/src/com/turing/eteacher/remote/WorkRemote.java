@@ -122,8 +122,9 @@ public class WorkRemote extends BaseRemote {
 	public ReturnBody workDetail(HttpServletRequest request) {
 		try {
 			String workId = request.getParameter("workId");
-			if (StringUtil.checkParams(workId)) {
-				Map work = workServiceImpl.getSWorkDetail(workId, FileUtil.getRequestUrl(request));
+			String userId = getCurrentUserId(request);
+			if (StringUtil.checkParams(workId , userId)) {
+				Map work = workServiceImpl.getSWorkDetail(workId, FileUtil.getRequestUrl(request) , userId);
 				if (null != work) {
 					return new ReturnBody(ReturnBody.RESULT_SUCCESS, work);
 				} else {

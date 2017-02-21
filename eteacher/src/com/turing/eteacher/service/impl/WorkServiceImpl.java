@@ -13,7 +13,6 @@ import com.turing.eteacher.dao.WorkDAO;
 import com.turing.eteacher.model.TaskModel;
 import com.turing.eteacher.model.Work;
 import com.turing.eteacher.service.IFileService;
-import com.turing.eteacher.service.IWorkClassService;
 import com.turing.eteacher.service.IWorkService;
 import com.turing.eteacher.util.CustomIdGenerator;
 import com.turing.eteacher.util.DateUtil;
@@ -36,9 +35,6 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	public BaseDAO<Work> getDAO() {
 		return workDAO;
 	}
-
-	@Autowired
-	private IWorkClassService workClassServiceImpl;
 
 	@Override
 	public List<Map> getListForTable(String termId, String courseId) {
@@ -66,39 +62,44 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	 */
 	@Override
 	public List<Map> getListByStuId(String stuId, String status, int page,String date) {
-		// String hql = "select distinct w.workId as workId,c.courseName as
-		// courseName," ;
 		String hql = "";
-		System.out.println("-------------------------------");
 		List<Map> list = null;
 		if ("0".equals(status)) {// 获取未完成作业列表
-			hql = "select distinct w.WORK_ID as workId,c.COURSE_NAME as courseName, "
-					+ "w.CONTENT as content,w.PUBLISH_TIME as publishTime, w.END_TIME as endTime "
-					+ "from t_work w,t_course c,t_work_course wc,t_course_class cc,t_student s "
-					+ "where w.WORK_ID = wc.WORK_ID and wc.COURSE_ID = c.COURSE_ID "
-					+ "and c.COURSE_ID =cc.COURSE_ID and cc.CLASS_ID = s.CLASS_ID "
-					+ "and w.STATUS = 1 and w.PUBLISH_TIME <= now() " + "and s.STU_ID = ? and w.WORK_ID not in "
-					+ "(select w.WORK_ID from t_status ss,t_work w,t_student s where ss.WORK_ID = w.WORK_ID and ss.STU_ID = s.STU_ID) "
+			hql = "select distinct w.WORK_ID as workId , c.COURSE_NAME as courseName , "
+					+ "w.CONTENT as content , w.PUBLISH_TIME as publishTime , "
+					+ "w.END_TIME as endTime , w.TITLE as title "
+					+ "from t_work w , t_course c , t_work_class wc , t_student s "
+					+ "where w.WORK_ID = wc.WORK_ID and wc.CLASS_ID = s.CLASS_ID "
+					+ "and c.COURSE_ID = w.COURSE_ID "
+					+ "and w.STATUS = 1 and w.PUBLISH_TIME <= now() " 
+					+ "and s.STU_ID = ? and w.WORK_ID not in "
+					+ "(select w.WORK_ID from t_status ss , t_work w , t_student s "
+					+ "where ss.WORK_ID = w.WORK_ID and ss.STU_ID = s.STU_ID) "
 					+ "order by w.PUBLISH_TIME desc";
 			list = workDAO.findBySqlAndPage(hql, page * 20, 20, stuId);
+			System.out.println("---:"+list.toString());
 		}
 		if ("1".equals(status)) {// 获取已完成作业列表
-			hql = "select distinct w.workId as workId,c.courseName as courseName, "
-					+ "w.content as content,w.publishTime as publishTime, w.endTime as endTime "
-					+ "from Work w,Course c,WorkCourse wc,CourseClasses cc,Student s,WorkStatus ss "
-					+ "where w.workId = wc.workId and wc.courseId = c.courseId "
-					+ "and c.courseId =cc.courseId and cc.classId = s.classId "
+			hql = "select distinct w.workId as workId , c.courseName as courseName , "
+					+ "w.content as content , w.publishTime as publishTime , "
+					+ "w.endTime as endTime "
+					+ "from Work w , Course c , WorkClass wc , Student s , WorkStatus ss "
+					+ "where w.workId = wc.workId and wc.classId = s.classId "
+					+ "and c.courseId = w.courseId "
 					+ "and ss.workId = w.workId and ss.stuId = s.stuId "
-					+ "and w.status = 1 and w.publishTime <= now() " + "and s.stuId = ? order by w.publishTime desc";
+					+ "and w.status = 1 and w.publishTime <= now() " 
+					+ "and s.stuId = ? order by w.publishTime desc";
 			list = workDAO.findMapByPage(hql, page * 20, 20, stuId);
 		}
 		if ("2".equals(status)) {// 获取所有作业列表
-			hql = "select distinct w.workId as workId,c.courseName as courseName,"
-					+ "w.content as content,w.publishTime as publishTime, w.endTime as endTime "
-					+ "from Work w,Course c,WorkCourse wc,CourseClasses cc,Student s "
-					+ "where w.workId = wc.workId and wc.courseId = c.courseId "
-					+ "and c.courseId =cc.courseId and cc.classId = s.classId "
-					+ "and w.status = 1 and w.publishTime <= now() " + "and s.stuId = ? order by w.publishTime desc";
+			hql = "select distinct w.workId as workId , c.courseName as courseName, "
+					+ "w.content as content , w.publishTime as publishTime, "
+					+ "w.endTime as endTime "
+					+ "from Work w , Course c , WorkClass wc , Student s "
+					+ "where w.workId = wc.workId and wc.classId = s.classId "
+					+ "and c.courseId = w.courseId "
+					+ "and w.status = 1 and w.publishTime <= now() " 
+					+ "and s.stuId = ? order by w.publishTime desc";
 			list = workDAO.findMapByPage(hql, page * 20, 20, stuId);
 		}
 		if ("3".equals(status)) {// 获取指定日期截止的作业
@@ -131,18 +132,28 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	 * @author zjx 返回结果：作业所属课程名称[],作业内容，作业发布时间（开始时间），作业到期时间（结束时间）
 	 */
 	@Override
-	public Map getSWorkDetail(String workId, String url) {
-		String hql = "select w.workId as workId, c.courseName as courseName, "
-				+ "w.publishTime as publishTime, w.endTime as endTime, w.content as content "
-				+ "from Work w ,WorkCourse wc,Course c "
-				+ "where w.workId = wc.workId and wc.courseId = c.courseId and w.workId = ?";
+	public Map getSWorkDetail(String workId, String url,String userId) {
+		String hql = "select w.workId as workId, w.title as title , "
+				+ "w.content as content , "
+				+ "w.publishTime as publishTime, w.endTime as endTime "
+				+ "from Work w "
+				+ "where w.workId = ?";
+		String hql2 = "select ws.wsId as wsId from WorkStatus ws "
+				+ "where ws.workId = ? and ws.stuId = ? ";
 		List<Map> list = workDAO.findMap(hql, workId);
 		if (null != list && list.size() > 0) {
 			Map detail = list.get(0);
 			List fileList = fileServiceImpl.getFileList(workId, url);
+			List status = workDAO.findMap(hql2, (String)detail.get("workId"), userId);
 			if (null != fileList && fileList.size() > 0) {
 				detail.put("files", fileList);
 			}
+			if(null != status && status.size() > 0){
+				detail.put("status", "1");//已完成状态
+			}else{
+				detail.put("status", "0");//未完成状态
+			}
+			
 			return detail;
 		}
 		return null;
