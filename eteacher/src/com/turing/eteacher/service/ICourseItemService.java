@@ -1,5 +1,7 @@
 package com.turing.eteacher.service;
 
+import java.util.List;
+
 import com.turing.eteacher.base.IService;
 import com.turing.eteacher.model.CourseItem;
 /**
@@ -14,7 +16,7 @@ public interface ICourseItemService extends IService<CourseItem> {
 	 * @param courseId
 	 * @return
 	 */
-	public CourseItem getItemByCourseId(String courseId);
+	public List<CourseItem> getItemByCourseId(String courseId);
 	/**
 	 * 保存课程时间的详细信息
 	 * @author lifei

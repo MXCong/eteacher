@@ -13,4 +13,10 @@ public interface ICourseClassService extends IService<CourseClasses> {
 	 * @return
 	 */
 	public List<Map> getCoursesByCourseId(String courseId);
+	/**
+	 * 通过courseId获得对应的班级Id
+	 * @param courseId
+	 * @return
+	 */
+	public List<Map> getClassByCourseId(String courseId);
 }

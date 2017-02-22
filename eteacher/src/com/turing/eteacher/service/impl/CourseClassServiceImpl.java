@@ -49,4 +49,11 @@ public class CourseClassServiceImpl extends BaseService<CourseClasses> implement
 		return list;
 	}
 
+	@Override
+	public List<Map> getClassByCourseId(String courseId) {
+		String hql = "select cc.classId as classId from CourseClasses cc where cc.courseId = ?";
+		List<Map> list = courseClassesDao.findMap(hql, courseId);
+		return list;
+	}
+
 }

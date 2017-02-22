@@ -1,7 +1,11 @@
 package com.turing.eteacher.constants;
 
 public class EteacherConstants {
-
+	/**
+	 * 上课前提醒
+	 */
+	public static final int COURSE_REMIND = 10;
+	
 	/**
 	 * 当前登录用户
 	 */

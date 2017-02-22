@@ -57,20 +57,24 @@ public class FileUtil {
 		// filesavePath.mkdir();
 		// }
 		String savePath = "D://upload";
-		//	String savePath = "/usr/local/eteacherFile";
+		// String savePath = "/usr/local/eteacherFile";
 		File filesavePath = new File(savePath);
 		if (!filesavePath.exists()) {
 			filesavePath.mkdir();
 		}
 		return savePath;
 	}
+
 	/**
 	 * 获取Tomcat的url和端口号
+	 * 
 	 * @param request
 	 * @return
 	 */
-	public static String getRequestUrl(HttpServletRequest request){
-		return request.getRequestURL().substring(0, request.getRequestURL().indexOf("8080")+5)+"download/";
+	public static String getRequestUrl(HttpServletRequest request) {
+		return request.getRequestURL().substring(0,
+				request.getRequestURL().indexOf("8080") + 5)
+				+ "download/";
 	}
 
 	/**

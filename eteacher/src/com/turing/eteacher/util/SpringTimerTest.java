@@ -15,15 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.turing.eteacher.constants.EteacherConstants;
 import com.turing.eteacher.model.Course;
 import com.turing.eteacher.model.CourseCell;
 import com.turing.eteacher.model.CourseItem;
 import com.turing.eteacher.model.Notice;
-import com.turing.eteacher.model.PushMessage;
 import com.turing.eteacher.model.TaskModel;
-import com.turing.eteacher.model.TimeTable;
 import com.turing.eteacher.model.Work;
 import com.turing.eteacher.service.ICourseCellService;
+import com.turing.eteacher.service.ICourseClassService;
 import com.turing.eteacher.service.ICourseItemService;
 import com.turing.eteacher.service.ICourseService;
 import com.turing.eteacher.service.INoticeService;
@@ -31,6 +31,10 @@ import com.turing.eteacher.service.IRegistConfigService;
 import com.turing.eteacher.service.ISignInService;
 import com.turing.eteacher.service.ITimeTableService;
 import com.turing.eteacher.service.IWorkService;
+import com.turing.eteacher.util.PushBody.Platform;
+import com.turing.eteacher.util.PushBody.Role;
+import com.turing.eteacher.util.PushBody.SortComb;
+import com.turing.eteacher.util.PushBody.SortType;
 
 /**
  * Spring定时器
@@ -63,6 +67,9 @@ public class SpringTimerTest {
 	@Autowired
 	private ICourseItemService courseItemServiceImpl;
 	
+	@Autowired
+	private ICourseClassService courseClassServiceImpl;
+	
 	private static List<TaskModel> allList = new ArrayList<>();
 	
 	private static Timer timer;
@@ -72,8 +79,8 @@ public class SpringTimerTest {
 	 * 
 	 * @author lifei
 	 */
-	@Scheduled(cron = "0 0 0 * * ?")
-	//@Scheduled(cron = "0 0/10 10,11 * * ?")
+	//@Scheduled(cron = "0 0 0 * * ?")
+	@Scheduled(cron = "0 0/5 16,17 * * ?")
 	public void test() {
 		System.out.println(new SimpleDateFormat("yyyy 年 MM 月 dd 日 HH 时 mm 分 ss 秒").format(new Date()));
 		getTimer().cancel();
@@ -102,17 +109,17 @@ public class SpringTimerTest {
 	 */
 	private List<TaskModel> getNoticeList() {
 		List<TaskModel> tempList = new ArrayList<>();
-		List<Map> list = noticeServiceImpl.getDateLimitNotice(DateUtil
-				.getCurrentDateStr("yyyy-MM-dd HH:mm"), DateUtil.addDays(
-				DateUtil.getCurrentDateStr("yyyy-MM-dd HH:mm"), 1));
+		List<Map> list = noticeServiceImpl.getDateLimitNotice(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM), 
+				DateUtil.addDays(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD), 1));
 		if (null != list) {
 			for (int i = 0; i < list.size(); i++) {
-				TaskModel temp = new TaskModel();
-				temp.setDate((String) list.get(i).get("time"));
-				temp.setId((String) list.get(i).get("id"));
-				temp.setType(TaskModel.TYPE_NOTICE);
-				temp.setUserType(TaskModel.UTYPE_STUDENT);
-				tempList.add(temp);
+				if (DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM), (String)list.get(i).get("time"), DateUtil.YYYYMMDDHHMM)) {
+					TaskModel temp = new TaskModel();
+					temp.setDate((String) list.get(i).get("time"));
+					temp.setId((String) list.get(i).get("id"));
+					temp.setType(TaskModel.TYPE_NOTICE_PUBLISH);
+					tempList.add(temp);
+				}
 			}
 			System.out.println("通知提醒有："+tempList.size()+"条");
 		}
@@ -125,17 +132,17 @@ public class SpringTimerTest {
 	 */
 	private List<TaskModel> getHomeWorkList() {
 		List<TaskModel> tempList = new ArrayList<>();
-		List<Map> list = workServiceImpl.getDateLimitHomeWork(DateUtil
-				.getCurrentDateStr("yyyy-MM-dd HH:mm"), DateUtil.addDays(
-						DateUtil.getCurrentDateStr("yyyy-MM-dd HH:mm"), 1));
+		List<Map> list = workServiceImpl.getDateLimitHomeWork(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM), 
+				DateUtil.addDays(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD), 1));
 		if (null != list) {
 			for (int i = 0; i < list.size(); i++) {
-				TaskModel temp = new TaskModel();
-				temp.setDate((String) list.get(i).get("time"));
-				temp.setId((String) list.get(i).get("id"));
-				temp.setType(TaskModel.TYPE_HOMEWORK_PUBLISH);
-				temp.setUserType(TaskModel.UTYPE_STUDENT);
-				tempList.add(temp);
+				if (DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM), (String)list.get(i).get("time"), DateUtil.YYYYMMDDHHMM)) {
+					TaskModel temp = new TaskModel();
+					temp.setDate((String) list.get(i).get("time"));
+					temp.setId((String) list.get(i).get("id"));
+					temp.setType(TaskModel.TYPE_HOMEWORK_PUBLISH);
+					tempList.add(temp);
+				}
 			}
 		}
 		System.out.println("作业提醒有："+tempList.size()+"条");
@@ -148,7 +155,7 @@ public class SpringTimerTest {
 	 * @return
 	 */
 	private List<TaskModel> getCurrentDayCourseStartTime() {
-		String now = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM);
+		String now = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD);
 		List<TaskModel> result = new ArrayList<>(); 
 		List<Map> list2 = courseServiceImpl.getContainDateList(now, now);;
 		if (null != list2) {
@@ -156,126 +163,81 @@ public class SpringTimerTest {
 				Map map = list2.get(j);
 				//天循环的课程
 				if (map.get("repeatType").equals("01")) {
-					//判断课程的开始结束时间是否与今天有交集
-					if (DateUtil.isOverlap2(now, now, (String)map.get("startDay"), (String)map.get("endDay"))) {
-						//课程重复天数
-						int repeatNumber = (int)map.get("repeatNumber");
-						//该课程一共有多少天
-						int distance = DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay"));
-						//一共上几次课
-						int repeat = distance / repeatNumber;
-						for (int k = 0; k <= repeat; k++) {
-							//每次上课的具体日期
-							String date = DateUtil.addDays((String)map.get("startDay"), k*repeatNumber);
-							//判断是否上课时间在指定月份里
-							//System.out.println("*上课时间："+date);
-							if (date.equals(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD))) {
-								//System.out.println("*今天有要上的课："+map.get("courseId"));
-								//获取课程的重复规律
-								List<CourseCell> list3 = courseCellServiceImpl.getCells((String)map.get("ciId"));
-								if (null != list3 && list3.size() > 0) {
-									//System.out.println("*courseCell的个数："+list3.size());
-									for (int l = 0; l < list3.size(); l++) {
-										//获取上课时间集合
-										String[] lessions = list3.get(l).getLessonNumber().split(",");
-										for (int m = 0; m < lessions.length; m++) {
-											TimeTable timeTable = timeTableServiceImpl.getItemBySchoolId((String)map.get("schoolId"), lessions[m]);
-											Map registMap = registConfigServiceImpl.getRegistTimeByCourseId((String)map.get("courseId"));
-											if (null != timeTable) {
-												int remind = (int)map.get("remindTime");
-												String remindTime = DateUtil.deleteMinutes(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" "+timeTable.getStartTime(),remind);
-												//System.out.println("*课程的提醒时间："+remindTime);
-												int regist = 10;
-												if (null != registMap) {
-													regist = (int)registMap.get("registTime");
-												}
-												String registTime = DateUtil.deleteMinutes(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" "+timeTable.getStartTime(),regist);
-												//System.out.println("*课程的签到时间："+registTime);
-												if (DateUtil.isBefore(now,remindTime, DateUtil.YYYYMMDDHHMM)) {
+					//课程重复天数
+					int repeatNumber = (int)map.get("repeatNumber");
+					//该课程一共有多少天
+					int distance = DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay"));
+					//一共上几次课
+					int repeat = distance / repeatNumber;
+					for (int k = 0; k <= repeat; k++) {
+						//每次上课的具体日期
+						String date = DateUtil.addDays((String)map.get("startDay"), k*repeatNumber);
+						//判断是否上课时间为今天
+						if (date.equals(now)) {
+							//获取课程的重复规律
+							List<CourseCell> list3 = courseCellServiceImpl.getCells((String)map.get("ciId"));
+							if (null != list3 && list3.size() > 0) {
+								for (int l = 0; l < list3.size(); l++) {
+									String courseStart = now +" "+list3.get(l).getStartTime(); 
+									String remindTime = DateUtil.deleteMinutes(courseStart,EteacherConstants.COURSE_REMIND);
+									//上课提醒
+									if (DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM),remindTime, DateUtil.YYYYMMDDHHMM)) {
+										TaskModel model = new TaskModel();
+										model.setDate(remindTime);
+										model.setId((String)map.get("courseId"));
+										model.setType(TaskModel.TYPE_COURSE_START_REMIND);
+										result.add(model);
+									}
+									//签到提醒
+									if (DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM),courseStart, DateUtil.YYYYMMDDHHMM)) {
+										TaskModel model = new TaskModel();
+										model.setDate(courseStart);
+										model.setId((String)map.get("courseId"));
+										model.setType(TaskModel.TYPE_SIGN_IN);
+										result.add(model);
+									}
+								}
+							}
+					   }
+					}
+				}else{
+					//获取课程的重复规律
+					List<CourseCell> list3 = courseCellServiceImpl.getCells((String)map.get("ciId"));
+					if (null != list3) {
+						for (int k = 0; k < list3.size(); k++) {
+							CourseCell cell = list3.get(k);
+							if (null != cell.getWeekDay()) {
+								//查看具体课程在周几上课
+								String[] week = cell.getWeekDay().split(",");
+								for (int l = 0; l < week.length; l++) {
+									//课程的间隔周期
+									int repeatNumber = (int)map.get("repeatNumber");
+									//课程一共上几周
+									int repeatCount = (DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay")))/(repeatNumber*7);
+									for (int m = 0; m <= repeatCount; m++) {
+										//获取课程具体在指定星期的上课时间
+										String dateStr = DateUtil.getWeek((String)map.get("startDay"), m*repeatNumber, Integer.parseInt(week[l]));
+										if (null != dateStr) {
+											//如果上课时间在学期内&&在所指定的月份内
+											if (dateStr.equals(now)) {
+												//获取上课时间集合
+												String courseStart = now +" "+list3.get(l).getStartTime();
+												String remindTime = DateUtil.deleteMinutes(courseStart,EteacherConstants.COURSE_REMIND);
+												//上课提醒
+												if (DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM),remindTime, DateUtil.YYYYMMDDHHMM)) {
 													TaskModel model = new TaskModel();
 													model.setDate(remindTime);
 													model.setId((String)map.get("courseId"));
 													model.setType(TaskModel.TYPE_COURSE_START_REMIND);
-													model.setUserType(TaskModel.UTYPE_TEACHER);
 													result.add(model);
 												}
-												if (DateUtil.isBefore(now,registTime, DateUtil.YYYYMMDDHHMM)) {
-													TaskModel model1 = new TaskModel();
-													model1.setDate(registTime);
-													model1.setId((String)map.get("courseId"));
-													model1.setType(TaskModel.TYPE_SIGN_IN);
-													model1.setUserType(TaskModel.UTYPE_STUDENT);
-													result.add(model1);
-												}
-											}
-										}
-									}
-								}
-						   }
-						}
-					}
-				}else{
-					//获取周重复课程的开始时间
-					String start = (String)map.get("startDay");
-					//获取周重复课程结束周的周一
-					String end = (String)map.get("endDay");
-					//查看课程是否与指定的月份有交集
-					if (DateUtil.isOverlap2(now, now, start, end)) {
-						//System.out.println("*周重复有交集的");
-						//获取课程的重复规律
-						List<CourseCell> list3 = courseCellServiceImpl.getCells((String)map.get("ciId"));
-						if (null != list3) {
-							for (int k = 0; k < list3.size(); k++) {
-								CourseCell cell = list3.get(k);
-								if (null != cell.getWeekDay()) {
-									//查看具体课程在周几上课
-									String[] week = cell.getWeekDay().split(",");
-									for (int l = 0; l < week.length; l++) {
-										//课程的间隔周期
-										int repeatNumber = (int)map.get("repeatNumber");
-										//课程一共上几周
-										int repeatCount = (DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay")))/(repeatNumber*7);
-										for (int m = 0; m <= repeatCount; m++) {
-											//获取课程具体在指定星期的上课时间
-											String dateStr = DateUtil.getWeek(start, m*repeatNumber, Integer.parseInt(week[l]));
-											if (null != dateStr) {
-												//如果上课时间在学期内&&在所指定的月份内
-												if (DateUtil.isBefore(dateStr,end,DateUtil.YYYYMMDD) && dateStr.equals(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD))) {
-													//获取上课时间集合
-													String[] lessions = cell.getLessonNumber().split(",");
-													if (null != lessions) {
-														for (int n = 0; n < lessions.length; n++) {
-															TimeTable timeTable = timeTableServiceImpl.getItemBySchoolId((String)map.get("schoolId"), lessions[n]);
-															Map registMap = registConfigServiceImpl.getRegistTimeByCourseId((String)map.get("courseId"));
-															if (null != timeTable) {
-																int remind = (int)map.get("remindTime");
-																String remindTime = DateUtil.deleteMinutes(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" "+timeTable.getStartTime(),remind);
-																int regist = 10;
-																if (null != registMap) {
-																	regist = (int)registMap.get("registTime");
-																}
-																String registTime = DateUtil.deleteMinutes(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" "+timeTable.getStartTime(),regist);
-																if (null != remindTime) {
-																	if (DateUtil.isBefore(now,remindTime, DateUtil.YYYYMMDDHHMM)) {
-																		TaskModel model = new TaskModel();
-																		model.setDate(remindTime);
-																		model.setId((String)map.get("courseId"));
-																		model.setType(TaskModel.TYPE_COURSE_START_REMIND);
-																		model.setUserType(TaskModel.UTYPE_TEACHER);
-																		result.add(model);
-																	}
-																	if (DateUtil.isBefore(now,registTime, DateUtil.YYYYMMDDHHMM)) {
-																		TaskModel model1 = new TaskModel();
-																		model1.setDate(registTime);
-																		model1.setId((String)map.get("courseId"));
-																		model1.setType(TaskModel.TYPE_SIGN_IN);
-																		model1.setUserType(TaskModel.UTYPE_STUDENT);
-																		result.add(model1);
-																	}
-																}
-															}
-														}
-													}
+												//签到提醒
+												if (DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM),courseStart, DateUtil.YYYYMMDDHHMM)) {
+													TaskModel model = new TaskModel();
+													model.setDate(courseStart);
+													model.setId((String)map.get("courseId"));
+													model.setType(TaskModel.TYPE_SIGN_IN);
+													result.add(model);
 												}
 											}
 										}
@@ -290,134 +252,97 @@ public class SpringTimerTest {
 		System.out.println("上课提醒有："+result.size()+"条");
 		return result;
 	}
+
 	/**
 	 * 获取当天所有课程的提醒时间
 	 * (用于用户新增课程后新增课程提醒)
 	 */
-	public void checkCourseById(String courseId,String schoolId) {
-		Course course = courseServiceImpl.get(courseId);
-		CourseItem courseItem = courseItemServiceImpl.getItemByCourseId(courseId);
-		if (null == course || null == courseItem) {
+	public void addCourseById(String courseId) {
+		List<CourseItem> courseItemList = courseItemServiceImpl.getItemByCourseId(courseId);
+		if (null == courseItemList) {
 			return;
 		}
-		List<TaskModel> result = new ArrayList<>(); 
-		String now = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM);
-		if (DateUtil.isBefore(courseItem.getStartDay(), DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD), DateUtil.YYYYMMDD)
-				&& DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD), courseItem.getEndDay(), DateUtil.YYYYMMDD)) {
-			//天循环的课程
-			if (courseItem.getRepeatType().equals("01")) {
-				if (DateUtil.isOverlap2(now, now, courseItem.getStartDay(), courseItem.getEndDay())) {
-					//课程重复天数
-					int repeatNumber = courseItem.getRepeatNumber();
-					//该课程一共有多少天
-					int distance = DateUtil.getDayBetween(courseItem.getStartDay(), courseItem.getEndDay());
-					//一共上几次课
-					int repeat = distance / repeatNumber;
-					for (int k = 0; k <= repeat; k++) {
-						//每次上课的具体日期
-						String date = DateUtil.addDays(courseItem.getStartDay(), k*repeatNumber);
-						//判断是否上课时间在指定月份里
-						if (date.equals(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD))) {
-							//获取课程的重复规律
-							List<CourseCell> list3 = courseCellServiceImpl.getCells(courseItem.getCiId());
-							if (null != list3 && list3.size() > 0) {
-								for (int l = 0; l < list3.size(); l++) {
-									//获取上课时间集合
-									String[] lessions = list3.get(l).getLessonNumber().split(",");
-									for (int m = 0; m < lessions.length; m++) {
-										TimeTable timeTable = timeTableServiceImpl.getItemBySchoolId(schoolId, lessions[m]);
-										Map registMap = registConfigServiceImpl.getRegistTimeByCourseId(courseId);
-										if (null != timeTable) {
-											int remind = Integer.parseInt(course.getRemindTime().trim());
-											String remindTime = DateUtil.deleteMinutes(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" "+timeTable.getStartTime(),remind);
-											int regist = 10;
-											if (null != registMap) {
-												regist = (int)registMap.get("registTime");
-											}
-											String registTime = DateUtil.deleteMinutes(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" "+timeTable.getStartTime(),regist);
-											if (DateUtil.isBefore(now,remindTime, DateUtil.YYYYMMDDHHMM)) {
-												TaskModel model = new TaskModel();
-												model.setDate(remindTime);
-												model.setId(courseId);
-												model.setType(TaskModel.TYPE_COURSE_START_REMIND);
-												model.setUserType(TaskModel.UTYPE_TEACHER);
-												result.add(model);
-											}
-											if (DateUtil.isBefore(now,registTime, DateUtil.YYYYMMDDHHMM)) {
-												TaskModel model1 = new TaskModel();
-												model1.setDate(registTime);
-												model1.setId(courseId);
-												model1.setType(TaskModel.TYPE_SIGN_IN);
-												model1.setUserType(TaskModel.UTYPE_STUDENT);
-												result.add(model1);
-											}
+		for (int i = 0; i < courseItemList.size(); i++) {
+			CourseItem courseItem = courseItemList.get(i);
+			List<TaskModel> result = new ArrayList<>(); 
+			String now = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD);
+			if (DateUtil.isInRange(now, courseItem.getStartDay(), courseItem.getEndDay())) {
+				//天循环的课程
+				if (courseItem.getRepeatType().equals("01")) {
+						//课程重复天数
+						int repeatNumber = courseItem.getRepeatNumber();
+						//该课程一共有多少天
+						int distance = DateUtil.getDayBetween(courseItem.getStartDay(), courseItem.getEndDay());
+						//一共上几次课
+						int repeat = distance / repeatNumber;
+						for (int k = 0; k <= repeat; k++) {
+							//每次上课的具体日期
+							String date = DateUtil.addDays(courseItem.getStartDay(), k*repeatNumber);
+							//判断是否上课时间在指定月份里
+							if (date.equals(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD))) {
+								//获取课程的重复规律
+								List<CourseCell> list3 = courseCellServiceImpl.getCells(courseItem.getCiId());
+								if (null != list3 && list3.size() > 0) {
+									for (int l = 0; l < list3.size(); l++) {
+										String courseStart = now +" "+list3.get(l).getStartTime();  
+										String remindTime = DateUtil.deleteMinutes(courseStart,EteacherConstants.COURSE_REMIND);
+										//上课提醒
+										if (DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM),remindTime, DateUtil.YYYYMMDDHHMM)) {
+											TaskModel model = new TaskModel();
+											model.setDate(remindTime);
+											model.setId(courseId);
+											model.setType(TaskModel.TYPE_COURSE_START_REMIND);
+											result.add(model);
+										}
+										//签到提醒
+										if (DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM),courseStart, DateUtil.YYYYMMDDHHMM)) {
+											TaskModel model = new TaskModel();
+											model.setDate(courseStart);
+											model.setId(courseId);
+											model.setType(TaskModel.TYPE_SIGN_IN);
+											result.add(model);
 										}
 									}
 								}
 							}
 						}
-					}
-				}
-			}else{
-				//获取周重复课程的开始时间
-				String start = courseItem.getStartDay();
-				//获取周重复课程结束周的周一
-				String end = courseItem.getEndDay();
-				//查看课程是否与指定的月份有交集
-				if (DateUtil.isOverlap2(now, now, start, end)) {
-					//System.out.println("*周重复有交集的");
-					//获取课程的重复规律
-					List<CourseCell> list3 = courseCellServiceImpl.getCells(courseItem.getCiId());
-					if (null != list3) {
-						for (int k = 0; k < list3.size(); k++) {
-							CourseCell cell = list3.get(k);
-							if (null != cell.getWeekDay()) {
-								//查看具体课程在周几上课
-								String[] week = cell.getWeekDay().split(",");
-								for (int l = 0; l < week.length; l++) {
-									//课程的间隔周期
-									int repeatNumber = courseItem.getRepeatNumber();
-									//课程一共上几周
-									int repeatCount = (DateUtil.getDayBetween(courseItem.getStartDay(), courseItem.getEndDay()))/(repeatNumber*7);
-									for (int m = 0; m <= repeatCount; m++) {
-										//获取课程具体在指定星期的上课时间
-										String dateStr = DateUtil.getWeek(start, m*repeatNumber, Integer.parseInt(week[l]));
-										if (null != dateStr) {
-											//如果上课时间在学期内&&在所指定的月份内
-											if (DateUtil.isBefore(dateStr,courseItem.getEndDay(),DateUtil.YYYYMMDD) && dateStr.equals(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD))) {
-												//获取上课时间集合
-												String[] lessions = cell.getLessonNumber().split(",");
-												if (null != lessions) {
-													for (int n = 0; n < lessions.length; n++) {
-														TimeTable timeTable = timeTableServiceImpl.getItemBySchoolId(schoolId, lessions[n]);
-														Map registMap = registConfigServiceImpl.getRegistTimeByCourseId(courseId);
-														if (null != timeTable) {
-															int remind = Integer.parseInt((course.getRemindTime()).trim());
-															String remindTime = DateUtil.deleteMinutes(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" "+timeTable.getStartTime(),remind);
-															int regist = 10;
-															if (null != registMap) {
-																regist = (int)registMap.get("registTime");
-															}
-															String registTime = DateUtil.deleteMinutes(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" "+timeTable.getStartTime(),regist);
-															if (null != remindTime) {
-																if (DateUtil.isBefore(now,remindTime, DateUtil.YYYYMMDDHHMM)) {
-																	TaskModel model = new TaskModel();
-																	model.setDate(remindTime);
-																	model.setId(courseId);
-																	model.setType(TaskModel.TYPE_COURSE_START_REMIND);
-																	model.setUserType(TaskModel.UTYPE_TEACHER);
-																	result.add(model);
-																}
-																if (DateUtil.isBefore(now,registTime, DateUtil.YYYYMMDDHHMM)) {
-																	TaskModel model1 = new TaskModel();
-																	model1.setDate(registTime);
-																	model1.setId(courseId);
-																	model1.setType(TaskModel.TYPE_SIGN_IN);
-																	model1.setUserType(TaskModel.UTYPE_STUDENT);
-																	result.add(model1);
-																}
-															}
-														}
+				}else{
+						//获取课程的重复规律
+						List<CourseCell> list3 = courseCellServiceImpl.getCells(courseItem.getCiId());
+						if (null != list3) {
+							for (int k = 0; k < list3.size(); k++) {
+								CourseCell cell = list3.get(k);
+								if (null != cell.getWeekDay()) {
+									//查看具体课程在周几上课
+									String[] week = cell.getWeekDay().split(",");
+									for (int l = 0; l < week.length; l++) {
+										//课程的间隔周期
+										int repeatNumber = courseItem.getRepeatNumber();
+										int repeatCount = (DateUtil.getDayBetween(courseItem.getStartDay(), courseItem.getEndDay()))/(repeatNumber*7);
+										for (int m = 0; m <= repeatCount; m++) {
+											//获取课程具体在指定星期的上课时间
+											String dateStr = DateUtil.getWeek(courseItem.getStartDay(), m*repeatNumber, Integer.parseInt(week[l]));
+											if (null != dateStr) {
+												//如果上课时间在学期内&&在所指定的月份内
+												if (dateStr.equals(now)) {
+													//获取上课时间集合
+													String courseStart = now +" "+list3.get(l).getStartTime();
+													String remindTime = DateUtil.deleteMinutes(courseStart,EteacherConstants.COURSE_REMIND);
+													//上课提醒
+													if (DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM),remindTime, DateUtil.YYYYMMDDHHMM)) {
+														TaskModel model = new TaskModel();
+														model.setDate(remindTime);
+														model.setId(courseId);
+														model.setType(TaskModel.TYPE_COURSE_START_REMIND);
+														result.add(model);
+													}
+													//签到提醒
+													if (DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM),courseStart, DateUtil.YYYYMMDDHHMM)) {
+														TaskModel model = new TaskModel();
+														model.setDate(courseStart);
+														model.setId(courseId);
+														model.setType(TaskModel.TYPE_SIGN_IN);
+														result.add(model);
 													}
 												}
 											}
@@ -426,16 +351,15 @@ public class SpringTimerTest {
 								}
 							}
 						}
-					}
+				}
+				if (result.size() != 0) {
+					int size = result.size();
+					TaskModel[] tempsModels =  (TaskModel[])result.toArray(new TaskModel[size]);
+					addTask(tempsModels);
 				}
 			}
-			if (result.size() != 0) {
-				int size = result.size();
-				TaskModel[] tempsModels =  (TaskModel[])result.toArray(new TaskModel[size]);
-				addTask(tempsModels);
-			}
+			System.out.println("上课提醒有："+result.size()+"条");
 		}
-		System.out.println("上课提醒有："+result.size()+"条");
 	}
 	
 	/**
@@ -492,8 +416,12 @@ public class SpringTimerTest {
 			startTimer();
 		}
 	}
-	
-	 class MyComparator implements Comparator<TaskModel>
+	/**
+	 * 比较器
+	 * @author lifei
+	 *
+	 */
+	class MyComparator implements Comparator<TaskModel>
 	 {
 	     public int compare(TaskModel m1, TaskModel m2)
 	     {
@@ -538,15 +466,29 @@ public class SpringTimerTest {
 		}
 		TaskModel model = allList.get(0);
 		allList.remove(0);
+		PushBody pBody = getPushBodyByTaskModel(model);
+		System.out.println("------------pbody");
+		if (null != pBody) {
+			System.out.println("adfdfdfdfdf");
+			JPushUtils.pushMessage(pBody);
+		}
+	}
+	/**
+	 * TaskModel转换为PushBody
+	 * @param model
+	 * @return
+	 */
+	private PushBody getPushBodyByTaskModel(TaskModel model) {
+		PushBody pushBody = null;
 		switch (model.getType()) {
-		case TaskModel.TYPE_NOTICE:
-			pushNotice(model);
+		case TaskModel.TYPE_NOTICE_PUBLISH:
+			pushBody = getNoticeBody(model.getId());
 			break;
 		case TaskModel.TYPE_COURSE_START_REMIND:
-			pushCourseStartRemind(model);
+			pushBody = getCourseStartRemindBody(model.getId());
 			break;
 		case TaskModel.TYPE_HOMEWORK_PUBLISH:
-			pushHomeWorkPublish(model);
+			pushBody = getHomeWorkBody(model.getId());
 			break;
 		case TaskModel.TYPE_SIGN_IN:
 			pushSignIn(model);
@@ -554,68 +496,101 @@ public class SpringTimerTest {
 		default:
 			break;
 		}
+		return pushBody;
 	}
-	
 	/**
-	 * 发送通知推送
-	 * @param model
+	 * 获取上课时间提醒
+	 * @param id
+	 * @return
 	 */
-	private void pushNotice(TaskModel model){
-		Notice notice = noticeServiceImpl.get(model.getId());
+	private PushBody getCourseStartRemindBody(String courseId) {
+		Course course = courseServiceImpl.get(courseId);
+		if (null != course) {
+			List<Map> list = courseClassServiceImpl.getClassByCourseId(courseId);
+			if (null != list && list.size() > 0) {
+				List<String> classIds = new ArrayList<>();
+				for (int i = 0; i < list.size(); i++) {
+					classIds.add((String)list.get(i).get("classId"));
+				}
+				PushBody pBody = new PushBody();
+				pBody.setPlatform(Platform.all);
+				pBody.setRole(Role.student);
+				pBody.setSortFlag(classIds);
+				pBody.setSortType(SortType.tag);
+				pBody.setSortComb(SortComb.or);
+				HashMap<String, Object> extra = new HashMap<>();
+				extra.put("courseId", courseId);
+				NotifyBody nBody = NotifyBody.getNotifyBody("快要上课啦！",
+						course.getCourseName()+"提前"+EteacherConstants.COURSE_REMIND+"分钟进行课程提醒！",
+						0, extra);
+				pBody.setNotifyBody(nBody);
+				return pBody;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 通过通知Id获取通知的推送体
+	 * @param noticeId
+	 * @return
+	 */
+	private PushBody getNoticeBody(String noticeId){
+		Notice notice = noticeServiceImpl.get(noticeId);
 		if (null != notice) {
-			List<Map> list = noticeServiceImpl.getClassIdByNoticeId(model.getId());
-			String classIds = ""; 
+			List<Map> list = noticeServiceImpl.getClassIdByNoticeId(noticeId);
 			if (null != list && list.size() > 0) {
+				List<String> classIds = new ArrayList<>();
 				for (int i = 0; i < list.size(); i++) {
-					classIds += list.get(i).get("classId")+",";
+					classIds.add((String)list.get(i).get("classId"));
 				}
-				classIds = classIds.substring(0, classIds.length()-1);
+				PushBody pBody = new PushBody();
+				pBody.setPlatform(Platform.all);
+				pBody.setRole(Role.student);
+				pBody.setSortFlag(classIds);
+				pBody.setSortType(SortType.tag);
+				pBody.setSortComb(SortComb.or);
+				HashMap<String, Object> extra = new HashMap<>();
+				extra.put("noticeId", noticeId);
+				extra.put("flag",0);
+				NotifyBody nBody = NotifyBody.getNotifyBody(notice.getTitle(),
+						notice.getContent(),
+						1, extra);
+				pBody.setNotifyBody(nBody);
+				return pBody;
 			}
-			PushMessage message = new PushMessage();
-			message.setAction(JPushUtil.ACTION_NOTICE_DETAIL);
-			message.setTitle(notice.getTitle());
-			message.setContent(notice.getContent());
-			message.setShow(JPushUtil.SHOW_ON);
-			message.setClassId(classIds);
-			message.setUserType(model.getUserType());
-			Map<String, String> map = new HashMap();
-			map.put("noticeId", model.getId());
-			map.put("flag", "1");
-			message.setExtra(map);
-			JPushUtil.pushMessage(message);
-			System.out.println("message:"+message.toString());
-			System.out.println("执行通知推送啦");
 		}
+		return null;
 	}
 	/**
-	 * 发送作业发布推送
-	 * @param model
+	 * 通过作业Id获取作业的推送体
+	 * @param workId
+	 * @return
 	 */
-	private void pushHomeWorkPublish(TaskModel model){
-		Work work = workServiceImpl.get(model.getId());
+	private PushBody getHomeWorkBody(String workId){
+		Work work = workServiceImpl.get(workId);
 		if (null != work) {
-			List<Map> list = workServiceImpl.getClassIdByWorkId(model.getId());
-			String classIds = ""; 
-			if (null != list && list.size() > 0) {
+			List<Map> list = workServiceImpl.getClassIdByWorkId(workId);
+			if (null != list) {
+				List<String> classIds = new ArrayList<>();
 				for (int i = 0; i < list.size(); i++) {
-					classIds += list.get(i).get("classId")+",";
+					classIds.add((String)list.get(i).get("classId"));
 				}
-				classIds = classIds.substring(0, classIds.length()-1);
+				PushBody pBody = new PushBody();
+				pBody.setPlatform(Platform.all);
+				pBody.setRole(Role.student);
+				pBody.setSortFlag(classIds);
+				pBody.setSortType(SortType.tag);
+				pBody.setSortComb(SortComb.or);
+				HashMap<String, Object> extra = new HashMap<>();
+				extra.put("workId", workId);
+				NotifyBody nBody = NotifyBody.getNotifyBody(work.getTitle(),
+						work.getContent(),3, extra);
+				pBody.setNotifyBody(nBody);
+				return pBody;
 			}
-			PushMessage message = new PushMessage();
-			message.setAction(JPushUtil.ACTION_HOMEWORK_DETAIL);
-			message.setTitle("有新作业啦！");
-			message.setContent(work.getContent());
-			message.setShow(JPushUtil.SHOW_ON);
-			message.setUserType(model.getUserType());
-			message.setClassId(classIds);
-			Map<String, String> map = new HashMap();
-			map.put("workId", model.getId());
-			message.setExtra(map);
-			JPushUtil.pushMessage(message);
-			System.out.println("message:"+message.toString());
-			System.out.println("执行作业推送啦");
 		}
+		return null;
 	}
 	
 	/**
@@ -623,7 +598,7 @@ public class SpringTimerTest {
 	 * @param model
 	 */
 	private void pushSignIn(TaskModel model){
-		Course course = courseServiceImpl.get(model.getId());
+		/**Course course = courseServiceImpl.get(model.getId());
 		if (null != course) {
 			List<Map> list = noticeServiceImpl.getClassIdByNoticeId(model.getId());
 			String classIds = ""; 
@@ -640,31 +615,10 @@ public class SpringTimerTest {
 			message.setContent("提前"+course.getCourseId()+"进行课程提醒！");
 			message.setShow(JPushUtil.SHOW_ON);
 			message.setClassId(classIds);
-			message.setUserType(model.getUserType());
 			JPushUtil.pushMessage(message);
 			System.out.println("message:"+message.toString());
 			System.out.println("执行上课签到推送啦");
-		}
+		}**/
 	}
-	/**
-	 * 发送课程上课提醒推送（教师端）
-	 * @param model
-	 */
-	private void pushCourseStartRemind(TaskModel model){
-		Course course = courseServiceImpl.get(model.getId());
-		if (null != course) {
-			PushMessage message = new PushMessage();
-			message.setAction(JPushUtil.ACTION_ALERT);
-			message.setTitle(course.getCourseName()+" 快要上课啦！");
-			message.setContent("提前"+course.getCourseId()+"进行课程提醒！");
-			message.setUserId(course.getUserId());
-			message.setShow(JPushUtil.SHOW_ON);
-			message.setUserType(model.getUserType());
-			JPushUtil.pushMessage(message);
-			System.out.println("message:"+message.toString());
-			System.out.println("执行上课提醒推送啦");
-			//课程上课次数+1
-			signInServiceImpl.updateCourseNum(course.getCourseId());
-		}
-	}
+
 }

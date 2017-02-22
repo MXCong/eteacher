@@ -5,18 +5,16 @@ package com.turing.eteacher.model;
  *
  */
 public class TaskModel {
-	public static final int TYPE_COURSE_START_REMIND = 0;//课程开始提醒（教师端）
-	public static final int TYPE_NOTICE = 1;//通知发布提醒
-	public static final int TYPE_SIGN_IN = 2;//签到提醒
-	public static final int TYPE_HOMEWORK_PUBLISH = 3;//作业发布提醒
+	public static final int TYPE_COURSE_START_REMIND = 0;//课程开始提醒（教师端和学生端）
+	public static final int TYPE_NOTICE_PUBLISH = 1;//通知发布提醒(学生端)
+	public static final int TYPE_SIGN_IN = 2;//签到开启（教师端）
+	public static final int TYPE_HOMEWORK_PUBLISH = 3;//作业发布提醒（学生端）
+	public static final int TYPE_SIGN_START = 4;//课程开始签到提醒（学生端）
+	public static final int TYPE_SIGN_STOP = 5;//课程结束签到提醒（学生端）
 	
-	public static final int UTYPE_STUDENT = 1;
-	public static final int UTYPE_TEACHER = 2;
-	public static final int UTYPE_ALL = 3;
 	private int type;
 	private String id;
 	private String date;
-	private int userType;
 	public int getType() {
 		return type;
 	}
@@ -34,12 +32,6 @@ public class TaskModel {
 	}
 	public void setDate(String date) {
 		this.date = date;
-	}
-	public int getUserType() {
-		return userType;
-	}
-	public void setUserType(int userType) {
-		this.userType = userType;
 	}
 	@Override
 	public String toString() {

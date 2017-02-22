@@ -348,7 +348,6 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 			model.setDate(work.getPublishTime());
 			model.setId(workId);
 			model.setType(TaskModel.TYPE_HOMEWORK_PUBLISH);
-			model.setUserType(TaskModel.UTYPE_STUDENT);
 			springTimerTest.addTask(model);
 			break;
 		case 2:

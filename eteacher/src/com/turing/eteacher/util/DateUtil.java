@@ -361,22 +361,20 @@ public class DateUtil {
 	}
 	public static boolean isOverlap2(String startdate1, String enddate1,
 			String startdate2, String enddate2) {
-		SimpleDateFormat format1 = new SimpleDateFormat(YYYYMMDDHHMM);
-		SimpleDateFormat format2 = new SimpleDateFormat(YYYYMMDD);
+		SimpleDateFormat format = new SimpleDateFormat(YYYYMMDD);
 		Date start1 = null;
 		Date end1 = null;
 		Date start2 = null;
 		Date end2 = null;
 		try {
-			start1 = format1.parse(startdate1);
-			end1 = format1.parse(enddate1);
-			start2 = format2.parse(startdate2);
-			end2 = format2.parse(enddate2);
+			start1 = format.parse(startdate1);
+			end1 = format.parse(enddate1);
+			start2 = format.parse(startdate2);
+			end2 = format.parse(enddate2);
 		} catch (ParseException e) {
 			return false;
 		}
-		return !(((end1.getTime() <= start2.getTime()) || end2.getTime() < start1
-				.getTime()));
+		return !(((end1.getTime() < start2.getTime()) || end2.getTime() < start1.getTime()));
 	}
 
 	/**

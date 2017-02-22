@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -117,25 +116,24 @@ public class NoticeRemote extends BaseRemote {
 							return ReturnBody.getErrorBody("本通知已发布！");
 						}
 						if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
-							springTimerTest.updateTask(noticeId,TaskModel.TYPE_NOTICE,DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM));
+							springTimerTest.updateTask(noticeId,TaskModel.TYPE_NOTICE_PUBLISH,DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM));
 						}else {
 							TaskModel model = new TaskModel();
 							model.setId(noticeId);
 							model.setDate(notice.getPublishTime());
-							model.setType(TaskModel.UTYPE_STUDENT);
-							model.setType(TaskModel.TYPE_NOTICE);
+							model.setType(TaskModel.TYPE_NOTICE_PUBLISH);
 							springTimerTest.addTask(model);
 						}
 					}else if("0".equals(status)){//删除通知，不可见
 						if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
-							springTimerTest.deleteTask(noticeId, TaskModel.TYPE_NOTICE);
+							springTimerTest.deleteTask(noticeId, TaskModel.TYPE_NOTICE_PUBLISH);
 						}
 					}else if("2".equals(status)){//编辑状态
 						if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM), DateUtil.YYYYMMDDHHMM)) {
 							return ReturnBody.getErrorBody("本通知已发布不可编辑！");
 						}
 						if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
-							springTimerTest.deleteTask(noticeId,TaskModel.TYPE_NOTICE);
+							springTimerTest.deleteTask(noticeId,TaskModel.TYPE_NOTICE_PUBLISH);
 						}
 					}
 				}
@@ -256,17 +254,16 @@ public class NoticeRemote extends BaseRemote {
 					
 					if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
 						if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
-							springTimerTest.updateTask(noticeId,TaskModel.TYPE_NOTICE, publishTime);
+							springTimerTest.updateTask(noticeId,TaskModel.TYPE_NOTICE_PUBLISH, publishTime);
 						}else {
-							springTimerTest.deleteTask(noticeId,TaskModel.TYPE_NOTICE);
+							springTimerTest.deleteTask(noticeId,TaskModel.TYPE_NOTICE_PUBLISH);
 						}
 					}else {
 						if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
 							TaskModel model = new TaskModel();
 							model.setId(noticeId);
 							model.setDate(notice.getPublishTime());
-							model.setType(TaskModel.UTYPE_STUDENT);
-							model.setType(TaskModel.TYPE_NOTICE);
+							model.setType(TaskModel.TYPE_NOTICE_PUBLISH);
 							springTimerTest.addTask(model);
 						}
 					}
@@ -292,8 +289,7 @@ public class NoticeRemote extends BaseRemote {
 						TaskModel model = new TaskModel();
 						model.setId(noticeId);
 						model.setDate(notice.getPublishTime());
-						model.setType(TaskModel.UTYPE_STUDENT);
-						model.setType(TaskModel.TYPE_NOTICE);
+						model.setType(TaskModel.TYPE_NOTICE_PUBLISH);
 						springTimerTest.addTask(model);
 					}
 				}
