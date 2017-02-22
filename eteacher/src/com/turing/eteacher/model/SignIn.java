@@ -25,6 +25,7 @@ public class SignIn extends CreateTimeModel implements Serializable{
 	private String lon;//签到地点的经度坐标
 	private String lat;//签到地点的纬度坐标
 	private int courseNum;//上课次数
+	private String scId;
 	
 	@Id
 	@GeneratedValue(generator = "customId")
@@ -91,6 +92,13 @@ public class SignIn extends CreateTimeModel implements Serializable{
 	}
 	public void setCourseNum(int courseNum) {
 		this.courseNum = courseNum;
+	}
+	@Column(name = "SIGN_CODE_ID")
+	public String getScId() {
+		return scId;
+	}
+	public void setScId(String scId) {
+		this.scId = scId;
 	}
 	
 	
