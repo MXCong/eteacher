@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.SignCode;
+import com.turing.eteacher.model.SignIn;
 import com.turing.eteacher.service.ISignCodeService;
 import com.turing.eteacher.util.CustomIdGenerator;
 import com.turing.eteacher.util.StringUtil;
@@ -101,7 +102,44 @@ public class SignCodeRemote extends BaseRemote {
 				System.out.println(e.getMessage());
 				return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 			}
+		}
+		/**
+		 * 学生点击签到
+		 */
+		@RequestMapping(value="student/ClickSign",method=RequestMethod.POST)
+		public ReturnBody ClickSign(HttpServletRequest request){
+			try {
+				String code = request.getParameter("code");           
+				String courseId = request.getParameter("courseId");  
+				String scId = request.getParameter("scId");             
+				String userId = request.getParameter("userId");       
+				if(StringUtil.checkParams(code,courseId)){        
+					SignCode sc = SignCodeServiceImpl.selectOne("scId");
+					if(code.equals(sc.getCode())){                
+					  	SignIn si=new SignIn();                     
+					  	si.setCourseId(courseId);                 
+					  	si.setScId(scId);                           
+						si.setCreateTime(new Date());               
+						si.setStudentId(userId);                   
+						si.setStatus(1);                          
+						si.setSignId(CustomIdGenerator.generateShortUuid());
+						SignCodeServiceImpl.save(si);                  
+						return new ReturnBody("结束签到"); 
+					}else{
+						return new ReturnBody("输入验证码有误"); 
+					}
+				}else{
+					return new ReturnBody("验证码不能为空或系统异常"); 
+				}
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+				return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
+			}
 			
 		}
 	
+		
+		
+		
+		
 }
