@@ -80,6 +80,8 @@ public class JPushUtils {
 		NotifyBody nBody = NotifyBody.getNotifyBody("呃呃",
 				"我想问一下",
 				1, extra);
+//		NotifyBody nBody = NotifyBody.getPassthroughBody(
+//				1, extra);
 		pBody.setNotifyBody(nBody);
 		pushMessage(pBody);
 	}

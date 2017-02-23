@@ -221,7 +221,7 @@ public class SpringTimerTest {
 											//如果上课时间在学期内&&在所指定的月份内
 											if (dateStr.equals(now)) {
 												//获取上课时间集合
-												String courseStart = now +" "+list3.get(l).getStartTime();
+												String courseStart = now +" "+cell.getStartTime();
 												String remindTime = DateUtil.deleteMinutes(courseStart,EteacherConstants.COURSE_REMIND);
 												//上课提醒
 												if (DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM),remindTime, DateUtil.YYYYMMDDHHMM)) {
@@ -326,7 +326,7 @@ public class SpringTimerTest {
 												//如果上课时间在学期内&&在所指定的月份内
 												if (dateStr.equals(now)) {
 													//获取上课时间集合
-													String courseStart = now +" "+list3.get(l).getStartTime();
+													String courseStart = now +" "+cell.getStartTime();
 													String remindTime = DateUtil.deleteMinutes(courseStart,EteacherConstants.COURSE_REMIND);
 													//上课提醒
 													if (DateUtil.isBefore(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM),remindTime, DateUtil.YYYYMMDDHHMM)) {

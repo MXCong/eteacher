@@ -175,6 +175,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		String hql = "select distinct w.workId as workId , c.courseId as courseId , "
 				+ "c.courseName as courseName , w.title as title , ";
 		List<Map> list = null;
+		String now = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM);
 		if ("0".equals(status)) {// 已过期作业
 			hql += "w.publishTime as publishTime , w.endTime as endTime , " 
 					+ "w.status as status , "
@@ -182,8 +183,8 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 					+ "from Work w , Course c "
 					+ "where w.courseId = c.courseId "
 					+ "and w.status = 1 and c.userId = ? "
-					+ "and w.endTime < now() order by w.endTime desc";
-			list = workDAO.findMapByPage(hql, page * 20, 20, userId);
+					+ "and w.endTime < ? order by w.endTime desc";
+			list = workDAO.findMapByPage(hql, page * 20, 20, userId,now);
 		}
 		if ("1".equals(status)) {// 已发布作业（已发布但未到期）
 			hql += "w.publishTime as publishTime," 
@@ -192,9 +193,9 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 					+ "from Work w , Course c "
 					+ "where w.courseId = c.courseId and w.status=1 "
 					+ "and c.userId = ? "
-					+ "and w.publishTime < now() and w.endTime > now() "
+					+ "and w.publishTime <= ? and w.endTime >= ? "
 					+ "order by w.publishTime desc";
-			list = workDAO.findMapByPage(hql, page * 20, 20, userId);
+			list = workDAO.findMapByPage(hql, page * 20, 20, userId,now,now);
 		}
 		if ("2".equals(status)) {// 获取待发布作业
 			hql += "w.publishTime as publishTime , w.content as content , "
@@ -202,9 +203,9 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 					+ "from Work w , Course c "
 					+ "where w.courseId = c.courseId and ( w.status=1 "
 					+ "or w.status = 2 ) and c.userId = ? "
-					+ "and (w.publishTime > now() or w.publishTime is null ) "
+					+ "and (w.publishTime > ? or w.publishTime is null ) "
 					+ "order by w.publishTime asc";
-			list = workDAO.findMapByPage(hql, page * 20, 20, userId);
+			list = workDAO.findMapByPage(hql, page * 20, 20, userId,now);
 		}
 		if ("4".equals(status)) {// 获取全部作业
 			if(null != courseId){
@@ -229,11 +230,11 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 				String publishTime = (String) list.get(i).get("publishTime");
 				String endTime = (String) list.get(i).get("endTime");
 				int st = (int) list.get(i).get("status");
-				if(publishTime.compareTo(nowDate) > 0 && st == 1){
+				if(DateUtil.isBefore(now, publishTime, DateUtil.YYYYMMDDHHMM) && st == 1){
 					list.get(i).put("period", "待发布");
-				}else if(endTime.compareTo(nowDate) < 0 && st == 1){
+				}else if(DateUtil.isBefore(endTime, now, DateUtil.YYYYMMDDHHMM) && st == 1){
 					list.get(i).put("period", "已到期");
-				}else if(publishTime.compareTo(nowDate) <= 0 && endTime.compareTo(nowDate) >= 0 && st == 1){
+				}else if(DateUtil.isBefore(publishTime, now, DateUtil.YYYYMMDDHHMM) && DateUtil.isBefore(now, endTime , DateUtil.YYYYMMDDHHMM) && st == 1){
 					list.get(i).put("period", "已发布");
 				}else{
 					list.get(i).put("period", "草稿");
@@ -244,13 +245,13 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 			hql += "w.content as content from Work w, Course c "
 					+ "where w.courseId = c.courseId "
 					+ "and c.userId = ? and  w.endTime like CONCAT(?,'%') "
-					+ "and w.status = 1 and w.publishTime < now() and w.publishTime is not null " 
+					+ "and w.status = 1 and w.publishTime < ? and w.publishTime is not null " 
 					+ "order by w.publishTime asc";
 			// "where w.workId = wc.workId and wc.courseId = c.courseId "+
 			// "and c.userId = ? and w.endTime like CONCAT(?,'%') "+
 			// "and w.status = 1 and w.publishTime < now() "+
 			// "order by w.publishTime asc";
-			list = workDAO.findMap(hql, userId, date);
+			list = workDAO.findMap(hql, userId, date,now);
 		}
 		/*
 		 * 修改：macong abandon 一个作业可能对应多门课程，一门课程可能包含多个班级信息。对这些信息进行拼接

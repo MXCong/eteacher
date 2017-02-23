@@ -135,7 +135,7 @@ public class TeacherServiceImpl extends BaseService<Teacher> implements
 		List<Map> list = courseDAO.findMapByPage(hql, page * 20, 20, userId);
 		if (null != list && list.size() > 0) {
 			for (int i = 0; i < list.size(); i++) {
-				String sql = "SELECT c.CLASS_NAME AS className  FROM t_class c WHERE c.CLASS_ID IN (SELECT cc.CLASS_ID FROM t_course_class cc WHERE cc.COURSE_ID = ?)";
+				String sql = "SELECT CONCAT(c.GRADE,'级', c.CLASS_NAME) AS className  FROM t_class c WHERE c.CLASS_ID IN (SELECT cc.CLASS_ID FROM t_course_class cc WHERE cc.COURSE_ID = ?)";
 				List<Map> list2 = courseDAO.findBySql(sql,list.get(i).get("courseId"));
 				if (null != list2 && list2.size() > 0) {
 					String className = "(";

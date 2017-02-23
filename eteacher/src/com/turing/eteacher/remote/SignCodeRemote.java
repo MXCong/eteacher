@@ -1,7 +1,9 @@
 package com.turing.eteacher.remote;	
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
@@ -18,8 +20,16 @@ import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.SignCode;
 import com.turing.eteacher.model.SignIn;
+import com.turing.eteacher.service.ICourseClassService;
 import com.turing.eteacher.service.ISignCodeService;
 import com.turing.eteacher.util.CustomIdGenerator;
+import com.turing.eteacher.util.JPushUtils;
+import com.turing.eteacher.util.NotifyBody;
+import com.turing.eteacher.util.PushBody;
+import com.turing.eteacher.util.PushBody.Platform;
+import com.turing.eteacher.util.PushBody.Role;
+import com.turing.eteacher.util.PushBody.SortComb;
+import com.turing.eteacher.util.PushBody.SortType;
 import com.turing.eteacher.util.StringUtil;
 
 @RestController
@@ -27,7 +37,9 @@ import com.turing.eteacher.util.StringUtil;
 public class SignCodeRemote extends BaseRemote {
 
 		@Autowired
-		private ISignCodeService SignCodeServiceImpl;		
+		private ISignCodeService SignCodeServiceImpl;	
+		@Autowired
+		private ICourseClassService courseClassServiceImpl;
 		/**
 		 * 开启签到          
 		 * @param request     
@@ -50,6 +62,7 @@ public class SignCodeRemote extends BaseRemote {
 					sc.setCreateTime(new Date());
 					boolean bn = SignCodeServiceImpl.Add(sc);
 					if (bn = true) {
+						startSign(courseId,id);
 						final Timer timer = new Timer();
 					    timer.schedule(new TimerTask() {
 					      public void run() {
@@ -70,14 +83,66 @@ public class SignCodeRemote extends BaseRemote {
 					    m.put("code", String.valueOf(code));
 						return new ReturnBody(m);
 					} else {
-						return new ReturnBody(ReturnBody.getErrorBody("保存失败"));
+						return ReturnBody.getErrorBody("保存失败");
 					}
 				}else {
-					return new ReturnBody(ReturnBody.getErrorBody("值不能为空"));
+					return ReturnBody.getErrorBody("值不能为空");
 				} 
 			} catch (Exception e) {
 				return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 			}
+		}
+		/**
+		 * 开启签到通知
+		 * @param courseId
+		 * @param scId
+		 */
+		private void startSign(String courseId,String scId){
+			PushBody pBody = new PushBody();
+			HashMap<String, String> extra = new HashMap<>();
+			extra.put("courseId", courseId);
+			extra.put("scId", scId);
+			NotifyBody noBody = NotifyBody.getNotifyBody("签到提醒", "上课啦,快来签到吧！", 
+					4, extra);
+			pBody.setNotifyBody(noBody);
+			pBody.setPlatform(Platform.all);
+			pBody.setRole(Role.student);
+			List<Map> list = courseClassServiceImpl.getClassByCourseId(courseId);
+			if (null != list && list.size() > 0) {
+				List<String> classIds = new ArrayList<>();
+				for (int i = 0; i < list.size(); i++) {
+					classIds.add((String)list.get(i).get("classId"));
+				}
+				pBody.setSortFlag(classIds);
+			}
+			pBody.setSortType(SortType.tag);
+			pBody.setSortComb(SortComb.or);
+			JPushUtils.pushMessage(pBody);
+		}
+		/**
+		 * 关闭签到通知
+		 * @param courseId
+		 * @param csId
+		 */
+		private void endSign(String courseId,String scId){
+			PushBody pBody = new PushBody();
+			HashMap<String, String> extra = new HashMap<>();
+			extra.put("scId", scId);
+			NotifyBody noBody = NotifyBody.getPassthroughBody(5, extra);
+			pBody.setNotifyBody(noBody);
+			pBody.setPlatform(Platform.all);
+			pBody.setRole(Role.student);
+			List<Map> list = courseClassServiceImpl.getClassByCourseId(courseId);
+			if (null != list && list.size() > 0) {
+				List<String> classIds = new ArrayList<>();
+				for (int i = 0; i < list.size(); i++) {
+					classIds.add((String)list.get(i).get("classId"));
+				}
+				pBody.setSortFlag(classIds);
+			}
+			pBody.setSortType(SortType.tag);
+			pBody.setSortComb(SortComb.or);
+			JPushUtils.pushMessage(pBody);
 		}
 	
 		/**
@@ -94,6 +159,7 @@ public class SignCodeRemote extends BaseRemote {
 					sc.setEndTime(new Date());
 					sc.setState(1);
 					SignCodeServiceImpl.update(sc);
+					endSign(sc.getCourseId(),scId);
 					return new ReturnBody("结束签到");
 				} else {
 					return new ReturnBody("结束签到");
