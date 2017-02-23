@@ -9,9 +9,12 @@ import org.springframework.stereotype.Service;
 
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
+import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.dao.WorkDAO;
+import com.turing.eteacher.dao.WorkStatusDAO;
 import com.turing.eteacher.model.TaskModel;
 import com.turing.eteacher.model.Work;
+import com.turing.eteacher.model.WorkStatus;
 import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.IWorkService;
 import com.turing.eteacher.util.CustomIdGenerator;
@@ -24,6 +27,9 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 
 	@Autowired
 	private WorkDAO workDAO;
+	
+	@Autowired
+	private WorkStatusDAO workStatusDAO;
 
 	@Autowired
 	private IFileService fileServiceImpl;
@@ -82,7 +88,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		if ("1".equals(status)) {// 获取已完成作业列表
 			hql = "select distinct w.workId as workId , c.courseName as courseName , "
 					+ "w.content as content , w.publishTime as publishTime , "
-					+ "w.endTime as endTime "
+					+ "w.endTime as endTime , w.title as title "
 					+ "from Work w , Course c , WorkClass wc , Student s , WorkStatus ss "
 					+ "where w.workId = wc.workId and wc.classId = s.classId "
 					+ "and c.courseId = w.courseId "
@@ -94,7 +100,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		if ("2".equals(status)) {// 获取所有作业列表
 			hql = "select distinct w.workId as workId , c.courseName as courseName, "
 					+ "w.content as content , w.publishTime as publishTime, "
-					+ "w.endTime as endTime "
+					+ "w.endTime as endTime , w.title as title "
 					+ "from Work w , Course c , WorkClass wc , Student s "
 					+ "where w.workId = wc.workId and wc.classId = s.classId "
 					+ "and c.courseId = w.courseId "
@@ -192,7 +198,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		}
 		if ("2".equals(status)) {// 获取待发布作业
 			hql += "w.publishTime as publishTime , w.content as content , "
-					+ "w.status as status , w.endTime as endTime "
+					+ "w.status as status , w.endTime as endTime , w.title as title "
 					+ "from Work w , Course c "
 					+ "where w.courseId = c.courseId and ( w.status=1 "
 					+ "or w.status = 2 ) and c.userId = ? "
@@ -203,7 +209,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		if ("4".equals(status)) {// 获取全部作业
 			if(null != courseId){
 				hql += "w.publishTime as publishTime , w.content as content , "
-						+ "w.status as status , w.endTime as endTime "
+						+ "w.status as status , w.endTime as endTime , w.title as title "
 						+ "from Work w , Course c "
 						+ "where w.courseId = c.courseId and ( w.status = 1 "
 						+ "or w.status = 2 ) and c.userId = ? and w.courseId = ? "
@@ -437,5 +443,26 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 			}
 		}
 		
+	}
+	/**
+	 * 学生端功能：改变作业状态（未完成作业-->已完成作业；已完成作业-->未完成作业）
+	 * @param stuId
+	 * @param workId
+	 * @param status （true or false）
+	 */
+	@Override
+	public void changeStatus(String stuId, String workId, String status) {
+		if(status.equals("true")){//未完成作业-->已完成作业
+			WorkStatus record = new WorkStatus();
+			record.setStuId(stuId);
+			record.setWorkId(workId);
+			workDAO.save(record);
+		}else{					  //已完成作业-->未完成作业
+			String hql = "select ws.wsId as wsId from WorkStatus ws "
+					+ "where ws.workId = ? and ws.stuId = ?";
+			Map m = workDAO.findMap(hql, workId,stuId).get(0);
+			String tid = (String)m.get("wsId");
+			workStatusDAO.deleteById(tid);
+		}
 	}
 }

@@ -67,4 +67,12 @@ public interface IWorkService extends IService<Work> {
 	 * @param classList ：该作业作用的班级数组
 	 */
 	public void addWorkClass(String workId , String classList);
+	/**
+	 * 学生端功能：改变作业状态（未完成作业-->已完成作业；已完成作业-->未完成作业）
+	 * @author macong
+	 * @param stuId
+	 * @param workId
+	 * @param status （true or false）
+	 */
+	public void changeStatus(String stuId, String workId, String status);
 }

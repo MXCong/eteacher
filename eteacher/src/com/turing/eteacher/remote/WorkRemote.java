@@ -155,11 +155,11 @@ public class WorkRemote extends BaseRemote {
 		try {
 			String stuId = getCurrentUser(request) == null ? null : getCurrentUser(request).getUserId();
 			String workId = request.getParameter("workId");
-			WorkStatus record = new WorkStatus();
-			record.setStuId(stuId);
-			record.setWorkId(workId);
-			String wsId = (String) workServiceImpl.save(record);
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, wsId);
+			String status = request.getParameter("status");
+			if (StringUtil.checkParams(status, workId,stuId)) {
+				workServiceImpl.changeStatus(stuId,workId,status);
+			}
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
