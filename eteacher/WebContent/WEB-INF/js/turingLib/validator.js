@@ -1,8 +1,8 @@
 
 //引用style和js文件
 if(!$.formValidator){
-	document.write('<scri'+'pt type="text/java'+'script" src="'+top.rootPath+'/js/formValidator/formValidator-4.1.3.js"></script>');
-	document.write('<scri'+'pt type="text/java'+'script" src="'+top.rootPath+'/js/formValidator/formValidatorRegex.js"></script>');
+	document.write('<scri'+'pt type="text/java'+'script" src="../js/formValidator/formValidator-4.1.3.js"></script>');
+	document.write('<scri'+'pt type="text/java'+'script" src="../js/formValidator/formValidatorRegex.js"></script>');
 }
 $(function() {
 	$.extend( {

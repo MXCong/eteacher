@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>教学系统教师pc端</title>
+<link href="../css/base.css" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/turingLib/alert.js"></script>
+<script type="text/javascript" src="../js/turingLib/validator.js"></script>
+<script type="text/javascript" src="../js/utils/md5.js"></script>
+<script type="text/javascript" src="../js/utils/PrefsUtils.js"></script>
+<script type="text/javascript" src="../js/utils/ajax.js"></script>
+<script type="text/javascript">
+
+	function loginBtn() {
+        var phone_value = $('#account');
+        var passWord_value = $('#password');
+        var phone = /^((13\d)|(14[5,7])|(15[0,1,2,3,5,6,7,8,9])|(17[0,8,7])|(18\d))\d{8}$/;
+        if (!passWord_value.val()) {
+            alert("密码不能为空！");
+            return;
+        }
+        if (!phone_value.val()) {
+            alert("账号不能为空！");
+            return;
+        }
+        if (phone.test(phone_value.val())) {
+            var myDate = new Date();
+            var params = {};
+            params.appKey = '20161001_ITEACHER';
+            params.account = phone_value.val();
+            params.timeStamp = myDate.getTime();
+            params.imei = $.IMEI();
+            var pwd = hex_md5(passWord_value.val());
+            params.sign = hex_md5(params.appKey + params.account + params.timeStamp + pwd + params.imei);
+            $httpUtils.postNormal('login', params, function(ret) {
+            	$PrefsUtils.savePref('userId', ret.data.userId);
+            	$PrefsUtils.savePref('token', hex_md5(ret.data.token + pwd));
+            	getUserInfo();
+            });
+        } else {
+            if (phone_value.val() == "") {
+                alert("手机号不能为空！");
+            } else {
+                alert("手机格式有误！");
+            }
+        }
+    }
+	
+	/**
+     *获取用户信息
+     */
+    function getUserInfo() {
+    	$httpUtils.post('teacher/personInfo', null, function(ret) {
+    		if (ret.schoolId) {
+                $PrefsUtils.savePref('schoolId', ret.schoolId);
+                $PrefsUtils.savePref('name', ret.name);
+                $PrefsUtils.savePref('icon', ret.picture);
+                //$BaseUI.closeToWin('index', 'index.html');
+                window.location.href = 'index.html';
+            } else {
+            	window.location.href = 'index.html';
+            }
+        });
+    }
+</script>
+</head>
+<body>
+<div class="register-box">
+	<div class="panel">
+    	<div class="panel-body">
+        	<div class="reheader">
+            	<img src="../images/relogo.png" width="240" height="125" alt="" title="" />
+                <p>用户登录</p>
+            </div>
+            <form id="loginForm" class="register">
+            	<div class="register-body">
+            		<div class="form-group">
+                    	<label>账号：</label>
+                        <input id="account" onkeyup="value=value.replace(/[^\d{1,}\d{1,}|\d{1,}]/g,'')" maxlength="11" name="account" type="text" class="form-control" placeholder="手机号" />
+                    </div>
+                    
+                    <div class="form-group">
+                    	<label>密码：</label>
+                        <input id="password" maxlength="20" onkeyup="value=value.replace(/[\W]/g,'') " onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))" name="password" type="password" class="form-control" placeholder="密码" />
+                    </div>                   
+                    
+                    <div class="checkbox-custom">
+                    	<div class="agreeterm">
+                        	<a href="#">忘记密码？</a>
+                        </div>
+                        <div class="register-btn">
+                        	
+                        	<input type='button' onclick="loginBtn()" class="btn-primary" value="登录">
+                        </div>
+                    </div>
+                    
+                    <div class="textad">
+                    	<p>还没有账号？ <a href="register.html">马上注册</a></p>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+    </div>
+    <div class="register-bottom">
+    	    版权所有 河北图灵 
+    </div>
+</div>
+
+</body>
+</html>

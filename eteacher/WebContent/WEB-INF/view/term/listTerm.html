@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>教学系统教师pc端</title>
+<link href="../../css/base.css" rel="stylesheet" type="text/css">
+<link href="../../js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+<link href="../../js/bootstrap-table/bootstrap-table.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/turingLib/alert.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+
+<script type="text/javascript" src="../js/utils/md5.js"></script>
+<script type="text/javascript" src="../js/utils/PrefsUtils.js"></script>
+<script type="text/javascript" src="../js/utils/ajax.js"></script>
+<script type="text/javascript">
+	$(function(){
+		var termTable = $('#termTable').bootstrapTable({
+		    url: 'getTermListData',
+		    striped : true,
+		    toolbar : '#toolbar',
+		    idField : 'termId',
+		    columns: [{
+		        title: '序号',
+		        align: 'center',
+		        formatter : function (value, row, index){
+		        	return index + 1;
+		        }
+		    },{
+		        field: 'termName',
+		        halign: 'center',
+		        title: '学期名称',
+		        formatter : function (value, row, index){
+		        	//return '<a href="${context}/course/viewListCourse?termId='+row.termId+'">'+value+'</a>';
+		        	var url = '${context}/course/viewListCourse?termId=' + row.termId;
+		        	return '<a href="#" onclick="parent.jump(\''+url+'\',parent.document.getElementById(\'courseMenu\'))">'+value+'</a>';
+		        }
+		    }, {
+		        field: 'startDate',
+		        halign: 'center',
+		        title: '开始日期'
+		    }, {
+		        field: 'endDate',
+		        halign: 'center',
+		        title: '结束日期'
+		    }, {
+		        title: '操作',
+		        field: 'termId',
+		        align: 'center',
+		        formatter : function (value, row, index){
+		        	return '<i style="cursor: pointer;" title="编辑" class="glyphicon glyphicon-edit"></i> &nbsp;'
+		        		 + '<i style="cursor: pointer;" title="删除" class="glyphicon glyphicon-trash"></i>';
+		        },
+		        events : {
+		        	'click .glyphicon-edit': function (e, value, row, index) {
+			            window.location.href = 'viewEditTerm?tpId=' + value;
+			        },
+			        'click .glyphicon-trash': function (e, value, row, index) {
+			        	if(confirm("确定删除")){
+			            	$.post('deleteTerm1',{termId : value},function(data){
+			            		if(data!='success'){
+			            			alert(data);
+			            		}
+				            	termTable.bootstrapTable('refresh');
+				            });
+				           
+			            }
+			        }
+		        }
+		    } ]
+		});
+	});
+</script>
+</head>
+<body>
+	<div class="maincont">
+		<div class="title"><span>学期列表</span></div>
+		<div class="enter-message">
+			<div id="toolbar" class="btn-group">
+			    <button type="button" class="btn btn-default  btn-sm" title="新增" onclick="window.location.href='viewAddTerm'">
+			        <i class="glyphicon glyphicon-plus"></i> 新增
+			    </button>
+			</div>
+			<table id="termTable"></table>
+        </div>
+	</div>
+	<div class="footer">
+    <div class="container">
+       <p>版权所有：河北图灵</p>
+    </div>
+</div>
+</body>
+</html>

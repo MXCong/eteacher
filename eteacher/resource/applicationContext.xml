@@ -86,7 +86,7 @@
 	
 	<bean id="testInitializingBean" class="com.turing.eteacher.util.TestInitializingBean" ></bean>
 	
-		    <!-- 设置任务执行者池的大小 -->  
+	<!-- 设置任务执行者池的大小 -->  
     <task:executor id="executor" pool-size="5" />  
     <!-- 设置调度程序池的大小 -->  
     <task:scheduler id="scheduler" pool-size="10" />  

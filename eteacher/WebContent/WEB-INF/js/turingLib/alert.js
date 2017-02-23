@@ -4,8 +4,8 @@
 
 //引用style和js文件
 if(!$.alerts){
-	document.write('<link href="'+top.rootPath+'/js/jqueryAlerts/jquery.alerts.css" rel="stylesheet" type="text/css" />');
-	document.write('<scri'+'pt type="text/java'+'script" src="'+top.rootPath+'/js/jqueryAlerts/jquery.alerts.js"></script>');
+	document.write('<link href="../js/jqueryAlerts/jquery.alerts.css" rel="stylesheet" type="text/css" />');
+	document.write('<scri'+'pt type="text/java'+'script" src="../js/jqueryAlerts/jquery.alerts.js"></script>');
 }
 //alert
 JAlert = function(message, title, callback) {
