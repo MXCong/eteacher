@@ -52,4 +52,10 @@ public interface ITermPrivateService  extends IService<TermPrivate>{
 	 * @return
 	 */
 	public Map getCurrentTerm(String currentUserId);
+	/**
+	 * 根据termId,获取学期详情
+	 * @param termId
+	 * @return
+	 */
+	public Map getTermDetail(String termId);
 }

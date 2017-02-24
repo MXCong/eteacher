@@ -192,4 +192,13 @@ public class TermPrivateServiceImpl extends BaseService<TermPrivate> implements
 		}
 		return null;
 	}
+
+	@Override
+	public Map getTermDetail(String termId) {
+		String hql = "select t.tpId as termId , t.startDate as startDate, "
+				+ "t.endDate as endDate , t.weekCount as weekCount , t.termName as termName "
+				+ "from TermPrivate t where t.tpId = ? ";
+		Map m = (Map) termPrivateDAO.findMap(hql, termId).get(0);
+		return m;
+	}
 }

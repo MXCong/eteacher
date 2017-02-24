@@ -121,5 +121,22 @@ public class TermRemote extends BaseRemote {
 		Map term = getCurrentTerm(request);
 		return new ReturnBody(ReturnBody.RESULT_SUCCESS,term);
 	}
+	/**
+	 * 获取指定学期的详细信息
+	 * @author macong
+	 * @creatTime 2017-01-17
+	 * @param request
+	 * @param term
+	 * @return
+	 */
+	@RequestMapping(value = "teacher/term/getTermDetail", method = RequestMethod.POST)
+	public ReturnBody getTermDetail(HttpServletRequest request) {
+		String termId = request.getParameter("termId");
+		if(StringUtil.checkParams(termId)){
+			Map term = termPrivateServiceImpl.getTermDetail(termId);
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS,term);
+		}
+		return new ReturnBody(ReturnBody.RESULT_FAILURE);
+	}
 	
 }

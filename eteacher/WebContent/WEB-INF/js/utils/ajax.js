@@ -22,7 +22,7 @@
 		params.timeStamp = myDate.getTime();
 		params.signature = hex_md5(token + params.timeStamp);
 		$.ajax({
-			url : '../remote/' + url,
+			url : 'http://localhost:8080/eteacher/remote/' + url,
 			type : 'POST',
 			dataType : 'json',
 			data : params,

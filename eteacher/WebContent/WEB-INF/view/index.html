@@ -24,6 +24,19 @@
 		}
 		$('iframe').attr('src', url);
 	}
+	//退出登录功能
+	function loginOut(){
+		$httpUtils.post('logout', null, function() {
+			//清除本地缓存
+			$PrefsUtils.remValue('userId');
+        	$PrefsUtils.remValue('token');
+			$PrefsUtils.remValue('schoolId');
+            $PrefsUtils.remValue('name');
+            $PrefsUtils.remValue('icon');
+			//跳转到登录页面
+			window.location.href = 'login.html';
+		});	
+	}
 </script>
 </head>
 
@@ -37,7 +50,7 @@
 					<li class="iname"><a id="userName" href="#" onclick="jump('user/viewEidtUserInfo')"></a></li>
 					<li class="imessage"><a href="#">信息</a></li>
 					<li class="iset"><a href="#">设置</a></li>
-					<li class="iexit"><a href="loginOut">退出</a></li>
+					<li class="iexit"><a href="#" onclick="loginOut();">退出</a></li>
 				</ul>
 			</div>
 		</div>

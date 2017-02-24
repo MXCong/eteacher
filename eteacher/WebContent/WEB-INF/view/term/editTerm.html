@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>教学系统教师pc端</title>
+<link href="../../css/base.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/turingLib/validator.js"></script>
+<script type="text/javascript" src="../../js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="../../js/utils/md5.js"></script>
+<script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
+<script type="text/javascript" src="../../js/utils/ajax.js"></script>
+
+<script type="text/javascript">
+	var termId = null;
+	//查看学期详情
+	$(function(){
+		termId = $PrefsUtils.receive("termId");
+		getTermDetail(termId);
+	});
+	//获取学期信息信息
+	function getTermDetail(termId){
+		var params = {};
+		params.termId = termId;
+		$httpUtils.post('teacher/term/getTermDetail', params, function(ret) {
+            if (ret) {
+                var termName = ret.termName;
+                var yb = termName.substring(0,4);
+                var yd = termName.substring(5,9);
+                var tn = termName.substring(11,12);
+                $('#yearBegin').val(yb);
+        		$('#yearEnd').val(yd);
+        		$('#termNum').val(tn);
+        		$('#startDate').val(ret.startDate);
+        		$('#endDate').val(ret.endDate);
+        		$('#weekCount').val(ret.weekCount);
+            }
+        });
+	}
+	/**
+     *指定日期加周数
+     * @date 指定日期字符串
+     * @days 天数
+     */
+    function dateSubmit() {
+		var date = $('#startDate').val();
+		var days = $('#weekCount').val();
+        var arrDate, objDate;	
+        arrDate = date.split('-');
+        objDate = new Date(arrDate[1] + '/' + arrDate[2] + '/' + arrDate[0]);
+        var weekFirstDay = getWeekFirstDay(objDate);
+        var objDate2 = new Date(weekFirstDay);
+        objDate2.setDate(weekFirstDay.getDate() + days * 7 - 1);
+        var m = objDate2.getMonth() + 1;
+        if(m < 10){
+            m = '0'+m;
+        }
+        var d = objDate2.getDate();
+        if(d < 10){
+            d = '0'+d;
+        }
+        var times = objDate2.getFullYear() + "-" + m + "-" + d;
+        $('#endDate').val(times);
+    }
+    /**
+     *返回Nowdate所在周的第一天
+     */
+    function getWeekFirstDay(Nowdate) {
+        var WeekFirstDay = new Date(Nowdate - (Nowdate.getDay() - 1) * 86400000);
+        return WeekFirstDay;
+    }
+    
+  	//学期编辑
+	function saveTerm() {
+		var yearBegin = $('#yearBegin').val();
+		var yearEnd = $('#yearEnd').val();
+		var termNum = $('#termNum').val();
+		var startDate = $('#startDate').val();
+		var endDate = $('#endDate').val();
+		var weekCount = $('#weekCount').val();
+		if (!yearBegin) {
+			alert("请完善学期名称");
+			return;
+		}
+		if (!yearEnd) {
+			alert("请完善学期名称");
+			return;
+		}
+		if (!termNum) {
+			alert("请完善学期名称");
+			return;
+		}
+		if (!startDate) {
+			alert("请选择开始时间！");
+			return;
+		}
+		if (!weekCount) {
+			alert("请选择持续周数！");
+			return;
+		}
+		if (yearBegin > yearEnd) {
+			alert("开始学年必须小于或等于结束学年！");
+			return;
+		}
+		var params = {};
+		params.tpId = termId;
+		params.termName = $('#yearBegin').val() + "-" + $('#yearEnd').val()
+				+ " 第" + $('#termNum').val() + "学期";
+		params.startDate = startDate;
+		params.endDate = endDate;
+		params.weekCount = weekCount;
+		$httpUtils.post('teacher/term/addTerm', params, function(data) {
+			alert("学期修改成功");
+		});
+	};
+</script>
+</head>
+<body>
+	<div class="maincont">
+		<div class="title"><span>编辑学期</span></div>
+        <div class="enter-message">
+            <form id="termForm">
+				<div class="message-group">
+					<div class="message-left">学期名称：</div>
+					<div class="message-right">
+						<select id="yearBegin" name="termId" style="width: 25%;">
+							<option>----开始时间----</option>
+							<option value="2014">2014</option>
+							<option value="2015">2015</option>
+							<option value="2016">2016</option>
+							<option value="2017">2017</option>
+							<option value="2018">2018</option>
+							<option value="2019">2019</option>
+						</select>— 
+						<select id="yearEnd" name="termId" style="width: 25%;">
+							<option>----结束时间----</option>
+							<option value="2014">2014</option>
+							<option value="2015">2015</option>
+							<option value="2016">2016</option>
+							<option value="2017">2017</option>
+							<option value="2018">2018</option>
+							<option value="2019">2019</option>
+						</select>学年第 
+						<select id="termNum" name="termId" style="width: 15%;">
+							<option>--学期数--</option>
+							<option value="一">一</option>
+							<option value="二">二</option>
+							<option value="三">三</option>
+							<option value="四">四</option>
+						</select> 学期
+					</div>
+				</div>
+				<div class="message-group">
+					<div class="message-left">起始日期：</div>
+					<div class="message-right">
+						<input id="startDate" name="startDate" readonly type="text"
+							class="mess-control"
+							onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})"
+							placeholder="请选择起始时间" onblur="dateSubmit();"/>
+					</div>
+				</div>
+				<div class="message-group">
+					<div class="message-left">学期时长：</div>
+					<div class="message-right">
+						<input id="weekCount" name="weekCount" maxlength="3" type="text" 
+						style="width: 80px" class="mess-control" onblur="dateSubmit();" value="" /> 周
+					</div>
+				</div>
+				<div class="message-group">
+					<div class="message-left">终止日期：</div>
+					<div class="message-right">
+						<input id="endDate" name="endDate" readonly type="text" class="mess-control" placeholder="学期结束时间" />
+					</div>
+				</div>
+				
+				<div class="btnsub">
+					<!-- <button type="submit" class="btn-submit" style="float: left;" onclick="window.location.href='listTerm.html'">保存</button> -->
+					<input type="button" class="btn-submit" style="float: left;" value="保存" onclick="saveTerm();">
+					<button type="button" class="btn-submit" style="float: right;" onclick="history.back();">返回</button>
+				</div>
+			</form> 
+        </div>
+	</div>
+	<div class="footer">
+    <div class="container">
+       <p>版权所有：河北图灵</p>
+    </div>
+</div>
+</body>
+</html>
