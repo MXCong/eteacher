@@ -11,19 +11,9 @@
 <script type="text/javascript" src="../js/utils/ajax.js"></script>
 
 <script type="text/javascript">
-	(function($) {
-		var name = $PrefsUtils.getPref('name');
-		//alert(name);
-		$("a").html(name);
-	})(jQuery);
+	
 
-	function jump(url, a) {
-		$('.navcurrent').removeClass();
-		if (a) {
-			$(a).addClass('navcurrent');
-		}
-		$('iframe').attr('src', url);
-	}
+
 	//退出登录功能
 	function loginOut(){
 		$httpUtils.post('logout', null, function() {
@@ -92,4 +82,23 @@
 	</div>
 
 </body>
+<script type="text/javascript">
+	(function($) {
+		var name = $PrefsUtils.getPref('name');
+		document.getElementById("userName").innerHTML=name;
+	})(jQuery);
+
+	function jump(url, a) {
+		$('.navcurrent').removeClass();
+		if (a) {
+			$(a).addClass('navcurrent');
+		}
+		$('iframe').attr('src', url);
+		// window.location.href = url;
+	}
+	
+	function editMima(){
+		$('iframe').attr('src', 'user/editeMiMa.html');
+	}
+</script>
 </html>
