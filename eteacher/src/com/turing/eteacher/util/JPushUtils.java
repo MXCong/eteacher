@@ -29,8 +29,8 @@ public class JPushUtils {
 	// 在极光注册上传应用的 appKey 和 masterSecret
 	private static final String stuAppKey = "b6ea7ba889557cfb16579e3c";// //必填，例如466f7032ac604e02fb7bda89
 	private static final String stuMasterSecret = "a8623d40b4007d8cb38c664b";// 必填，每个应用都对应一个masterSecret
-	private static final String teachAppKey = "3ea95ca12ee4a62e3ff58a96";// //必填，例如466f7032ac604e02fb7bda89
-	private static final String teachMasterSecret = "05051cb0bb9c5b30ad968edc";// 必填，每个应用都对应一个masterSecret
+	private static final String teachAppKey = "41f45a885410ecfe56138d5f";// //必填，例如466f7032ac604e02fb7bda89
+	private static final String teachMasterSecret = "3c3086fe4c212350b2419e38";// 必填，每个应用都对应一个masterSecret
 	private static JPushClient stuJpush = null;
 	private static JPushClient teachJPush = null;
 
@@ -49,24 +49,8 @@ public class JPushUtils {
 	}
 
 	public static void main(String[] args) {
-//		PushBody body = new PushBody();
-//		body.setPlatform(com.turing.eteacher.util.PushBody.Platform.all);
-//		body.setRole(Role.all);
-//		body.setSortType(SortType.tag);
 		List<String> tagsList = new ArrayList<>();
 		tagsList.add("EjCodTlSKK");
-		//tagsList.add("4");
-//		body.setSortFlag(tagsList);
-//		body.setSortComb(SortComb.or);
-//		NotifyBody notifyBody = new NotifyBody();
-//		notifyBody.setAction(3);
-//		notifyBody.setContent("通知内容");
-//		notifyBody.setTitle("通知标题");
-//		notifyBody.setExtra("fsdfsdfsdfdfdf");
-//		notifyBody.setNotify(1);
-//		notifyBody.setType(3);
-//		body.setNotifyBody(notifyBody);
-//		pushMessage(body);
 		
 		PushBody pBody = new PushBody();
 		pBody.setPlatform(com.turing.eteacher.util.PushBody.Platform.all);
@@ -116,6 +100,10 @@ public class JPushUtils {
 				e.printStackTrace();
 				return false;
 			} catch (APIRequestException e) {
+				if(e.getErrorCode() == 1011){
+					e.printStackTrace();
+					return true;
+				}
 				e.printStackTrace();
 			}
 		}

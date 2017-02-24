@@ -32,7 +32,181 @@ public class PushBody {
 	private List<String> sortFlag; // 筛选标签或者Id集合
 	private SortComb sortComb; // 标签或id组合方式：1：交集；2：并集
 	private NotifyBody notifyBody;
+	/**
+	 * 获取一个发给所有用户的通知
+	 * 用户：所有
+	 * 平台：所有
+	 * 标记：无
+	 * @param notifyBody
+	 * @return
+	 */
+	public static PushBody buildPushBody_all(NotifyBody notifyBody){
+		PushBody pBody = new PushBody();
+		pBody.setNotifyBody(notifyBody);
+		pBody.setPlatform(Platform.all);
+		pBody.setRole(Role.all);
+		pBody.setSortType(SortType.none);
+		return pBody;
+	}
+	/**
+	 * 发送给所有教师的通知
+	 * 用户：教师
+	 * 平台：所有
+	 * 标记：无
+	 * @param notifyBody
+	 * @return
+	 */
+	public static PushBody buildPushBody_teacher_all(NotifyBody notifyBody){
+		PushBody pBody = new PushBody();
+		pBody.setNotifyBody(notifyBody);
+		pBody.setPlatform(Platform.all);
+		pBody.setRole(Role.teacher);
+		pBody.setSortType(SortType.none);
+		return pBody;
+	}
+	
+	/**
+	 * 发送给所有学生的通知
+	 * 用户：学生
+	 * 平台：所有
+	 * 标记：无
+	 * @param notifyBody
+	 * @return
+	 */
+	public static PushBody buildPushBody_student_all(NotifyBody notifyBody){
+		PushBody pBody = new PushBody();
+		pBody.setNotifyBody(notifyBody);
+		pBody.setPlatform(Platform.all);
+		pBody.setRole(Role.student);
+		pBody.setSortType(SortType.none);
+		return pBody;
+	}
 
+	/**
+	 * 获取一个发送给tag并集的教师的通知
+	 * 用户：教师
+	 * 平台：所有
+	 * 标记：tags的并集
+	 * @param tags
+	 * @param notifyBody
+	 * @return
+	 */
+	public static PushBody buildPushBody_teacher_by_tag_or(List<String> tags, NotifyBody notifyBody){
+		PushBody pBody = new PushBody();
+		pBody.setNotifyBody(notifyBody);
+		pBody.setPlatform(Platform.all);
+		pBody.setRole(Role.teacher);
+		pBody.setSortType(SortType.tag);
+		pBody.setSortFlag(tags);
+		pBody.setSortComb(SortComb.or);
+		return pBody;
+	}
+	
+	/**
+	 * 获取一个发送给tag并集的学生的通知
+	 * 用户：学生
+	 * 平台：所有
+	 * 标记：tags的并集
+	 * @param tags
+	 * @param notifyBody
+	 * @return
+	 */
+	public static PushBody buildPushBody_student_by_tag_or(List<String> tags, NotifyBody notifyBody){
+		PushBody pBody = new PushBody();
+		pBody.setNotifyBody(notifyBody);
+		pBody.setPlatform(Platform.all);
+		pBody.setRole(Role.student);
+		pBody.setSortType(SortType.tag);
+		pBody.setSortFlag(tags);
+		pBody.setSortComb(SortComb.or);
+		return pBody;
+	}
+	
+	/**
+	 * 获取一个发送给tag并集的用户的通知
+	 * 用户：所有
+	 * 平台：所有
+	 * 标记：tags的并集
+	 * @param flag
+	 * @param notifyBody
+	 * @return
+	 */
+	public static PushBody buildPushBody_all_by_tag_or(List<String> flag, NotifyBody notifyBody){
+		PushBody pBody = new PushBody();
+		pBody.setNotifyBody(notifyBody);
+		pBody.setPlatform(Platform.all);
+		pBody.setRole(Role.all);
+		pBody.setSortType(SortType.tag);
+		pBody.setSortFlag(flag);
+		pBody.setSortComb(SortComb.or);
+		return pBody;
+	}
+	/**
+	 * 获取一个发送给所有学生端android设备的通知
+	 * 用户：学生
+	 * 平台：android
+	 * 标记：无
+	 * @param notifyBody
+	 * @return
+	 */
+	public static PushBody buildPushBody_student_android(NotifyBody notifyBody){
+		PushBody pBody = new PushBody();
+		pBody.setNotifyBody(notifyBody);
+		pBody.setPlatform(Platform.android);
+		pBody.setRole(Role.student);
+		pBody.setSortType(SortType.none);
+		return pBody;
+	}
+	/**
+	 * 获取一个发送给所有学生端iOS设备的通知
+	 * 用户：学生
+	 * 平台：iOS
+	 * 标记：无
+	 * @param notifyBody
+	 * @return
+	 */
+	public static PushBody buildPushBody_student_iOS(NotifyBody notifyBody){
+		PushBody pBody = new PushBody();
+		pBody.setNotifyBody(notifyBody);
+		pBody.setPlatform(Platform.iOS);
+		pBody.setRole(Role.student);
+		pBody.setSortType(SortType.none);
+		return pBody;
+	}
+	/**
+	 * 获取一个发送给所有教师端android设备的通知
+	 * 用户：教师
+	 * 平台：android
+	 * 标记：无
+	 * @param notifyBody
+	 * @return
+	 */
+	public static PushBody buildPushBody_teacher_android(NotifyBody notifyBody){
+		PushBody pBody = new PushBody();
+		pBody.setNotifyBody(notifyBody);
+		pBody.setPlatform(Platform.android);
+		pBody.setRole(Role.teacher);
+		pBody.setSortType(SortType.none);
+		return pBody;
+	}
+	/**
+	 * 获取一个发送给所有教师端iOS设备的通知
+	 * 用户：教师
+	 * 平台：iOS
+	 * 标记：无
+	 * @param notifyBody
+	 * @return
+	 */
+	public static PushBody buildPushBody_teacher_iOS(NotifyBody notifyBody){
+		PushBody pBody = new PushBody();
+		pBody.setNotifyBody(notifyBody);
+		pBody.setPlatform(Platform.iOS);
+		pBody.setRole(Role.teacher);
+		pBody.setSortType(SortType.none);
+		return pBody;
+	}
+	
+	
 	public NotifyBody getNotifyBody() {
 		return notifyBody;
 	}
