@@ -15,7 +15,13 @@
 			alert("value不能为空！");
 			return;
 		}
-		localStorage.setItem(k, v);
+		if(typeof v == "string"){
+			localStorage.setItem(k, v);
+		}else{
+			var value = JSON.stringify(v);
+			localStorage.setItem(k,value);
+		}
+		
 	}
 	/**
 	 * 获取配置文件中的数据
@@ -25,8 +31,7 @@
 		if (!k) {
 			alert("key不能为空！");
 			return;
-		}
-		
+		}	
 		return localStorage.getItem(k);
 	}
 

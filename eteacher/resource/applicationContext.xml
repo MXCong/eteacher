@@ -46,7 +46,9 @@
 		<property name="timeBetweenEvictionRunsMillis" value="60000" />
 		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
 		<property name="minEvictableIdleTimeMillis" value="300000" />
-
+		
+		
+		
 		<property name="validationQuery" value="SELECT 'x'" />
 		<property name="testWhileIdle" value="true" />
 		<property name="testOnBorrow" value="false" />
@@ -74,6 +76,8 @@
 			<props>
 				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
 				<prop key="hibernate.show_sql">true</prop>
+				<!-- 启动时删数据库中的表，然后创建，退出时不删除数据表 
+				<prop key="hbm2ddl.auto">update</prop> -->
 			</props>
 		</property>
 	</bean>

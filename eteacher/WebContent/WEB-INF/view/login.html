@@ -37,7 +37,8 @@
             $httpUtils.postNormal('login', params, function(ret) {
             	$PrefsUtils.savePref('userId', ret.data.userId);
             	$PrefsUtils.savePref('token', hex_md5(ret.data.token + pwd));
-            	getUserInfo();
+            	getTermList();//获取用户的学期信息并本地存储
+            	getUserInfo();//获取用户基本信息并本地存储
             });
         } else {
             if (phone_value.val() == "") {
@@ -57,57 +58,79 @@
                 $PrefsUtils.savePref('schoolId', ret.schoolId);
                 $PrefsUtils.savePref('name', ret.name);
                 $PrefsUtils.savePref('icon', ret.picture);
-                //$BaseUI.closeToWin('index', 'index.html');
                 window.location.href = 'index.html';
             } else {
-            	window.location.href = 'index.html';
+            	//window.location.href = 'index.html';
             }
         });
     }
+	function getTermList(){
+		$httpUtils.post('teacher/term/getAllTerms', null, function(ret) {
+			var terms = new Array();
+            if (ret.current && ret.current.length > 0) {
+                terms = terms.concat(ret.current);
+                //存储当前学期到
+                $PrefsUtils.savePref("currentTerm" , terms[0]);
+            }
+            if (ret.future && ret.future.length > 0) {
+                terms = terms.concat(ret.future);
+            }
+            if (ret.before && ret.before.length > 0) {
+                terms = terms.concat(ret.before);
+            }
+            $PrefsUtils.savePref("termList" , terms);
+		});
+	}
 </script>
 </head>
 <body>
-<div class="register-box">
-	<div class="panel">
-    	<div class="panel-body">
-        	<div class="reheader">
-            	<img src="../images/relogo.png" width="240" height="125" alt="" title="" />
-                <p>用户登录</p>
-            </div>
-            <form id="loginForm" class="register">
-            	<div class="register-body">
-            		<div class="form-group">
-                    	<label>账号：</label>
-                        <input id="account" onkeyup="value=value.replace(/[^\d{1,}\d{1,}|\d{1,}]/g,'')" maxlength="11" name="account" type="text" class="form-control" placeholder="手机号" />
-                    </div>
-                    
-                    <div class="form-group">
-                    	<label>密码：</label>
-                        <input id="password" maxlength="20" onkeyup="value=value.replace(/[\W]/g,'') " onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))" name="password" type="password" class="form-control" placeholder="密码" />
-                    </div>                   
-                    
-                    <div class="checkbox-custom">
-                    	<div class="agreeterm">
-                        	<a href="#">忘记密码？</a>
-                        </div>
-                        <div class="register-btn">
-                        	
-                        	<input type='button' onclick="loginBtn()" class="btn-primary" value="登录">
-                        </div>
-                    </div>
-                    
-                    <div class="textad">
-                    	<p>还没有账号？ <a href="register.html">马上注册</a></p>
-                    </div>
-                </div>
-            </form>
-        </div>
-        
-    </div>
-    <div class="register-bottom">
-    	    版权所有 河北图灵 
-    </div>
-</div>
+	<div class="register-box">
+		<div class="panel">
+			<div class="panel-body">
+				<div class="reheader">
+					<img src="../images/relogo.png" width="240" height="125" alt=""
+						title="" />
+					<p>用户登录</p>
+				</div>
+				<form id="loginForm" class="register">
+					<div class="register-body">
+						<div class="form-group">
+							<label>账号：</label> <input id="account"
+								onkeyup="value=value.replace(/[^\d{1,}\d{1,}|\d{1,}]/g,'')"
+								maxlength="11" name="account" type="text" class="form-control"
+								placeholder="手机号" />
+						</div>
+
+						<div class="form-group">
+							<label>密码：</label> <input id="password" maxlength="20"
+								onkeyup="value=value.replace(/[\W]/g,'') "
+								onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))"
+								name="password" type="password" class="form-control"
+								placeholder="密码" />
+						</div>
+
+						<div class="checkbox-custom">
+							<div class="agreeterm">
+								<a href="#">忘记密码？</a>
+							</div>
+							<div class="register-btn">
+								<input type='button' onclick="loginBtn()" class="btn-primary"
+									value="登录">
+							</div>
+						</div>
+
+						<div class="textad">
+							<p>
+								还没有账号？ <a href="register.html">马上注册</a>
+							</p>
+						</div>
+					</div>
+				</form>
+			</div>
+
+		</div>
+		<div class="register-bottom">版权所有 河北图灵</div>
+	</div>
 
 </body>
 </html>

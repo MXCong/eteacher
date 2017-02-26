@@ -102,8 +102,7 @@ public class SignCodeRemote extends BaseRemote {
 			HashMap<String, String> extra = new HashMap<>();
 			extra.put("courseId", courseId);
 			extra.put("scId", scId);
-			NotifyBody noBody = NotifyBody.getNotifyBody("签到提醒", "上课啦,快来签到吧！", 
-					4, extra);
+			NotifyBody noBody = NotifyBody.getNotifyBody("签到提醒", "上课啦,快来签到吧！", 4, extra);
 			pBody.setNotifyBody(noBody);
 			pBody.setPlatform(Platform.all);
 			pBody.setRole(Role.student);
