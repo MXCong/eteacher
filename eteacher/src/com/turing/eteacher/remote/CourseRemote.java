@@ -167,7 +167,7 @@ public class CourseRemote extends BaseRemote {
 						//判断课程的开始结束时间是否与本月有交集
 						if (DateUtil.isOverlap(cFirstDay, cLastDay, (String)map.get("startDay"), (String)map.get("endDay"))) {
 							//课程重复天数
-							int repeatNumber = (int)map.get("repeatNumber");
+							int repeatNumber = Integer.parseInt((String)map.get("repeatNumber"));
 							//该课程一共有多少天
 							int distance = DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay"));
 							//一共上几次课
@@ -203,7 +203,7 @@ public class CourseRemote extends BaseRemote {
 										String[] week = cell.getWeekDay().split(",");
 										for (int l = 0; l < week.length; l++) {
 											//课程的间隔周期
-											int repeatNumber = (int)map.get("repeatNumber");
+											int repeatNumber = Integer.parseInt((String)map.get("repeatNumber"));
 											//课程一共上几周
 											int repeatCount = (DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay")))/(repeatNumber*7);
 											for (int m = 0; m <= repeatCount; m++) {
@@ -211,7 +211,7 @@ public class CourseRemote extends BaseRemote {
 												String dateStr = DateUtil.getWeek(start, m*repeatNumber, Integer.parseInt(week[l]));
 												if (null != dateStr) {
 													//如果上课时间在学期内&&在所指定的月份内
-													if (DateUtil.isBefore(dateStr,(String)map.get("termEndDay"),DateUtil.YYYYMMDD) && DateUtil.isInRange(dateStr, cFirstDay, cLastDay)) {
+													if (DateUtil.isBefore(dateStr,end,DateUtil.YYYYMMDD) && DateUtil.isInRange(dateStr, cFirstDay, cLastDay)) {
 														Map<String, String> n = new HashMap<>(); 
 														n.put("date", dateStr);
 														n.put("courseId", (String)map.get("courseId"));
@@ -326,7 +326,7 @@ public class CourseRemote extends BaseRemote {
 									//判断课程的开始结束时间是否与本月有交集
 									if (DateUtil.isOverlap(cFirstDay, cLastDay, (String)map.get("startDay"), (String)map.get("endDay"))) {
 										//课程重复天数
-										int repeatNumber = (int)map.get("repeatNumber");
+										int repeatNumber = Integer.parseInt((String)map.get("repeatNumber"));
 										//该课程一共有多少天
 										int distance = DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay"));
 										//一共上几次课
@@ -362,7 +362,7 @@ public class CourseRemote extends BaseRemote {
 													String[] week = cell.getWeekDay().split(",");
 													for (int l = 0; l < week.length; l++) {
 														//课程的间隔周期
-														int repeatNumber = (int)map.get("repeatNumber");
+														int repeatNumber = Integer.parseInt((String)map.get("repeatNumber"));
 														//课程一共上几周
 														int repeatCount = (DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay")))/(repeatNumber*7);
 														for (int m = 0; m <= repeatCount; m++) {

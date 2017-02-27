@@ -1112,34 +1112,16 @@ public class CourseServiceImpl extends BaseService<Course> implements
 
 	@Override
 	public List<Map> getCourseTimebyStuId(String stuId) {
-//		String sql = "SELECT c.COURSE_ID AS courseId, " + "ci.CI_ID AS ciId, "
-//				+ "ci.REPEAT_TYPE AS repeatType, "
-//				+ "ci.REPEAT_NUMBER AS repeatNumber, "
-//				+ "ci.START_WEEK AS startWeek, " + "ci.END_WEEK AS endWeek, "
-//				+ "ci.START_DAY AS startDay, " + "ci.END_DAY AS endDay, "
-//				+ "ttp.TP_ID AS tpId, " + "ttp.START_DATE AS termStartDay, "
-//				+ "ttp.END_DATE AS termEndDay "
-//				+ "FROM t_course c ,t_course_item ci ,t_term_private ttp "
-//				+ "WHERE c.COURSE_ID = ci.COURSE_ID AND c.TERM_ID = ttp.TP_ID "
-//				+ "AND ttp.TREM_ID = ? " + "AND c.COURSE_ID IN ( "
-//				+ "SELECT tcc.COURSE_ID "
-//				+ "FROM t_course_class tcc ,t_student ts "
-//				+ "WHERE tcc.CLASS_ID = ts.CLASS_ID " + "AND ts.STU_ID = ? )";
-		String sql2 = "SELECT ci.CI_ID AS ciId, "
-				+ "ci.REPEAT_TYPE AS repeatType, ci.REPEAT_NUMBER AS repeatNumber, "
-				+ "ci.START_WEEK AS startWeek,ci.END_WEEK AS endWeek, "
-				+ "ci.START_DAY AS startDay, ci.END_DAY AS endDay, "
-				+ "ttp.TP_ID AS tpId, ttp.START_DATE AS termStartDay, "
-				+ "ttp.END_DATE AS termEndDay, "
-				+ "st.STU_NAME as stuName , ccls.COURSE_ID as courseId "
-				+ "FROM t_course c ,t_course_item ci, t_student st , t_course_class ccls , "
-				+ "t_term_private ttp "
-				+ "WHERE c.COURSE_ID = ci.COURSE_ID AND st.CLASS_ID = ccls.CLASS_ID "
-				+ "AND c.TERM_ID = ttp.TP_ID "
-				+ "AND ccls.COURSE_ID = c.COURSE_ID AND c.COURSE_ID IN "
-				+ "(SELECT tcc.COURSE_ID FROM t_course_class tcc ,t_student ts "
-				+ "WHERE tcc.CLASS_ID = ts.CLASS_ID AND ts.STU_ID = ? )";
-		System.out.println("==========:"+sql2);
+		String sql2 = "SELECT ci.CI_ID AS ciId, "+
+				" ci.REPEAT_TYPE AS repeatType, ci.REPEAT_NUMBER AS repeatNumber, "+
+				" ci.START_WEEK AS startWeek,ci.END_WEEK AS endWeek," +
+				" ci.START_DAY AS startDay, ci.END_DAY AS endDay, "+
+				" st.STU_NAME AS stuName , ccls.COURSE_ID AS courseId "+
+				" FROM t_course c ,t_course_item ci, t_student st , t_course_class ccls "+
+				" WHERE c.COURSE_ID = ci.COURSE_ID AND st.CLASS_ID = ccls.CLASS_ID "+
+				" AND ccls.COURSE_ID = c.COURSE_ID AND c.COURSE_ID IN "+
+				" (SELECT tcc.COURSE_ID FROM t_course_class tcc ,t_student ts "+
+				" WHERE tcc.CLASS_ID = ts.CLASS_ID AND ts.STU_ID = ?)";
 		return courseDAO.findBySql(sql2 , stuId);
 	}
 

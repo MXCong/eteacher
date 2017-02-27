@@ -164,7 +164,7 @@ public class SpringTimerTest {
 				//天循环的课程
 				if (map.get("repeatType").equals("01")) {
 					//课程重复天数
-					int repeatNumber = (int)map.get("repeatNumber");
+					int repeatNumber = Integer.parseInt((String)map.get("repeatNumber"));
 					//该课程一共有多少天
 					int distance = DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay"));
 					//一共上几次课
@@ -211,7 +211,7 @@ public class SpringTimerTest {
 								String[] week = cell.getWeekDay().split(",");
 								for (int l = 0; l < week.length; l++) {
 									//课程的间隔周期
-									int repeatNumber = (int)map.get("repeatNumber");
+									int repeatNumber = Integer.parseInt((String)map.get("repeatNumber"));
 									//课程一共上几周
 									int repeatCount = (DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay")))/(repeatNumber*7);
 									for (int m = 0; m <= repeatCount; m++) {
