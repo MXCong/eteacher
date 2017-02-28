@@ -37,6 +37,9 @@
 		});
 	}
 	function initTable(data){
+		if(null == data){
+  			data = {};	
+  		}
 		workTable = $('#workTable').bootstrapTable({
 			data : data ,
 			striped : true,

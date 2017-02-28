@@ -15,10 +15,6 @@
 
 <script type="text/javascript">
 	var courseId = null;
-	var cs = 1;
-	var cu = 0;
-	var ts = 1;
-	var tu = 0;
 	$(function(){
 		courseId = $PrefsUtils.receive('courseId');
 		getCurrentSignInData();//获取当堂课的出勤情况
@@ -38,7 +34,7 @@
 					series : [
 						        {
 						            data:[
-						            	{value:2, name:'未签到'},
+						            	{value:5, name:'未签到'},
 						                {value:44, name:'签到'}
 						            ]
 						        }
@@ -65,8 +61,7 @@
 		var par = {};
 		par.courseId = courseId;
 		$httpUtils.post('course/currentAttendence',par,function(data){
-			alert(JSON.stringify(data));
-			cs = 
+			//alert(JSON.stringify(data));
 		});
 	}
 	//获取某课程的整体出勤情况
@@ -74,8 +69,7 @@
 		var par = {};
 		par.courseId = courseId;
 		$httpUtils.post('course/totalAttendence',par,function(data){
-			alert(JSON.stringify(data));
-			totalAttendence = JSON.stringify(data);
+			//alert(JSON.stringify(data));
 		});
 	}
 </script>

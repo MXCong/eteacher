@@ -102,8 +102,8 @@
 				option.append(o);
 				getSignInData(currentCourseId , 0);
 			}
+			getSignInData(cId,1);
 		});
-		getSignInData(cId,1);
     }
   //获取成绩类型为“均值”的成绩项
 	function getScourType(courseId){
@@ -138,6 +138,9 @@
 		});
 	}
   	function initTable(data){
+  		if(null == data){
+  			data = {};	
+  		}
   		studentTable = $('#studentTable').bootstrapTable({
 		    data : data,
 		    striped : true,

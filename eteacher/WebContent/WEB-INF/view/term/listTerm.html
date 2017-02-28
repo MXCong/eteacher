@@ -17,67 +17,7 @@
 <script type="text/javascript" src="../../js/utils/ajax.js"></script>
 <script type="text/javascript">
 	$(function(){
-		$httpUtils.post('teacher/term/getAllTerms', null, function(ret) {
-			var terms = new Array();
-            if (ret.current && ret.current.length > 0) {
-                terms = terms.concat(ret.current);
-            }
-            if (ret.future && ret.future.length > 0) {
-                terms = terms.concat(ret.future);
-            }
-            if (ret.before && ret.before.length > 0) {
-                terms = terms.concat(ret.before);
-            }
-            
-            var termTable = $('#termTable').bootstrapTable({
-    		    data : terms,
-    		    striped : true,
-    		    toolbar : '#toolbar',
-    		    idField : 'tpId',
-    		    columns: [{
-    		        title: '序号',
-    		        align: 'center',
-    		        formatter : function (value, row, index){
-    		        	return index + 1;
-    		        }
-    		    },{
-    		        field: 'termName',
-    		        align: 'center',
-    		        title: '学期名称',
-    		        formatter : function (value, row, index){
-    		        	//return '<a href="${context}/course/viewListCourse?termId='+row.termId+'">'+value+'</a>';
-    		        	var url = '${context}/course/viewListCourse?termId=' + row.termId;
-    		        	return '<a href="#" onclick="parent.jump(\''+url+'\',parent.document.getElementById(\'courseMenu\'))">'+value+'</a>';
-    		        }
-    		    }, {
-    		        field: 'startDate',
-    		        align: 'center',
-    		        title: '开始日期'
-    		    }, {
-    		        field: 'endDate',
-    		        align: 'center',
-    		        title: '结束日期'
-    		    }, {
-    		        title: '操作',
-    		        field: 'tpId',
-    		        lign: 'center',
-    		        formatter : function (value, row, index){
-    		        	return '<i style="cursor: pointer;" title="编辑" class="glyphicon glyphicon-edit"></i> &nbsp;'
-    		        		 + '<i style="cursor: pointer;" title="删除" class="glyphicon glyphicon-trash"></i>';
-    		        },
-    		        events : {
-    		        	'click .glyphicon-edit': function (e, value, row, index) {
-    		        		editTerm(value);
-    			        },
-    			        'click .glyphicon-trash': function (e, value, row, index) {
-    			        	if(confirm("确定删除")){
-    			            	deleteTerm(value);
-    			            }
-    			        }
-    		        }
-    		    } ]
-    		});
-        });
+		getTermList();
 	});
 	function editTerm(termId){
 		$PrefsUtils.transfer("termId" , termId);
@@ -89,6 +29,76 @@
 		$httpUtils.post("teacher/term/delTerm", param, function(data) {
 			location.reload(); 
          });
+	}
+	//获取学期数据列表
+	function getTermList(){
+		$httpUtils.post('teacher/term/getAllTerms', null, function(ret) {
+			var terms = new Array();
+            if (ret.current && ret.current.length > 0) {
+                terms = terms.concat(ret.current);
+            }
+            if (ret.future && ret.future.length > 0) {
+                terms = terms.concat(ret.future);
+            }
+            if (ret.before && ret.before.length > 0) {
+                terms = terms.concat(ret.before);
+            }
+		}
+		intiTable(terms);
+	}
+	//table初始化
+	function intiTable(terms){
+		if(null == terms){
+			terms = {};	
+  		}
+		var termTable = $('#termTable').bootstrapTable({
+		    data : terms,
+		    striped : true,
+		    toolbar : '#toolbar',
+		    idField : 'tpId',
+		    columns: [{
+		        title: '序号',
+		        align: 'center',
+		        formatter : function (value, row, index){
+		        	return index + 1;
+		        }
+		    },{
+		        field: 'termName',
+		        align: 'center',
+		        title: '学期名称',
+		        formatter : function (value, row, index){
+		        	//return '<a href="${context}/course/viewListCourse?termId='+row.termId+'">'+value+'</a>';
+		        	var url = '${context}/course/viewListCourse?termId=' + row.termId;
+		        	return '<a href="#" onclick="parent.jump(\''+url+'\',parent.document.getElementById(\'courseMenu\'))">'+value+'</a>';
+		        }
+		    }, {
+		        field: 'startDate',
+		        align: 'center',
+		        title: '开始日期'
+		    }, {
+		        field: 'endDate',
+		        align: 'center',
+		        title: '结束日期'
+		    }, {
+		        title: '操作',
+		        field: 'tpId',
+		        lign: 'center',
+		        formatter : function (value, row, index){
+		        	return '<i style="cursor: pointer;" title="编辑" class="glyphicon glyphicon-edit"></i> &nbsp;'
+		        		 + '<i style="cursor: pointer;" title="删除" class="glyphicon glyphicon-trash"></i>';
+		        },
+		        events : {
+		        	'click .glyphicon-edit': function (e, value, row, index) {
+		        		editTerm(value);
+			        },
+			        'click .glyphicon-trash': function (e, value, row, index) {
+			        	if(confirm("确定删除")){
+			            	deleteTerm(value);
+			            }
+			        }
+		        }
+		    } ]
+		});
 	}
 </script>
 </head>
