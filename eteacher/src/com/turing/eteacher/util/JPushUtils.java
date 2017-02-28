@@ -101,7 +101,6 @@ public class JPushUtils {
 				return false;
 			} catch (APIRequestException e) {
 				if(e.getErrorCode() == 1011){
-					e.printStackTrace();
 					return true;
 				}
 				e.printStackTrace();

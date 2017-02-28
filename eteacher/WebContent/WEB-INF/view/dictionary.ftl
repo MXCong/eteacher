@@ -1,10 +1,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-<link href="${context}/css/base.css" rel="stylesheet" type="text/css">
-<script type="text/javascript" src="${context}/js/jquery.min.js"></script>
+<link href="../css/base.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="../js/jquery.min.js"></script>
 <head>
 <script type="text/javascript">
-	
+	/**
 	function selectData(id,value,pid){
 		$('#'+pid,parent.document).val(value);
 		$('#'+pid,parent.document).attr("name",id);
@@ -33,6 +33,7 @@
 			}
 		});
 		}
+		**/
 </script>
 </head>
 <body style="background:#fff;">
@@ -42,14 +43,14 @@
         	<input id="inputeData" value="" class="tabinput" type="text" /><a class="tabAddbtn" onclick="addDate(${type})">增加</a>
         </div>
     	<div class="tabCont">
-    	<#list titleList as dictionarys> 
+    	<!-- <#list titleList as dictionarys> 
 			<div class="onetab">
 				<span id="titleSel" onclick="selectData('${dictionarys['id']}','${dictionarys['content']}','${pid}')">${dictionarys['content']}</span>
 				<a class="delet-img" onclick="delData(${type},'${dictionarys['id']}')" href="#" title="删除"></a>
 			</div>
 		</#list>
+		-->
         </div>
   	</div>
-
 </body>
 </html>

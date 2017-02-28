@@ -27,9 +27,9 @@
         <button type="button" class="btn btn-default" onclick="saveScore();">保 存</button>
       </div>
       </form> 
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+    </div>
+  </div>
+</div>
  <script>
 	var courseScoreArr = [{scoreName:'平时'},{scoreName:'期中'},{scoreName:'期末'}];
 	var typeArr = [{id:1,type:'定值'},{id:2,type:'均值'}];
