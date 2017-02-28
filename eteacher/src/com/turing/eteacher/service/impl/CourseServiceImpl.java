@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1258,6 +1259,7 @@ public class CourseServiceImpl extends BaseService<Course> implements
 
 	@Override
 	public ReturnBody saveCourse(HttpServletRequest request, String schoolId) {
+		Enumeration rnames=request.getParameterNames();
 		String termId = request.getParameter("termId");
 		String courseId = request.getParameter("courseId");
 		String courseName = request.getParameter("courseName");// *
@@ -1265,7 +1267,9 @@ public class CourseServiceImpl extends BaseService<Course> implements
 		String examTypeId = request.getParameter("examTypeId");// *
 		String introduction = request.getParameter("introduction");
 		String classes = request.getParameter("classes");// *
+		System.out.println("classes:"+classes);
 		String scores = request.getParameter("scores");// *
+		System.out.println("scores:"+scores);
 		if (StringUtil.checkParams(courseName, teachMethodId, examTypeId, classes, scores)) {
 			Course course = null;
 			if (StringUtil.isNotEmpty(courseId)) {
@@ -1324,6 +1328,7 @@ public class CourseServiceImpl extends BaseService<Course> implements
 			map.put("courseId", course.getCourseId());
 			return new ReturnBody(map);
 		} else {
+			System.out.println("error");
 			return ReturnBody.getParamError();
 		}
 	}

@@ -20,18 +20,18 @@
 <script id="teachMethodTemplate" type="text/template">
 	{{~ it:data }}
 		<div class="onetab">
-		  <span class="teachMethodSpan">{{=data.content}}</span>
+		  <span data-dismiss="modal" class="teachMethodSpan" pId={{=data.id}} onclick='selectTeachMethod(this)'>{{=data.content}}</span>
 		  <a class="delet-img"
-		  title="删除"></a>
+		  title="删除" onclick='delTeachMethod(this,"{{=data.id}}");'></a>
 		</div>
 	{{~}}
 </script>
 <script id="examMethodTemplate" type="text/template">
 	{{~ it:data }}
 		<div class="onetab">
-		  <span class="examMethodSpan">{{=data.content}}</span>
+		  <span data-dismiss="modal" class="examMethodSpan"  pId={{=data.id}} onclick='selectExamMethod(this)'>{{=data.content}}</span>
 		  <a class="delet-img"
-		  title="删除"></a>
+		  title="删除" onclick='delExamMethod(this,"{{=data.id}}");'></a>
 		</div>
 	{{~}}
 </script>
@@ -42,7 +42,16 @@
 				 degree={{=data.degree}} majorId={{=data.majorId}} 
 			>{{=data.grade}}级{{=data.className}}</span>
 		  <a class="delet-img"
-		  title="删除"></a>
+		  title="删除" onclick="removeItem(this)"></a>
+		</div>
+	{{~}}
+</script>
+<script id="classResultTemplate" type="text/template">
+	{{~ it:data }}
+		<div class="onetab">
+		  <span class="classResultSpan" grade={{=data.grade}} className={{=data.className}} 
+				 degree={{=data.degree}} majorId={{=data.majorId}} 
+			>{{=data.grade}}级{{=data.className}}</span>
 		</div>
 	{{~}}
 </script>
@@ -50,8 +59,50 @@
 	var teachMethodDot = doT.template($('#teachMethodTemplate').html());
 	var examMethodDot = doT.template($('#examMethodTemplate').html());
 	var classDot = doT.template($('#classTemplate').html());
+	var classResultDot = doT.template($('#classResultTemplate').html());
 	$(function() {
-		
+			$('#saveBtn').click(function(){
+				if(!$('#courseName').val()){
+					alert("课程名称不能为空！");
+					return;
+				}
+				if(!$('#teachingMethod').val()){
+					alert("授课方式不能为空！");
+					return;
+				}
+				if(!$('#examinationMode').val()){
+					alert("考核方式不能为空！");
+					return;
+				}
+				if(!$('#classResultList').html()){
+					alert("授课班级不能为空！");
+					return;
+				}
+				if(!$('#courseScore').html()){
+					alert("成绩组成不能为空！");
+					return;
+				}
+				var params = {};
+				params.courseName = $('#courseName').val();
+				params.teachMethodId = $('#teachingMethod').attr('pId');
+				params.examTypeId = $('#examinationMode').attr('pId');
+				params.introduction = $('#introduction').val();
+				var classesParams = new Array();
+				$('.classResultSpan').each(function(i){
+					var item = {};
+					item.grade = $(this).attr('grade');
+					item.degree  = $(this).attr('degree');
+					item.className = $(this).attr('className');
+					item.majorId = $(this).attr('majorId');
+					classesParams.push(item);
+				});
+				params.classes = JSON.stringify(classesParams);
+				params.scores = JSON.stringify(courseScoreArr);
+				$httpUtils.post('teacher/course/updateCourse', params, function(data) {
+					alert("保存成功！");
+				});
+			});
+			
 	});
 	function init() {
 		//专业
@@ -94,12 +145,23 @@
 			}
 		});
 	}
-	
+	//添加字典数据
 	function addDictionary(content,type,fucSuc){
 		var params = {};
 		params.content = content;
 		params.type = type;
 		$httpUtils.post('dictionary/addItem', params, function(data) {
+			if(fucSuc){
+				fucSuc();
+			}
+		});
+	}
+	//添加字典数据
+	function delDictionary(id,type,fucSuc){
+		var params = {};
+		params.itemId = id;
+		params.type = type;
+		$httpUtils.post('dictionary/delItem', params, function(data) {
 			if(fucSuc){
 				fucSuc();
 			}
@@ -119,6 +181,9 @@
 		$('#textbookOthers').val(JSON.stringify(textbookOthers));
 		return true;
 	}
+	
+
+	
 </script>
 
 </head>
@@ -128,7 +193,7 @@
 			<span>课程信息</span>
 		</div>
 		<div class="enter-message">
-			<form id="courseForm" method="post" action="saveCourse"
+			<div id="courseForm" 
 				enctype="multipart/form-data">
 				<input type="hidden" name="courseId" /> <input type="hidden"
 					name="termId" value="${termId?default(" ")}" />
@@ -149,7 +214,7 @@
 				<div class="message-group">
 					<div class="message-left">授课方式：</div>
 					<div class="message-right">
-						<input id="teachingMethod" type="text" class="mess-control" 
+						<input readonly id="teachingMethod" type="text" class="mess-control" 
 						data-toggle="modal" data-target="#teachMethodModal" 
 						placeholder="请选授课方式" />
 					</div>
@@ -157,7 +222,7 @@
 				<div class="message-group">
 					<div class="message-left">考核方式：</div>
 					<div class="message-right">
-						<input id="examinationMode" data-toggle="modal"
+						<input readonly id="examinationMode" data-toggle="modal"
 							data-target="#examMethodModal" type="text" class="mess-control"
 							placeholder="请选择考核方式" />
 					</div>
@@ -169,6 +234,8 @@
 							style="cursor: pointer;" data-toggle="modal"
 							data-target="#classSelectModal" title="设置"
 							class="glyphicon glyphicon-edit"></i>
+							<div id="classResultList"></div>
+								
 					</div>
 				</div>
 				<div class="message-group">
@@ -178,14 +245,15 @@
 						<i style="cursor: pointer;" data-toggle="modal"
 							data-target="#courseScorekModal" title="设置"
 							class="glyphicon glyphicon-edit"></i>
+						<div id="courseScore"></div>
 					</div>
 				</div>
 				<div class="btnsub">
-					<button type="submit" class="btn-submit" style="float:left;">保存</button>
+					<button id="saveBtn" class="btn-submit" style="float:left;">保存</button>
 					<button type="button" class="btn-submit" style="float:right;"
 						onclick="history.back();">返回</button>
 				</div>
-			</form>
+			</div>
 		</div>
 	</div>
 </body>

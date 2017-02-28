@@ -11,7 +11,6 @@
       		<thead>
       			<tr>
       				<td align="center">类型</td>
-      				<td align="center">分制</td>
       				<td align="center">比例</td>
       				<td align="center">计分方式</td>
       				<td align="center">操作</td>
@@ -34,7 +33,7 @@
 	var courseScoreArr = [{scoreName:'平时'},{scoreName:'期中'},{scoreName:'期末'}];
 	var typeArr = [{id:1,type:'定值'},{id:2,type:'均值'}];
 	var pointArr = [];
-	initScore();
+	//initScore();
 	
 	//打开时初始化数据
 	$('#courseScorekModal').on('show.bs.modal', function (e) {
@@ -54,20 +53,9 @@
 		var html =  '<tr>'+
 					'	<td ><div class="btn-group" id="toolbar" style="float:left;">'+
 					'		<input value="'+scoreName+'" class="mess-control scoreName" style="width:110px; margin-top:5px;" />'+
-					'	</div></td>'+
-					'	<td>'+
-					'		<select class="mess-control scorePointId" style="width:110px; margin-top:5px">';
-		$.each(pointArr,function(i,n){
-			html+='<option value='+n.id;
-			if(n.id && scorePointId){
-				if(n.id == scorePointId){
-					html+=' selected = "selected"';
-				}	
-			}
-			html+='>'+n.content+'</option>';
-		});
-		html+=		'	</select>'+
-					'	</td>'+
+					'	</div></td>';
+
+		html+=	
 					'	<td>'+
 					'		<input value="'+scorePercent+'" name="" class="mess-control scorePercent" data-percent="30" data-csid="" style="width:100px; margin-top:5px" />'+
 					'	</td>'+
@@ -130,7 +118,6 @@
 			$('#scoreDiv').children().each(function(i){
 				record = {};
 				record.scoreName = $(this).find('.scoreName').val();
-				record.scorePointId = $(this).find('.scorePointId').val();
 				record.scorePercent = $(this).find('.scorePercent').val();
 				record.status = $(this).find('.status').val();
 				courseScoreArr.push(record);
@@ -143,13 +130,12 @@
 			
 	}  
 	function initScore(){
-		$('#courseScoreDiv').children('span').remove();
 		var html = '';
 		$.each(courseScoreArr,function(i,n){
 			var value = n.scorePercent?n.scorePercent:'';
 			html += '<span>' + n.scoreName +'&nbsp;&nbsp;'+ value+' %&nbsp;&nbsp;&nbsp;&nbsp</span>';
 		});
-		$('#courseScoreDiv').prepend(html);
+		$('#courseScore').html(html);
 	}
 	
 </script> 

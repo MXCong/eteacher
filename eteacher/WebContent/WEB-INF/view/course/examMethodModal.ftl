@@ -37,4 +37,21 @@
 			}
 		}
 	});
+	
+	//选择考核方式
+	function selectExamMethod(tag){
+		$('#examinationMode').attr('pId',$(tag).attr('pId'));
+		$('#examinationMode').val($(tag).html());
+	}
+	
+	//删除授课方式
+	function delExamMethod(tag,id){
+		delDictionary(id,3,function(ret){
+			if(id == $('#examinationMode').attr('pId')){
+				$('#examinationMode').val('');
+				$('#examinationMode').removeAttr('pId');
+			}
+			$(tag).parent().remove();
+		});
+	}
 </script>

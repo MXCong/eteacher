@@ -37,4 +37,19 @@
 			}
 		}
 	});
+	//选择授课方式
+	function selectTeachMethod(tag){
+		$('#teachingMethod').attr('pId',$(tag).attr('pId'));
+		$('#teachingMethod').val($(tag).html());
+	}
+	//删除授课方式
+	function delTeachMethod(tag,id){
+		delDictionary(id,2,function(ret){
+			if(id == $('#teachingMethod').attr('pId')){
+				$('#teachingMethod').val('');
+				$('#teachingMethod').removeAttr('pId');
+			}
+			$(tag).parent().remove();
+		});
+	}
 </script>

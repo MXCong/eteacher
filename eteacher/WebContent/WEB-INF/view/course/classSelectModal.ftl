@@ -73,7 +73,7 @@
 				if($(this).attr('grade') == $('#grade').val() 
 				&& $(this).attr('degree') == $('#degree').val() 
 				&& $(this).attr('majorId') == $('#specialty3').val()
-				&& $(this).attr('className') == $('#specialty3').find("option:selected").text()+$('#classNum').val()+'班'){
+				&& $(this).attr('className') == $('#specialty3').find("option:selected").text()+$('#degree').val()+$('#classNum').val()+'班'){
 					throw("该班级已存在");
 				}
 			});
@@ -82,13 +82,34 @@
 			item.grade = $('#grade').val();
 			item.degree  = $('#degree').val();
 			item.majorId = $('#specialty3').val();
-			item.className = $('#specialty3').find("option:selected").text()+$('#classNum').val()+'班';
+			item.className = $('#specialty3').find("option:selected").text()+$('#degree').val()+$('#classNum').val()+'班';
 			temp.push(item);
 			$('#classlist').append(classDot(temp));
+			refreshResult();
 		}catch(err){
 			if(err){
 				alert(err);
 			}
 		}
 	});
+	//删除班级
+	function removeItem(tag){
+		$(tag).parent().remove();
+		refreshResult();
+	}
+	
+	//更新主页面
+	function refreshResult(){
+		var temps = new Array();
+		$('.classSpan').each(function(i){
+			var item = {};
+			item.grade = $(this).attr('grade');
+			item.degree  = $(this).attr('degree');
+			item.majorId = $(this).attr('majorId');
+			item.className = $(this).attr('className');
+			temps.push(item);
+		});
+		$('#classResultList').html(classResultDot(temps));
+	}
+	
 </script>
