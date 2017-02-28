@@ -362,7 +362,7 @@ public class CourseRemote extends BaseRemote {
 													String[] week = cell.getWeekDay().split(",");
 													for (int l = 0; l < week.length; l++) {
 														//课程的间隔周期
-														int repeatNumber = Integer.parseInt((String)map.get("repeatNumber"));
+														int repeatNumber = (int) map.get("repeatNumber");
 														//课程一共上几周
 														int repeatCount = (DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay")))/(repeatNumber*7);
 														for (int m = 0; m <= repeatCount; m++) {

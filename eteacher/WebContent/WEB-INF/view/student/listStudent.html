@@ -10,44 +10,162 @@
 <script type="text/javascript" src="../../js/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table.min.js"></script>
 <script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+
+<script type="text/javascript" src="../../js/utils/md5.js"></script>
+<script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
+<script type="text/javascript" src="../../js/utils/ajax.js"></script>
+
 <script type="text/javascript">
-	var studentTable;
-	var courseId = '${courseId?default("")}';
+	var currentTermId = null;
+	var currentCourseId = null;//当前正在进行的课程ＩＤ
+	var cId = null;//定义变量，存储用户课程列表中的第一项课程ID
 	$(function(){
-		studentTable = $('#studentTable').bootstrapTable({
-		    url: 'getStudentListData',
-		    queryParams : function(params){
-		    	params.termId = $('#termSelect').val();
-		    	params.courseId = $('#courseSelect').val();
-		    	courseId = params.courseId;
-		    	return params;
-		    },
+		getCurrentTerm();//获取学期列表
+		getCouseList();//获取课程的下拉列表
+		getCurrentCourse();//获取目前正在进行的课程
+		
+		
+	});
+	function updateCourseSelect(termId){
+		getCouseList(termId);
+	}
+	function viewScore(){
+		if($PrefsUtils.receive('courseId') == null){
+			return;
+		}
+		window.location.href = '../score/listScore.html';
+	}
+	function viewStatistics(){
+		
+		if($PrefsUtils.receive('courseId') == null){
+			return;
+		}
+		window.location.href = '../statistics/courseStatistics.html';
+	}
+	
+	//获取学期列表
+	function getCurrentTerm(){
+		var currentTerm = JSON.parse($PrefsUtils.getPref('currentTerm'));
+		var tn = currentTerm.termName;
+		currentTermId = currentTerm.tpId;
+
+		var termList = JSON.parse($PrefsUtils.getPref("termList"));
+        var option = $("#termSelect");
+        for ( var i in termList) {
+        	if(termList[i].tpId == currentTermId){
+        		var o = "<option value="+termList[i].tpId+" selected='selected'>"+termList[i].termName+"</option>";
+        	}else{
+        		var o = "<option value="+termList[i].tpId+">"+termList[i].termName+"</option>";	
+        	}
+        	option.append(o);
+		}
+	}
+	//更换课程
+	function changeCourse(courseId){
+		$PrefsUtils.transfer('courseId' , courseId);
+		if(courseId != currentCourseId){
+			getSignInData(courseId , 1);
+		}else{
+			getSignInData(currentCourseId , 0);
+		}
+	}
+    //获取课程列表
+    function getCouseList(termId) {
+    	$("#courseSelect").empty();
+        var params = {};
+        if(null == termId ){
+        	params.termId = currentTermId;	
+        }else{
+        	params.termId = termId;
+        }
+        $httpUtils.post('teacher/course/getCourseByTerm', params, function(ret) {
+            if (ret && ret.length > 0) {
+            	cId = ret[0].courseId;
+            	var option = $("#courseSelect");
+            	for ( var i in ret) {
+                	var o = "<option value="+ret[i].courseId+">"+ret[i].courseName+"</option>";
+                	option.append(o);
+        		} 
+            }
+        });
+    }
+    //获取当前正在进行的课程
+    function getCurrentCourse(){
+		var params = {};
+		params.termId = currentTermId ;
+		$httpUtils.post('course/currentCourse', params, function(ret) {
+			if (null != ret && ret.length>0) {
+				currentCourseId　=　ret[0].courseId;
+				//将当前正在进行的课程置为“选中”状态
+				var option = $("#courseSelect");
+				var o = "<option selected value="+ret[0].courseId+">"+ret[0].courseName+"</option>";
+				option.append(o);
+				getSignInData(currentCourseId , 0);
+			}
+		});
+		getSignInData(cId,1);
+    }
+  //获取成绩类型为“均值”的成绩项
+	function getScourType(courseId){
+		var par = {};
+		par.courseId = courseId;
+		$httpUtils.post('score/getScoreType',par,function(data){
+			if (null != data && data.length>0) {
+				alert(JSON.stringify(data));
+			}
+		});
+	}
+    //获取学生签到数据
+	function getSignInData(courseId,status){
+		var par = {};
+		par.courseId = courseId;
+		par.status = status;
+		$httpUtils.post('course/registDetail' , par , function(data){
+			if (null != data && data.length>0) {
+				list = data;
+				if(status == 0){
+					var r = parseInt(data[0].studentNum) - parseInt(data.length);
+					var c = "本堂课程：已签到:" + data.length + "人，   未签到:" + r + "人";
+					$('#tableTitle').text(c);
+					initTable(data);
+					
+				}
+			}else{
+				var c = "本堂课程：已签到: 0人"
+				$('#tableTitle').text(c);
+				initTable(data);
+			}
+		});
+	}
+  	function initTable(data){
+  		studentTable = $('#studentTable').bootstrapTable({
+		    data : data,
 		    striped : true,
 		    toolbar : '#toolbar',
 		    search : true,
 		    showRefresh : true,
 		    columns: [{
-		        field: 'stuNo',
-		        halign: 'center',
+		        field: 'studentNo',
+		        align: 'center',
 		        title: '学号'
 		    }, {
-		        field: 'stuName',
-		        halign: 'center',
+		        field: 'studentName',
+		        align: 'center',
 		        title: '姓名'
 		    }, {
+		    	field: 'courseNum',
 		        align: 'center',
-		        valign: 'middle',
-		        title: '是否出勤',
+		        title: '上课次数'
+		    }, {
+		    	field: 'signInNum',
+		        align: 'center',
+		        title: '签到次数'
+		    }, {
+		        align: 'center',
+		        title: '出勤率',
 		        formatter : function (value, row, index){
-		        	return '<span class="label label-success">签到</span>';
+		        	return (row.signInNum)/(row.courseNum);
 		        }
-		    }, {
-		        align: 'center',
-		        title: '出勤率'
-		    }, {
-		    	field: 'normalScoreCount',
-		        align: 'center',
-		        title: '提问次数'
 		    },  {
 		        title: '操作',
 		        align: 'center',
@@ -70,34 +188,12 @@
 		        }
 		    } ]
 		});
-	});
-	function updateCourseSelect(termId){
-		$.post('${context}/course/getCourseListData',{termId:termId},function(data){
-			var list = data.data;
-			$('#courseSelect').empty();
-			$.each(list,function(i,n){
-				$('#courseSelect').append('<option value="'+n.courseId+'">'+n.courseName+'</option>');
-			});
-		},'json')
-	}
-	function viewScore(){
-		//window.location.href = 'viewAddWork?termId=' + $('#termSelect').val() + '&courseId=' + $('#courseSelect').val();
-		if(courseId == null){
-			return;
-		}
-		window.location.href = '${context}/score/viewListScore?courseId=' + courseId;
-	}
-	function viewStatistics(){
-		if(courseId == null){
-			return;
-		}
-		window.location.href = '${context}/statistics/viewCourseStatistics?courseId=' + courseId;
-	}
+  	}
 </script>
 </head>
 <body>
 	<div class="maincont">
-        <div class="title"><span>学生列表</span></div>
+        <div class="title"><span id="tableTitle"></span></div>
         <div class="enter-message">
             <table width="100%" border="0" cellpadding="0" cellspacing="0">
             	<tbody>
@@ -112,7 +208,7 @@
                         </td>
                         <td width="12%" align="left" valign="middle"><label for="kecheng" style="line-height:36px; margin-bottom:0;">课程名称：</label></td>
                         <td width="36%">
-                        	<select id="courseSelect" class="select-control">
+                        	<select id="courseSelect" class="select-control" onchange="changeCourse(this.value)">
                         		<!-- <#list courseList as course> 
 									<option value="${course.courseId}" <#if course.courseId == courseId?default("")>selected="selected"</#if>>${course.courseName}</option>
 								</#list> -->
@@ -142,6 +238,6 @@
             <p>版权所有：河北图灵</p>
         </div>
     </div>
-	<#include "courseScoreModal.ftl" />
+	<!-- <#include "courseScoreModal.ftl" /> -->
 </body>
 </html>

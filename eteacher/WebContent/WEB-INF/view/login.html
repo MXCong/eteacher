@@ -38,7 +38,7 @@
             	$PrefsUtils.savePref('userId', ret.data.userId);
             	$PrefsUtils.savePref('token', hex_md5(ret.data.token + pwd));
             	getTermList();//获取用户的学期信息并本地存储
-            	getUserInfo();//获取用户基本信息并本地存储
+            	
             });
         } else {
             if (phone_value.val() == "") {
@@ -79,6 +79,7 @@
                 terms = terms.concat(ret.before);
             }
             $PrefsUtils.savePref("termList" , terms);
+            getUserInfo();//获取用户基本信息并本地存储
 		});
 	}
 </script>

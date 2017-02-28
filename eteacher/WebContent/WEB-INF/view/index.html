@@ -23,6 +23,7 @@
 			$PrefsUtils.remValue('schoolId');
             $PrefsUtils.remValue('name');
             $PrefsUtils.remValue('icon');
+            $PrefsUtils.remValue('currentTerm');
 			//跳转到登录页面
 			window.location.href = 'login.html';
 		});	
@@ -64,8 +65,8 @@
 						onclick="jump('student/listStudent.html',this)">学生</a></li>
 					<li><a href="#" class="" title="课表"
 						onclick="jump('courseTable/courseTable.html',this)">课表</a></li>
-					<li><a href="#" class="" title="班级"
-						onclick="jump('class/listClass.html',this)">班级</a></li>
+					<!-- <li><a href="#" class="" title="班级"
+						onclick="jump('class/listClass.html',this)">班级</a></li> -->
 					<li><a href="#" class="" title="通知"
 						onclick="jump('notice/listNotice.html',this)">通知</a></li>
 					<!--<li><a href="#" class="" title="学生提问" onclick="jump('statistics/viewWorkloadStatistics',this)">学生提问</a></li>-->

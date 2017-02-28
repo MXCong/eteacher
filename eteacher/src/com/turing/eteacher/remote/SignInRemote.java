@@ -158,7 +158,7 @@ public class SignInRemote extends BaseRemote {
 	}
 
 	/**
-	 * 获取正在进行的课程的学生出勤率
+	 * 获取正在进行的课程的学生出勤情况
 	 * @author macong
 	 * @param request
 	 * @return

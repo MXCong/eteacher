@@ -166,7 +166,7 @@ public class WorkRemote extends BaseRemote {
 
 	// 教师操作
 	/**
-	 * 获取作业列表（已到期、已发布、待发布、指定截止日期）
+	 * 获取作业列表（已到期、已发布、待发布、指定截止日期、查看某门课程下的作业列表）
 	 * 
 	 * @param request
 	 * @return

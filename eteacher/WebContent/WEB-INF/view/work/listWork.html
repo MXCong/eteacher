@@ -10,17 +10,36 @@
 <script type="text/javascript" src="../../js/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table.min.js"></script>
 <script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+
+<script type="text/javascript" src="../../js/utils/md5.js"></script>
+<script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
+<script type="text/javascript" src="../../js/utils/ajax.js"></script>
+
 <script type="text/javascript">
+	var currentTermId = null;
 	var workTable;
 	$(function(){
+		getCurrentTerm();//获取学期列表
+		//获取课程列表
+	    getCouseList();
+		getWorkList();
+		
+	});
+	//获取作业列表
+	function getWorkList(courseId){
+		var params = {};
+		if(courseId){
+			params.courseId = courseId;
+		}
+		params.status = 4;
+		$httpUtils.post('teacher/work/getWorkList',params,function(res){
+			initTable(res);
+		});
+	}
+	function initTable(data){
 		workTable = $('#workTable').bootstrapTable({
-		    url: 'getWorkListData',
-		    queryParams : function(params){
-		    	params.termId = $('#termSelect').val();
-		    	params.courseId = $('#courseSelect').val();
-		    	return params;
-		    },
-		    striped : true,
+			data : data ,
+			striped : true,
 		    toolbar : '#toolbar',
 		    columns: [{
 		        title: '序号',
@@ -32,6 +51,10 @@
 		        field: 'courseName',
 		        halign: 'center',
 		        title: '课程名称'
+		    },{
+		        field: 'title',
+		        halign: 'center',
+		        title: '作业标题'
 		    }, {
 		        field: 'content',
 		        halign: 'center',
@@ -41,11 +64,12 @@
 		        valign: 'middle',
 		        title: '状态',
 		        formatter : function (value, row, index){
-		        	if(row.publishType == '01'){
-		        		return '<span class="label label-primary">编辑</span>';
-		        	}
-		        	else{
-		        		return '<span class="label label-success">发布</span>';
+		        	if(row.period == '待发布'){
+		        		return '<span class="label label-primary">待发布</span>';
+		        	}else if(row.period == '已发布'){
+		        		return '<span class="label label-success">已发布</span>';
+		        	}else{
+		        		return '<span class="label label-danger">已到期</span>';
 		        	}
 		        	//return '<span class="label label-danger">过期</span>';
 		        }
@@ -58,33 +82,69 @@
 		        },
 		        events : {
 		        	'click .glyphicon-edit': function (e, value, row, index) {
-			            window.location.href = 'viewEditWork?workId=' + row.workId;
+			          	$PrefsUtils.transfer('workId',row.workId);
+			            window.location.href = 'editWork.html';
 			        },
 			        'click .glyphicon-trash': function (e, value, row, index) {
 			        	if(confirm("确定删除")){
-			            	$.post('deleteWork',{workId : row.workId},function(data){
-				            	workTable.bootstrapTable('refresh');
-				            });
+		                    $httpUtils.post('teacher/work/updateWorkStatus', {
+		                        "workId" : row.workId,
+		                        "status" : 0
+		                    }, function(data) {
+		                    	location.reload(); 
+		                    	//workTable.bootstrapTable('refresh');
+		                    });
 			            }
 			        }
 		        }
-		    } ]
+		    }]
 		});
-	});
+	}
 	function updateCourseSelect(termId){
-		$.post('${context}/course/getCourseListData',{termId:termId},function(data){
-			var list = data.data;
-			$('#courseSelect').empty();
-			$('#courseSelect').append('<option value="">全部</option>');
-			$.each(list,function(i,n){
-				$('#courseSelect').append('<option value="'+n.courseId+'">'+n.courseName+'</option>');
-			});
-		},'json')
+		getCouseList(termId);
 	}
 	//新增作业按钮
 	function add(){
-		window.location.href = 'workForm.html?termId=' + $('#termSelect').val() + '&courseId=' + $('#courseSelect').val();
+		window.location.href = 'workForm.html';
 	}
+	//获取学期列表
+	function getCurrentTerm(){
+		var currentTerm = JSON.parse($PrefsUtils.getPref('currentTerm'));
+		var tn = currentTerm.termName;
+		currentTermId = currentTerm.tpId;
+
+		var termList = JSON.parse($PrefsUtils.getPref("termList"));
+        var option = $("#termSelect");
+        for ( var i in termList) {
+        	if(termList[i].tpId == currentTermId){
+        		var o = "<option value="+termList[i].tpId+" selected='selected'>"+termList[i].termName+"</option>";
+        	}else{
+        		var o = "<option value="+termList[i].tpId+">"+termList[i].termName+"</option>";	
+        	}
+        	option.append(o);
+		}
+	}
+    //获取课程列表
+    function getCouseList(termId) {
+    	$("#courseSelect").empty();
+        var params = {};
+        if(null == termId ){
+        	params.termId = currentTermId;	
+        }else{
+        	params.termId = termId;
+        }
+        $httpUtils.post('teacher/course/getCourseByTerm', params, function(ret) {
+            if (ret && ret.length > 0) {
+            	var option = $("#courseSelect");
+            	var o2 = "<option value=''>全部</option>";
+            	option.append(o2);
+            	for ( var i in ret) {
+                	var o = "<option value="+ret[i].courseId+">"+ret[i].courseName+"</option>";
+                	option.append(o);
+        		} 
+            }
+        });
+    }
 </script>
 </head>
 <body>
@@ -104,8 +164,7 @@
                         </td>
                         <td width="12%" align="left" valign="middle"><label for="kecheng" style="line-height:36px; margin-bottom:0;">课程名称：</label></td>
                         <td width="36%">
-                        	<select id="courseSelect" class="select-control">
-                        		<option value="">全部</option>
+                        	<select id="courseSelect" class="select-control" onchange="getWorkList(this.value)">
                         		<!-- <#list courseList as course> 
 									<option value="${course.courseId}" <#if course.courseId == courseId?default("")>selected="selected"</#if>>${course.courseName}</option>
 								</#list> -->

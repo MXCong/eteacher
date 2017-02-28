@@ -14,24 +14,15 @@
 <script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
 <script type="text/javascript" src="../../js/utils/ajax.js"></script>
 <script type='text/javascript' src='../../js/utils/doT.min.js' charset='utf-8'></script>
-<style>
-	.onetab {
-	    float: left;
-	    margin: 5px 5px 5px 5px;
-	    height: 30px;
-	    line-height: 30px;
-	    background: #eee;
-	    border-radius: 3px;
-	    color: #000;
-	}
-</style>
+
 <script type="text/javascript">
-	var editFlag = '${editFlag?default("")}';
-	var courseList = null;
 	var courseID = null;
+	var workId = null;
 	$(function(){
-		getCouseList();//获取课程列表
+		workId = $PrefsUtils.receive('workId');
+		getDetail(workId);
 	});
+	
 	function addFile(btn){
 		$(btn).parent().parent().clone().appendTo('#filesDiv');
 	}
@@ -50,8 +41,75 @@
 			});
 		}
 	}
-	//创建作业点击时间
-	function createWork(){
+	//获取课程列表
+    function getCouseList() {
+		var currentTerm = JSON.parse($PrefsUtils.getPref('currentTerm'));
+		var currentTermId = currentTerm.tpId;
+        var params = {};
+        params.termId = currentTermId;
+        $httpUtils.post('teacher/course/getCourseByTerm', params, function(ret) {
+            if (ret && ret.length > 0) {
+            	courseList = ret;
+            	var option = $("#courseId");
+            	for ( var i in ret) {
+                	var o = "<option value="+ret[i].courseId+">"+ret[i].courseName+"</option>";
+                	option.append(o);
+        		} 
+            }
+        });
+    }
+	
+	//选择课程，列出该课程下的授课班级
+    function updateCourseSelect(courseId){
+    	courseID = courseId;
+    	var classes = $("#classList");
+		for ( var i in courseList) {
+			if(courseList[i].courseId == courseId){
+				var cls = courseList[i].classes;
+				for ( var c in cls) {
+					var span = "<div>"+
+									"<div class='targetClass onetab' name='classes' id="+ cls[c].classId +">"+
+										"<span>"+cls[c].className+"</span>"+
+										"<a class='delet-img' onclick='delScore(this)' href='#' title='删除'></a>"+
+									"</div>"+
+								"</div>";
+					classes.append(span);
+				}
+			}
+		}
+	}
+	//删除所选的课程
+    function delScore(btn) {
+    	btn.parentNode.remove(btn.parentNode);
+        event.stopPropagation();
+    };
+	// 获取作业详情
+    function getDetail(workId) {
+        var parames = {};
+        parames.workId = workId;
+        $httpUtils.post('teacher/work/detail', parames, function(workInfo) {
+            if (workInfo) {
+            	$('#workTitle').val(workInfo.title);
+                $('#publishTime').val(workInfo.publishTime);
+                $('#endTime').val(workInfo.endTime);
+                $('#workContent').html(workInfo.content);
+                
+                var o = "<option value="+workInfo.courseId+">"+workInfo.courseName+"</option>";
+                $('#courseId').html(o);
+                
+                courseID = workInfo.courseId;
+                getCouseList();//获取课程的下拉列表项
+               /*  if (workInfo.targetClass) {
+                    $('#classes').html(dotClass(workInfo.targetClass));
+                }
+                if (workInfo.files) {
+                    $('#fileList').html(dotFiles(workInfo.files));
+                } */
+            }
+        });
+    }
+  	//保存修改后的作业
+	function saveWork(){
 		var title = $('#workTitle').val();
         var publishTime = $('#publishTime').val();
         var endTime = $('#endTime').val();
@@ -74,6 +132,7 @@
             return;
         }
         var params = {};
+        params.workId = workId;
         params.courseId = courseID;
         params.publishTime = publishTime;
         params.endTime = endTime;
@@ -92,50 +151,9 @@
         params.status = 1;
         alert(JSON.stringify(params));
         $httpUtils.post('teacher/work/addWork',params,function(date){
-            alert("作业创建成功");
+            alert("作业修改成功");
         });
 	}
-	//获取课程列表
-    function getCouseList() {
-		var currentTerm = JSON.parse($PrefsUtils.getPref('currentTerm'));
-		var currentTermId = currentTerm.tpId;
-        var params = {};
-        params.termId = currentTermId;
-        $httpUtils.post('teacher/course/getCourseByTerm', params, function(ret) {
-            if (ret && ret.length > 0) {
-            	courseList = ret;
-            	var option = $("#courseId");
-            	for ( var i in ret) {
-                	var o = "<option value="+ret[i].courseId+">"+ret[i].courseName+"</option>";
-                	option.append(o);
-        		} 
-            }
-        });
-    }
-	//选择课程，列出该课程下的授课班级
-    function updateCourseSelect(courseId){
-    	courseID = courseId;
-    	var classes = $("#classList");
-		for ( var i in courseList) {
-			if(courseList[i].courseId == courseId){
-				var cls = courseList[i].classes;
-				for ( var c in cls) {
-					var span = "<div>"+
-									"<div class='targetClass onetab' name='classes' id="+ cls[c].classId +">"+
-										"<span>"+cls[c].className+"</span>"+
-										"<a class='delet-img' onclick='delScore(this)' href='#' title='删除'></a>"+
-									"</div>"+
-								"</div>";
-					classes.append(span);
-				}
-			}
-		}
-	}
-    //删除所选的课程
-    function delScore(btn) {
-    	btn.parentNode.remove(btn.parentNode);
-        event.stopPropagation();
-    };
 </script>
 </head>
 <body>
@@ -195,7 +213,7 @@
                     </div>                   	
                 </div>
                 <div class="btnsub">
-                    <input type="button" class="btn-submit" value="保存" onclick="createWork();">
+                    <input type="button" class="btn-submit" value="保存" onclick="saveWork();">
                     <button type="button" class="btn-submit" onclick="history.back();">返回</button>
                 </div>
             </form> 
