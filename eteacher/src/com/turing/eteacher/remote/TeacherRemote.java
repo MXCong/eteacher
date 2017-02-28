@@ -117,7 +117,7 @@ public class TeacherRemote extends BaseRemote {
 		}
 	}
 
-	/**
+	/** 
 	 * （教师）用户的个人信息的编辑操作
 	 * 
 	 * @author macong
@@ -236,7 +236,7 @@ public class TeacherRemote extends BaseRemote {
 	@RequestMapping(value = "teacher/addCommunication", method = RequestMethod.POST)
 	public ReturnBody addCommunication(HttpServletRequest request,
 			UserCommunication userCommunication) {
-		try {
+		try {    
 			String userId = request.getParameter("userId");
 			String name = request.getParameter("name");
 			String value = request.getParameter("value");
@@ -257,6 +257,31 @@ public class TeacherRemote extends BaseRemote {
 					ReturnBody.ERROR_MSG);
 		}
 	}
+	
+	/**
+	 * 更新联系方式（邮箱、电话、ＩＭ）
+	 * 
+	 * @author macong
+	 * @param type
+	 * @param name
+	 * @param value
+	 * @param status
+	 */
+	@RequestMapping(value = "teacher/updateCommunication", method = RequestMethod.POST)
+	public ReturnBody updateCommunication(HttpServletRequest request,
+			UserCommunication userCommunication) {
+		try {    
+			userCommunicationServiceImpl.update(userCommunication);
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, new HashMap());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE,
+					ReturnBody.ERROR_MSG);
+		}
+	}
+	
+	
+	
 
 	/**
 	 * 删除联系方式（邮箱、电话、ＩＭ）
