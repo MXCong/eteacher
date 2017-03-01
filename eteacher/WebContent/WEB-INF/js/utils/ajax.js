@@ -11,52 +11,62 @@
 	 * @param {Object}
 	 *            callback 成功返回函数 例：function(data){}; data值为返回值，类型为JSON
 	 */
-	h.post = function(url, params, fnSuc) {
-		if (!params) {
-			params = {};
-		}
-		var myDate = new Date();
-		params.appKey = '20161001_ITEACHER';
-		params.userId = localStorage.getItem("userId");
-		var token = localStorage.getItem("token");
-		params.timeStamp = myDate.getTime();
-		params.signature = hex_md5(token + params.timeStamp);
-		$.ajax({
-			url : 'http://localhost:8080/eteacher/remote/' + url,
-			type : 'POST',
-			dataType : 'json',
-			data : params,
-			complete : function(XMLHttpRequest, textStatus) {
-				switch (XMLHttpRequest.status) {
-				/*
-				 * case 200: if (fnSuc) { fnSuc(XMLHttpRequest.data); } break;
-				 */
-				case 900:
+	 h.post = function(url, params, fnSuc) {
+	 	if (!params) {
+	 		params = {};
+	 	}
+	 	var myDate = new Date();
+	 	params.appKey = '20161001_ITEACHER';
+	 	params.userId = localStorage.getItem("userId");
+	 	var token = localStorage.getItem("token");
+	 	params.timeStamp = myDate.getTime();
+	 	params.signature = hex_md5(token + params.timeStamp);
+	 	$.ajax({
+	 		url : 'http://localhost:8080/eteacher/remote/' + url,
+	 		type : 'POST',
+	 		dataType : 'json',
+	 		data : params,
+	 		error : function(XMLHttpRequest, textStatus, errorThrown) {
+
+	 		},
+	 		success : function(data) {
+	 			switch (data.result) {
+	 				case '200':
+	 				if (fnSuc) {
+	 					fnSuc(data.data);
+	 				}
+	 				break;
+	 				case '900':
 					// 请求超时
+					alert(data.msg);
 					if (fnErr) {
 						fnErr(XMLHttpRequest.msg);
 					}
 					break;
-				case 406:
+					case '406':
 					// 非法请求
+					alert(data.msg);
 					if (fnErr) {
 						fnErr(XMLHttpRequest.msg);
 					}
 					break;
-				case 401:
+					case '401':
 					// 用户不存在
+					alert(data.msg);
 					goLogin();
 					if (fnErr) {
 						fnErr(XMLHttpRequest.msg);
 					}
 					break;
-				case 400:
+					case '400':
+					alert(data.msg);
 					// 请求失败
 					if (fnErr) {
 						fnErr(XMLHttpRequest.msg);
 					}
 					break;
-				case 201:
+					case '201':
+					alert(data.msg);
 					// token过期
 					goLogin();
 					if (fnErr) {
@@ -64,15 +74,9 @@
 					}
 					break;
 				}
-			},
-			error : function(XMLHttpRequest, textStatus, errorThrown) {
-				// TODO
-			},
-			success : function(data) {
-				fnSuc(data.data);
 			}
 		});
-	}
+	 }
 	/**
 	 * 不带默认参数的POST网络请求
 	 * 
@@ -84,51 +88,49 @@
 	 * @param {Object}
 	 *            callback 成功返回函数 例：function(data){}; data值为返回值，类型为JSON
 	 */
-	h.postNormal = function(url, params, fnSuc) {
-		$.ajax({
-			url : '../remote/' + url,
-			type : 'POST',
-			dataType : 'json',
-			data : params,
-			complete : function(XMLHttpRequest, textStatus) {
-				var status = XMLHttpRequest.status;
-				switch (status) {
-				/*
-				 * case 200: if (fnSuc) { // 转换Json数据为javascript对象 eval("var
-				 * objResults =" + XMLHttpRequest.responseText);
-				 * alert("--:"+objResults.Results); var displaytext = ""; for
-				 * (var i=0; i < objResults.Results.computer.length; i++) {
-				 * displaytext += objResults.Results.computer[i].Manufacturer + " " +
-				 * objResults.Results.computer[i].Model + ": $" +
-				 * objResults.Results.computer[i].Price + "<br>"; }
-				 * fnSuc(displaytext); } break;
-				 */
-				case 900:
+	 h.postNormal = function(url, params, fnSuc) {
+	 	$.ajax({
+	 		url : '../remote/' + url,
+	 		type : 'POST',
+	 		dataType : 'json',
+	 		data : params,
+	 		error : function(XMLHttpRequest, textStatus, errorThrown) {
+				// TODO
+			},
+			success : function(data) {
+				switch (data.result) {
+					case '200':
+					if (fnSuc) {
+						fnSuc(data.data);
+					}
+					break;
+
+					case '900':
 					// 请求超时
 					if (fnErr) {
 						fnErr(XMLHttpRequest.msg);
 					}
 					break;
-				case '406':
+					case '406':
 					// 非法请求
 					if (fnErr) {
 						fnErr(XMLHttpRequest.msg);
 					}
 					break;
-				case 401:
+					case '401':
 					// 用户不存在
 					goLogin();
 					if (fnErr) {
 						fnErr(XMLHttpRequest.msg);
 					}
 					break;
-				case 400:
+					case '400':
 					// 请求失败
 					if (fnErr) {
 						fnErr(XMLHttpRequest.msg);
 					}
 					break;
-				case 201:
+					case '201':
 					// token过期
 					goLogin();
 					if (fnErr) {
@@ -136,16 +138,10 @@
 					}
 					break;
 				}
-			},
-			error : function(XMLHttpRequest, textStatus, errorThrown) {
-				// TODO
-			},
-			success : function(data) {
-				fnSuc(data);
 			}
 
 		});
-	}
+	 }
 	// 生成数字串，模拟移动端的设备码
 	$.IMEI = function randomString(len) {
 		len = len || 15;
@@ -157,5 +153,14 @@
 		}
 		return pwd;
 	}
+
+	h.getUrlParam = function(name) {
+		var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+		var r = window.location.search.substr(1).match(reg);
+		if (r != null)
+			return unescape(r[2]);
+		return null;
+	}
+
 	window.$httpUtils = h;
 })(window);

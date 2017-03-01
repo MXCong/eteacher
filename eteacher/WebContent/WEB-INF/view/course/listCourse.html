@@ -1,32 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>教学系统教师pc端</title>
-<link href="../../css/base.css" rel="stylesheet" type="text/css">
-<link href="../../js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
-<link href="../../js/bootstrap-table/bootstrap-table.css" rel="stylesheet" type="text/css">
-<script type="text/javascript" src="../../js/jquery.min.js"></script>
-<script type="text/javascript" src="../../js/turingLib/alert.js"></script>
-<script type="text/javascript" src="../../js/bootstrap/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table.min.js"></script>
-<script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>教学系统教师pc端</title>
+    <link href="../../css/base.css" rel="stylesheet" type="text/css">
+    <link href="../../js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="../../js/bootstrap-table/bootstrap-table.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/turingLib/alert.js"></script>
+    <script type="text/javascript" src="../../js/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table.min.js"></script>
+    <script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
 
-<script type="text/javascript" src="../../js/utils/md5.js"></script>
-<script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
-<script type="text/javascript" src="../../js/utils/ajax.js"></script>
-<script type='text/javascript' src='../../js/utils/doT.min.js' charset='utf-8'></script>
+    <script type="text/javascript" src="../../js/utils/md5.js"></script>
+    <script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
+    <script type="text/javascript" src="../../js/utils/ajax.js"></script>
+    <script type='text/javascript' src='../../js/utils/doT.min.js' charset='utf-8'></script>
 
-<script type="text/javascript">
-	var courseTable;
-	var currentTermId = null;
-	$(function(){
+    <script type="text/javascript">
+     var courseTable;
+     var currentTermId = null;
+     $(function(){
 		//获取当前学期
 		getCurrentTerm();
-		//获取当前学期下的课程数据
-		getCouseList();
-		
+		$('#termSelect').change(function(){ 
+			currentTermId = $(this).children('option:selected').val();//这就是selected的值 
+            refreshList();
+        });
 	});
+
+     function refreshList(){
+        $httpUtils.post('teacher/course/getCourseByTerm', {termId:currentTermId}, function(ret) {
+            $('#courseTable').bootstrapTable('load', ret);
+        });
+    }
+
 	//获取当前学期
 	function getCurrentTerm(){
 		var currentTerm = JSON.parse($PrefsUtils.getPref('currentTerm'));
@@ -37,80 +45,84 @@
         var option = $("#termSelect");
         for ( var i in termList) {
         	if(termList[i].tpId == currentTermId){
-        		var o = "<option value="+termList[i].tpId+"selected='selected'>"+termList[i].termName+"</option>";
+        		var o = "<option value="+termList[i].tpId+" selected='selected'>"+termList[i].termName+"</option>";
         	}else{
         		var o = "<option value="+termList[i].tpId+">"+termList[i].termName+"</option>";	
         	}
         	option.append(o);
-		}
+        }
+		//获取当前学期下的课程数据
+		getCouseList();
 	}
 	//获取学期下的课程列表
 	function getCouseList() {
         var params = {};
-        params.termId = termId;
+        params.termId = currentTermId;
         $httpUtils.post('teacher/course/getCourseByTerm', params, function(ret) {
-            if (ret && ret.length > 0) {
-            	courseTable = $('#courseTable').bootstrapTable({
-            		data : ret ,
-        		    striped : true,
-        		    toolbar : '#toolbar',
-        		    //search : true,
-        		    idField : 'courseId',
-        		    columns: [{
-        		        title: '序号',
-        		        align: 'center',
-        		        formatter : function (value, row, index){
-        		        	return index + 1;
-        		        }
-        		    },{
-        		        field: 'courseName',
-        		        halign: 'center',
-        		        title: '课程名称',
-        		        formatter : function (value, row, index){
-        		        	//return '<a href="${context}/work/viewListWork?termId='+row.termId+'&courseId='+row.courseId+'">'+value+'</a>';
+         $('#courseTable').bootstrapTable({
+          data : ret ,
+          striped : true,
+          toolbar : '#toolbar',
+          idField : 'courseId',
+          columns: [{
+              title: '序号',
+              align: 'center',
+              formatter : function (value, row, index){
+               return index + 1;
+           }
+       },{
+          field: 'courseName',
+          halign: 'center',
+          title: '课程名称',
+          formatter : function (value, row, index){
         		        	var url = '${context}/work/viewListWork?termId=' + row.termId +'&courseId='+row.courseId;
-        		        	return '<a href="#" onclick="parent.jump(\''+url+'\',parent.document.getElementById(\'workMenu\'))">'+value+'</a>';
+        		        	return '<span>'+value+'</span>';
         		        }
         		    }, {
-        		        field: 'specialty',
-        		        halign: 'center',
-        		        title: '授课班级'
-        		    }, {
-        		        field: 'courseType',
-        		        halign: 'center',
-        		        title: '课程类型'
-        		    }, {
-        		        title: '操作',
-        		        align: 'center',
-        		        formatter : function (value, row, index){
-        		        	return '<i style="cursor: pointer;" title="编辑" class="glyphicon glyphicon-edit"></i> &nbsp;'
-        		        		 + '<i style="cursor: pointer;" title="课表" class="glyphicon glyphicon-list-alt"></i> &nbsp;'
-        		        		 + '<i style="cursor: pointer;" title="删除" class="glyphicon glyphicon-trash"></i>';
-        		        },
-        		        events : {
-        		        	'click .glyphicon-edit': function (e, value, row, index) {
-        			            window.location.href = 'viewEditCourse?courseId=' + row.courseId;
-        			        },
-        			        'click .glyphicon-list-alt': function (e, value, row, index) {
-        			            window.location.href = '${context}/courseTable/viewListCourseTable?courseId=' + row.courseId;
-        			        },
-        			        'click .glyphicon-trash': function (e, value, row, index) {
-        			        	if(confirm("确定删除")){
-        			            	$.post('deleteCourse',{courseId : row.courseId},function(data){
-        				            	courseTable.bootstrapTable('refresh');
-        				            });
-        			            }
-        			        }
-        		        }
-        		    } ]
-        		}); 
+                      field: 'specialty',
+                      halign: 'center',
+                      title: '授课班级',
+                      formatter : function (value, row, index){
+                         var html = '';
+                         for(var i= 0;i<row.classes.length;i++){
+                          html += '<span>'+row.classes[i].className+'</span>&nbsp&nbsp';
+                      }
+                      return html;
+                  }
+              }, {
+                  title: '操作',
+                  align: 'center',
+                  formatter : function (value, row, index){
+                   return '<i style="cursor: pointer;" title="编辑" class="glyphicon glyphicon-edit"></i> &nbsp;'
+                   + '<i style="cursor: pointer;" title="课表" class="glyphicon glyphicon-list-alt"></i> &nbsp;'
+                   + '<i style="cursor: pointer;" title="删除" class="glyphicon glyphicon-trash"></i>';
+               },
+               events : {
+                   'click .glyphicon-edit': function (e, value, row, index) {
+                       window.location.href = 'courseForm.html?courseId='+row.courseId;
+                   },
+                   'click .glyphicon-list-alt': function (e, value, row, index) {
+                       window.location.href = '${context}/courseTable/viewListCourseTable?courseId=' + row.courseId;
+                   },
+                   'click .glyphicon-trash': function (e, value, row, index) {
+                    if(confirm("确定删除")){
+                        $httpUtils.post('teacher/delCourse',{courseId : row.courseId},function(data){
+                            refreshList();
+                        });
+                    }
+                }
             }
-        });
+        } ]
+    }); 
+     });
     }
-	function add(){
-		//$PrefsUtils.transfer('termId',selTermId);
-		window.location.href = 'courseForm.html';
-	}
+    function add(){
+      if(currentTermId){
+       window.location.href = 'courseForm.html?termId='+currentTermId;
+   }else{
+       alert("请选择学期！");
+   }
+}
 </script>
 </head>
 <body>
@@ -118,34 +130,27 @@
 		<div class="title"><span>课程列表</span></div>
 		<div class="enter-message">
 			<div id="toolbar">
-			    <button type="button" class="btn btn-default btn-sm" title="新增" onclick="add();">
-			        <i class="glyphicon glyphicon-plus"></i> 新增
-			    </button>
-			</div>
-			<table width="100%" border="0" cellpadding="0" cellspacing="0">
-            	<tbody>
-                	<tr>
-                    	<td width="8%" align="left" valign="middle"><label style="line-height:36px; margin-bottom:0;">学期：</label></td>
-                        <td>
-                        	<select id="termSelect" class="select-control" style="width:30%" onchange="courseTable.bootstrapTable('refresh');">   
-                        		<!-- 
-                        		<script id="termTemplate" type="text/template">
-        						{{~ it:data }}
-       						 		<option id={{= data.tpId}}>{{=data.termName}}</option>
-        						{{~}}
-    							</script> 
-    							-->                       
-                            </select>                                
-                        </td>                    
-                </tbody>
-            </table>
-			<table id="courseTable"></table>
-        </div>
-	</div>
-	<div class="footer">
-    <div class="container">
-       <p>版权所有：河北图灵</p>
-    </div>
-</div>
+               <button type="button" class="btn btn-default btn-sm" title="新增" onclick="add();">
+                   <i class="glyphicon glyphicon-plus"></i> 新增
+               </button>
+           </div>
+           <table width="100%" border="0" cellpadding="0" cellspacing="0">
+             <tbody>
+                 <tr>
+                     <td width="8%" align="left" valign="middle"><label style="line-height:36px; margin-bottom:0;">学期：</label></td>
+                     <td>
+                         <select id="termSelect" class="select-control" style="width:30%" >   
+                         </select>                                
+                     </td>                    
+                 </tbody>
+             </table>
+             <table id="courseTable"></table>
+         </div>
+     </div>
+     <div class="footer">
+        <div class="container">
+           <p>版权所有：河北图灵</p>
+       </div>
+   </div>
 </body>
 </html>

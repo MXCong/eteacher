@@ -434,7 +434,6 @@ public class CourseRemote extends BaseRemote {
 	@RequestMapping(value = "teacher/course/updateCourse", method = RequestMethod.POST)
 	public ReturnBody updateCourse(HttpServletRequest request) {
 		Teacher teacher = getCurrentTeacher(request);
-		System.out.println("aaaaaaaaaaaaaaaaaa");
 		return courseServiceImpl.saveCourse(request,teacher.getSchoolId());
 	}
 	

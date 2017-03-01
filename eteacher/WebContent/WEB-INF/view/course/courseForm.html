@@ -1,109 +1,159 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>教学系统教师pc端</title>
-<link href="../../css/base.css" rel="stylesheet" type="text/css">
-<link href="../../js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
-<link href="../../js/chosen/chosen.css" rel="stylesheet" type="text/css">
-<script type="text/javascript" src="../../js/jquery.min.js"></script>
-<script type="text/javascript" src="../../js/turingLib/validator.js"></script>
-<script type="text/javascript" src="../../js/json2form.js"></script>
-<script type="text/javascript" src="../../js/bootstrap/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="../../js/chosen/chosen.jquery.min.js"></script>
-<script type="text/javascript" src="../../js/turingLib/modal.js"></script>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>教学系统教师pc端</title>
+	<link href="../../css/base.css" rel="stylesheet" type="text/css">
+	<link href="../../js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+	<link href="../../js/chosen/chosen.css" rel="stylesheet" type="text/css">
+	<script type="text/javascript" src="../../js/jquery.min.js"></script>
+	<script type="text/javascript" src="../../js/turingLib/validator.js"></script>
+	<script type="text/javascript" src="../../js/json2form.js"></script>
+	<script type="text/javascript" src="../../js/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="../../js/chosen/chosen.jquery.min.js"></script>
+	<script type="text/javascript" src="../../js/turingLib/modal.js"></script>
 
-<script type="text/javascript" src="../../js/utils/md5.js"></script>
-<script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
-<script type="text/javascript" src="../../js/utils/ajax.js"></script>
-<script type='text/javascript' src='../../js/utils/doT.min.js' charset='utf-8'></script>
-<script id="teachMethodTemplate" type="text/template">
-	{{~ it:data }}
+	<script type="text/javascript" src="../../js/utils/md5.js"></script>
+	<script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
+	<script type="text/javascript" src="../../js/utils/ajax.js"></script>
+	<script type='text/javascript' src='../../js/utils/doT.min.js' charset='utf-8'></script>
+	<script id="teachMethodTemplate" type="text/template">
+		{{~ it:data }}
 		<div class="onetab">
-		  <span data-dismiss="modal" class="teachMethodSpan" pId={{=data.id}} onclick='selectTeachMethod(this)'>{{=data.content}}</span>
-		  <a class="delet-img"
-		  title="删除" onclick='delTeachMethod(this,"{{=data.id}}");'></a>
+			<span data-dismiss="modal" class="teachMethodSpan" pId={{=data.id}} onclick='selectTeachMethod(this)'>{{=data.content}}</span>
+			<a class="delet-img"
+			title="删除" onclick='delTeachMethod(this,"{{=data.id}}");'></a>
 		</div>
-	{{~}}
-</script>
-<script id="examMethodTemplate" type="text/template">
-	{{~ it:data }}
+		{{~}}
+	</script>
+	<script id="examMethodTemplate" type="text/template">
+		{{~ it:data }}
 		<div class="onetab">
-		  <span data-dismiss="modal" class="examMethodSpan"  pId={{=data.id}} onclick='selectExamMethod(this)'>{{=data.content}}</span>
-		  <a class="delet-img"
-		  title="删除" onclick='delExamMethod(this,"{{=data.id}}");'></a>
+			<span data-dismiss="modal" class="examMethodSpan"  pId={{=data.id}} onclick='selectExamMethod(this)'>{{=data.content}}</span>
+			<a class="delet-img"
+			title="删除" onclick='delExamMethod(this,"{{=data.id}}");'></a>
 		</div>
-	{{~}}
-</script>
-<script id="classTemplate" type="text/template">
-	{{~ it:data }}
+		{{~}}
+	</script>
+	<script id="classTemplate" type="text/template">
+		{{~ it:data }}
 		<div class="onetab">
-		  <span class="classSpan" grade={{=data.grade}} className={{=data.className}} 
-				 degree={{=data.degree}} majorId={{=data.majorId}} 
+			<span class="classSpan" grade={{=data.grade}} className={{=data.className}} 
+			degree={{=data.degree}} majorId={{=data.majorId}} 
 			>{{=data.grade}}级{{=data.className}}</span>
-		  <a class="delet-img"
-		  title="删除" onclick="removeItem(this)"></a>
+			<a class="delet-img"
+			title="删除" onclick="removeItem(this)"></a>
 		</div>
-	{{~}}
-</script>
-<script id="classResultTemplate" type="text/template">
-	{{~ it:data }}
+		{{~}}
+	</script>
+	<script id="classResultTemplate" type="text/template">
+		{{~ it:data }}
 		<div class="onetab">
-		  <span class="classResultSpan" grade={{=data.grade}} className={{=data.className}} 
-				 degree={{=data.degree}} majorId={{=data.majorId}} 
+			<span class="classResultSpan" grade={{=data.grade}} className={{=data.className}} 
+			degree={{=data.degree}} majorId={{=data.majorId}} 
 			>{{=data.grade}}级{{=data.className}}</span>
 		</div>
-	{{~}}
-</script>
-<script type="text/javascript">
-	var teachMethodDot = doT.template($('#teachMethodTemplate').html());
-	var examMethodDot = doT.template($('#examMethodTemplate').html());
-	var classDot = doT.template($('#classTemplate').html());
-	var classResultDot = doT.template($('#classResultTemplate').html());
-	$(function() {
-			$('#saveBtn').click(function(){
-				if(!$('#courseName').val()){
-					alert("课程名称不能为空！");
-					return;
-				}
-				if(!$('#teachingMethod').val()){
-					alert("授课方式不能为空！");
-					return;
-				}
-				if(!$('#examinationMode').val()){
-					alert("考核方式不能为空！");
-					return;
-				}
-				if(!$('#classResultList').html()){
-					alert("授课班级不能为空！");
-					return;
-				}
-				if(!$('#courseScore').html()){
-					alert("成绩组成不能为空！");
-					return;
-				}
-				var params = {};
-				params.courseName = $('#courseName').val();
-				params.teachMethodId = $('#teachingMethod').attr('pId');
-				params.examTypeId = $('#examinationMode').attr('pId');
-				params.introduction = $('#introduction').val();
-				var classesParams = new Array();
-				$('.classResultSpan').each(function(i){
-					var item = {};
-					item.grade = $(this).attr('grade');
-					item.degree  = $(this).attr('degree');
-					item.className = $(this).attr('className');
-					item.majorId = $(this).attr('majorId');
-					classesParams.push(item);
-				});
-				params.classes = JSON.stringify(classesParams);
-				params.scores = JSON.stringify(courseScoreArr);
-				$httpUtils.post('teacher/course/updateCourse', params, function(data) {
-					alert("保存成功！");
-				});
+		{{~}}
+	</script>
+	<script type="text/javascript">
+		var teachMethodDot = doT.template($('#teachMethodTemplate').html());
+		var examMethodDot = doT.template($('#examMethodTemplate').html());
+		var classDot = doT.template($('#classTemplate').html());
+		var classResultDot = doT.template($('#classResultTemplate').html());
+		var termId = null;
+		var courseId = null;
+		$(function() {
+			termId = $httpUtils.getUrlParam('termId');
+			courseId = $httpUtils.getUrlParam('courseId');
+			if(courseId){
+				getCourseDetail();
+			}			
+			initLiseners();
+		});
+	/**
+	*设置时间监听
+	**/
+	function initLiseners(){
+		$('#saveBtn').click(function(){
+			if (!courseId  && !termId) {
+				alert("请先创建学期！");
+				return;
+			}
+			if(!$('#courseName').val()){
+				alert("课程名称不能为空！");
+				return;
+			}
+			if(!$('#teachingMethod').val()){
+				alert("授课方式不能为空！");
+				return;
+			}
+			if(!$('#examinationMode').val()){
+				alert("考核方式不能为空！");
+				return;
+			}
+			if(!$('#classResultList').html()){
+				alert("授课班级不能为空！");
+				return;
+			}
+			if(!$('#courseScore').html()){
+				alert("成绩组成不能为空！");
+				return;
+			}
+			var params = {};
+			params.courseName = $('#courseName').val();
+			params.teachMethodId = $('#teachingMethod').attr('pId');
+			params.examTypeId = $('#examinationMode').attr('pId');
+			params.introduction = $('#introduction').val();
+			params.termId = termId;
+			if (courseId) {
+				params.courseId = courseId;
+			}
+			var classesParams = new Array();
+			$('.classResultSpan').each(function(i){
+				var item = {};
+				item.grade = $(this).attr('grade');
+				item.degree  = $(this).attr('degree');
+				item.className = $(this).attr('className');
+				item.majorId = $(this).attr('majorId');
+				classesParams.push(item);
 			});
-			
-	});
+			params.classes = JSON.stringify(classesParams);
+			params.scores = JSON.stringify(courseScoreArr);
+			$httpUtils.post('teacher/course/updateCourse', params, function(data) {
+				alert("保存成功！");
+				window.location.href = 'listCourse.html';
+			});
+		});
+	}
+	/*
+	*获取作业详情
+	*/
+	function getCourseDetail(){
+		$httpUtils.post('teacher/course/getCourseDetail', {courseId:courseId}, function(data) {
+			if (data) {
+				$('#courseName').val(data.courseName);
+				$('#introduction').val(data.introduction);
+				$('#teachingMethod').val(data.teachMethodName);
+				$('#teachingMethod').attr('pId',data.teachMethodId);
+				$('#examinationMode').val(data.examTypeName);
+				$('#examinationMode').attr('pId',data.examTypeId);
+				$('#classlist').html(classDot(data.classes));
+				$('#classResultList').html(classResultDot(data.classes));
+				$('#scoreDiv').html('');
+				courseScoreArr.splice(0,courseScoreArr.length);
+				for (var i = 0; i < data.courseScore.length; i++) {
+					var temp = {};
+					temp.scoreName = data.courseScore[i].scoreName;
+					temp.scorePercent = data.courseScore[i].scorePercent+'';
+					temp.status = data.courseScore[i].status+'';
+					courseScoreArr.push(temp);
+					addScore(temp.scoreName,temp.scorePercent,temp.status);
+				}
+				initScore();
+			}
+		});
+	};
+	
 	function init() {
 		//专业
 		loadMajorData($('#specialty1'), '0');
@@ -117,7 +167,7 @@
 			$httpUtils.post('web/getMajorSelectData', params, function(data) {
 				$.each(data, function(i, r) {
 					select.append('<option value="'+r.majorId+'">'
-							+ r.majorName + '</option>');
+						+ r.majorName + '</option>');
 				});
 				if (value) {
 					select.val(value);
@@ -181,9 +231,6 @@
 		$('#textbookOthers').val(JSON.stringify(textbookOthers));
 		return true;
 	}
-	
-
-	
 </script>
 
 </head>
@@ -194,68 +241,68 @@
 		</div>
 		<div class="enter-message">
 			<div id="courseForm" 
-				enctype="multipart/form-data">
-				<input type="hidden" name="courseId" /> <input type="hidden"
-					name="termId" value="${termId?default(" ")}" />
-				<div class="message-group">
-					<div class="message-left">课程名称：</div>
-					<div class="message-right">
-						<input id="courseName" name="courseName" maxlength="40"
-							type="text" class="mess-control" value="" placeholder="请输入课程名称" />
-					</div>
+			enctype="multipart/form-data">
+			<input type="hidden" name="courseId" /> <input type="hidden"
+			name="termId" value="${termId?default(" ")}" />
+			<div class="message-group">
+				<div class="message-left">课程名称：</div>
+				<div class="message-right">
+					<input id="courseName" name="courseName" maxlength="40"
+					type="text" class="mess-control" value="" placeholder="请输入课程名称" />
 				</div>
-				<div class="message-group">
-					<div class="message-left">课程简介：</div>
-					<div class="message-right">
-						<textarea id="introduction" name="introduction" maxlength="200"
-							placeholder="课程简介（不超过200字）"></textarea>
-					</div>
+			</div>
+			<div class="message-group">
+				<div class="message-left">课程简介：</div>
+				<div class="message-right">
+					<textarea id="introduction" name="introduction" maxlength="200"
+					placeholder="课程简介（不超过200字）"></textarea>
 				</div>
-				<div class="message-group">
-					<div class="message-left">授课方式：</div>
-					<div class="message-right">
-						<input readonly id="teachingMethod" type="text" class="mess-control" 
-						data-toggle="modal" data-target="#teachMethodModal" 
-						placeholder="请选授课方式" />
-					</div>
+			</div>
+			<div class="message-group">
+				<div class="message-left">授课方式：</div>
+				<div class="message-right">
+					<input readonly id="teachingMethod" type="text" class="mess-control" 
+					data-toggle="modal" data-target="#teachMethodModal" 
+					placeholder="请选授课方式" />
 				</div>
-				<div class="message-group">
-					<div class="message-left">考核方式：</div>
-					<div class="message-right">
-						<input readonly id="examinationMode" data-toggle="modal"
-							data-target="#examMethodModal" type="text" class="mess-control"
-							placeholder="请选择考核方式" />
-					</div>
+			</div>
+			<div class="message-group">
+				<div class="message-left">考核方式：</div>
+				<div class="message-right">
+					<input readonly id="examinationMode" data-toggle="modal"
+					data-target="#examMethodModal" type="text" class="mess-control"
+					placeholder="请选择考核方式" />
 				</div>
-				<div>
-					<div class="message-left">授课班级：</div>
-					<div id="courseClassDiv" style="margin-left:10px;float:left;">
-						<input type="hidden" id="courseClassDiv" name="classes" /> <i
-							style="cursor: pointer;" data-toggle="modal"
-							data-target="#classSelectModal" title="设置"
-							class="glyphicon glyphicon-edit"></i>
-							<div id="classResultList"></div>
-								
-					</div>
+			</div>
+			<div>
+				<div class="message-left">授课班级：</div>
+				<div id="courseClassDiv" style="margin-left:10px;float:left;">
+					<input type="hidden" id="courseClassDiv" name="classes" /> <i
+					style="cursor: pointer;" data-toggle="modal"
+					data-target="#classSelectModal" title="设置"
+					class="glyphicon glyphicon-edit"></i>
+					<div id="classResultList"></div>
+
 				</div>
-				<div class="message-group">
-					<div class="message-left">成绩组成：</div>
-					<div class="message-right" id="courseScoreDiv">
-						<input type="hidden" id="#courseScoreArr" name="courseScoreArr" />
-						<i style="cursor: pointer;" data-toggle="modal"
-							data-target="#courseScorekModal" title="设置"
-							class="glyphicon glyphicon-edit"></i>
-						<div id="courseScore"></div>
-					</div>
+			</div>
+			<div class="message-group">
+				<div class="message-left">成绩组成：</div>
+				<div class="message-right" id="courseScoreDiv">
+					<input type="hidden" id="#courseScoreArr" name="courseScoreArr" />
+					<i style="cursor: pointer;" data-toggle="modal"
+					data-target="#courseScorekModal" title="设置"
+					class="glyphicon glyphicon-edit"></i>
+					<div id="courseScore"></div>
 				</div>
-				<div class="btnsub">
-					<button id="saveBtn" class="btn-submit" style="float:left;">保存</button>
-					<button type="button" class="btn-submit" style="float:right;"
-						onclick="history.back();">返回</button>
-				</div>
+			</div>
+			<div class="btnsub">
+				<button id="saveBtn" class="btn-submit" style="float:left;">保存</button>
+				<button type="button" class="btn-submit" style="float:right;"
+				onclick="history.back();">返回</button>
 			</div>
 		</div>
 	</div>
+</div>
 </body>
 <script type="text/javascript">
 	$.get('scorePercentModal.ftl', function(content) {
