@@ -483,7 +483,9 @@ $(function(){
 		info.introduction = $('#introduction').val();
 		$httpUtils.post("teacher/editPersonInfo", info, function(ret) {
 			$PrefsUtils.savePref('name', name);
-			window.location.href = '../index.html';
+			//window.location.href = '../index.html';
+			alert("修改成功！");
+			location.reload();
 		});
 	}
 	
