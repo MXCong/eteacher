@@ -20,8 +20,7 @@
 	var workTable;
 	$(function(){
 		getCurrentTerm();//获取学期列表
-		//获取课程列表
-	    getCouseList();
+	    getCouseList();//获取课程列表
 		getWorkList();
 		
 	});
@@ -33,7 +32,12 @@
 		}
 		params.status = 4;
 		$httpUtils.post('teacher/work/getWorkList',params,function(res){
-			initTable(res);
+			if(courseId){
+				$('#workTable').bootstrapTable('load', res);
+			}else{
+				initTable(res);
+			}
+			
 		});
 	}
 	function initTable(data){

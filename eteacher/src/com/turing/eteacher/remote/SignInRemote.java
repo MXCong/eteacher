@@ -36,7 +36,7 @@ public class SignInRemote extends BaseRemote {
 	// "schoolName": "国防科技大学",
 	// "cityName": "石家庄市"
 	// }
-	@RequestMapping(value = "signIn/getAddressInfo", method = RequestMethod.POST)
+	/*@RequestMapping(value = "signIn/getAddressInfo", method = RequestMethod.POST)
 	public ReturnBody getAddressInfo(HttpServletRequest request) {
 		try {
 			String courseId = request.getParameter("courseId");
@@ -49,14 +49,14 @@ public class SignInRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 		}
 		return null;
-	}
+	}*/
 
 	/**
 	 * 学生端接口：课程签到
 	 * 
 	 * @author macong 时间：2016年11月30日09:12:02
 	 */
-	@RequestMapping(value = "signIn/courseSignIn", method = RequestMethod.POST)
+	/*@RequestMapping(value = "signIn/courseSignIn", method = RequestMethod.POST)
 	public ReturnBody courseSignIn(HttpServletRequest request) {
 		try {
 			String studentId = getCurrentUserId(request);
@@ -72,7 +72,7 @@ public class SignInRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 		}
 		return null;
-	}
+	}*/
 
 	/**
 	 * 学生端接口：获取学生本学期内各课程的签到情况
@@ -99,7 +99,7 @@ public class SignInRemote extends BaseRemote {
 	 * 
 	 * @author macong 时间：2016年12月2日09:56:29
 	 */
-	@RequestMapping(value = "signIn/getSignSetting", method = RequestMethod.POST)
+	/*@RequestMapping(value = "signIn/getSignSetting", method = RequestMethod.POST)
 	public ReturnBody getSignSetting(HttpServletRequest request) {
 		try {
 			String teacherId = getCurrentUserId(request);
@@ -112,14 +112,14 @@ public class SignInRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 		}
 		return null;
-	}
+	}*/
 
 	/**
 	 * 教师端接口：更改签到设置
 	 * 
 	 * @author macong 时间：2016年12月9日10:24:35
 	 */
-	@RequestMapping(value = "signIn/saveSignSetting", method = RequestMethod.POST)
+	/*@RequestMapping(value = "signIn/saveSignSetting", method = RequestMethod.POST)
 	public ReturnBody saveSignSetting(HttpServletRequest request) {
 		try {
 			String configId = request.getParameter("configId");
@@ -135,7 +135,7 @@ public class SignInRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 		}
 		return null;
-	}
+	}*/
 
 	/**
 	 * 教师端接口：恢复用户的默认签到设置

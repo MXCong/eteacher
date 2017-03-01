@@ -15,18 +15,18 @@
 
 <script type="text/javascript">
 	var courseId = null;
+	var scale = 0;//签到人数占课程人数的比例
+	var totalAttendence = 0;//课程的总体出勤情况
+	var scoreData = null;//用于存储各个分数段学生的人数
 	$(function(){
 		courseId = $PrefsUtils.receive('courseId');
 		getCurrentSignInData();//获取当堂课的出勤情况
 		getTotalAttendence();//获取课程的整体出勤情况
-		
-		$('a[href="#scoreDiv"]').on('show.bs.tab', function (e) {
-			var scoreType = $(e.target).data('type');
-			var title = $(e.target).text();
-			$.post('getScoreStatisticsData',{courseId:'${courseId?default("")}',scoreType:scoreType},function(data){
-				scoreChart.setOption({title : {text: title},series: [{data:data}]});
-			},'json');
-		});
+		initSignInChart();//出勤统计图
+		getScourType();//获取成绩类型为“均值”的成绩项
+	});
+	//出勤统计图标
+	function initSignInChart(){
 		$('a[href="#courseDiv"]').on('show.bs.tab', function (e) {
 			if($(e.target).data('type') == 'record'){
 				courseChart.setOption({
@@ -34,8 +34,8 @@
 					series : [
 						        {
 						            data:[
-						            	{value:5, name:'未签到'},
-						                {value:44, name:'签到'}
+						            	{value:(1-scale), name:'未签到'},
+						                {value:scale, name:'签到'}
 						            ]
 						        }
 						    ]
@@ -47,21 +47,53 @@
 					series : [
 						        {
 						            data:[
-						            	{value:4, name:'未签到'},
-						                {value:60, name:'签到'}
+						            	{value:(1-getTotalAttendence) , name:'未签到'},
+						                {value:getTotalAttendence, name:'签到'}
 						            ]
 						        }
 						    ]
 				});
 			}
 		});
-	});
+	}
+	//成绩统计图表
+	function initScoreChart(stuList){
+		$('a[href="#scoreDiv"]').on('show.bs.tab', function (e) {
+			var scoreType = $(e.target).data('type');
+			var title = $(e.target).text();
+			/* $.post('getScoreStatisticsData',{courseId:'${courseId?default("")}',scoreType:scoreType},function(data){
+				scoreChart.setOption({title : {text: title},series: [{data:data}]});
+			},'json'); */
+			//多返回的结果进行数据处理，得到各个分数段学生的人数
+            if(null != stuList ){
+            	var a=0,b=0,c=0,d=0,e = 0;
+            	var score = 0;
+            	for ( var i in stuList) {
+            		//alert("---:"+stuList[i][scoreType]);
+            		score = stuList[i][scoreType];
+           			if(parseFloat(score) <60){
+   						a++;
+   					}else if(60<= parseFloat(score) && parseFloat(score) < 70){
+   						b++;
+   					}else if(70<= parseFloat(score) && parseFloat(score) < 80){
+   						c++;
+   					}else if(80<= parseFloat(score) && parseFloat(score) < 90){
+   						d++;
+   					}else if(90<= parseFloat(score) ){
+   						e++;
+   					}
+            	}
+               	scoreData = [a,b,c,d,e];
+               	scoreChart.setOption({title : {text: title},series: [{data:scoreData}]});	
+            }
+		});
+	}
 	//获取正在进行的课程的出勤数据
 	function getCurrentSignInData(){
 		var par = {};
 		par.courseId = courseId;
 		$httpUtils.post('course/currentAttendence',par,function(data){
-			//alert(JSON.stringify(data));
+			scale = data;
 		});
 	}
 	//获取某课程的整体出勤情况
@@ -69,9 +101,28 @@
 		var par = {};
 		par.courseId = courseId;
 		$httpUtils.post('course/totalAttendence',par,function(data){
-			//alert(JSON.stringify(data));
+			getTotalAttendence = data;
 		});
 	}
+	//获取成绩类型为“均值”的成绩项
+    function getScourType() {
+        var par = {};
+        par.courseId = courseId;
+        $httpUtils.post('teacher/classes/getScoreList', par, function(data) {
+            if (data && data.scoreName) {
+            	//alert(JSON.stringify(data));
+            	var opts = $('#scoreType');
+            	var list = data.scoreName;
+            	for ( var i in list) {
+            		var html = "<li><a href='#scoreDiv' data-type="+list[i].cspId+" data-toggle='tab'>"+list[i].scoreName+"</a></li>";
+            		opts.append(html);
+				}
+            }
+            if(data && data.stuList){
+	            initScoreChart(data.stuList);//成绩统计图
+            }
+        });
+    }
 </script>
 </head>
 <body>
@@ -92,10 +143,11 @@
 			    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
 			      	成绩统计 <span class="caret"></span>
 			    </a>
-			    <ul class="dropdown-menu">
+			    <ul class="dropdown-menu" id="scoreType">
 			    <!-- <#list CourseScoreList as courseScore> 
 			      	<li><a href="#scoreDiv" data-type="${courseScore.csId}" data-toggle="tab">${courseScore.scoreName}</a></li>
 			  	</#list> -->
+			  		
 			    </ul>
 			  </li>
 			  <button type="button" style="float:right" class="btn btn-default btn-sm" title="返回" onclick="history.back();">
@@ -124,7 +176,7 @@
 				            series: [{
 				                name: '人数',
 				                type: 'bar',
-				                data: [5, 20, 36, 10, 10]
+				                data: scoreData
 				            }]
 				        };
 				        // 使用刚指定的配置项和数据显示图表。
@@ -137,12 +189,12 @@
 			    		var courseChart = echarts.init(document.getElementById('courseChart'));
 						var option = {
 						    title : {
-						        text: '本堂课出勤情况',
+						        text: '课程出勤统计图',
 						        x:'center'
 						    },
 						    tooltip : {
 						        trigger: 'item',
-						        formatter: "{a} <br/>{b} : {c} ({d}%)"
+						        formatter: "{a} <br/>{b} : {d}%"
 						    },
 						    legend: {
 						        orient: 'vertical',
@@ -151,11 +203,11 @@
 						    },
 						    series : [
 						        {
-						            name: '人数',
+						            name: '比例',
 						            type: 'pie',
 						            data:[
-						            	{value:5, name:'未签到'},
-						                {value:22, name:'签到'},
+						            	{value:0, name:'未签到'},
+						                {value:0, name:'签到'}
 						            ]
 						        }
 						    ]

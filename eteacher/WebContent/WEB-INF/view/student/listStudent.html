@@ -4,12 +4,17 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>教学系统教师pc端</title>
 <link href="../../css/base.css" rel="stylesheet" type="text/css">
-<link href="../../js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
-<link href="../../js/bootstrap-table/bootstrap-table.css" rel="stylesheet" type="text/css">
+<link href="../../js/bootstrap/css/bootstrap.css" rel="stylesheet"
+	type="text/css">
+<link href="../../js/bootstrap-table/bootstrap-table.css"
+	rel="stylesheet" type="text/css">
 <script type="text/javascript" src="../../js/jquery.min.js"></script>
-<script type="text/javascript" src="../../js/bootstrap/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table.min.js"></script>
-<script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+<script type="text/javascript"
+	src="../../js/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript"
+	src="../../js/bootstrap-table/bootstrap-table.min.js"></script>
+<script type="text/javascript"
+	src="../../js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
 
 <script type="text/javascript" src="../../js/utils/md5.js"></script>
 <script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
@@ -20,10 +25,9 @@
 	var currentCourseId = null;//当前正在进行的课程ＩＤ
 	var cId = null;//定义变量，存储用户课程列表中的第一项课程ID
 	$(function(){
+		getCurrentCourse();//获取目前正在进行的课程
 		getCurrentTerm();//获取学期列表
 		getCouseList();//获取课程的下拉列表
-		getCurrentCourse();//获取目前正在进行的课程
-		
 		
 	});
 	function updateCourseSelect(termId){
@@ -31,18 +35,29 @@
 	}
 	function viewScore(){
 		if($PrefsUtils.receive('courseId') == null){
-			return;
+			$PrefsUtils.transfer('courseId' , currentCourseId);
 		}
 		window.location.href = '../score/listScore.html';
 	}
 	function viewStatistics(){
-		
-		if($PrefsUtils.receive('courseId') == null){
-			return;
-		}
 		window.location.href = '../statistics/courseStatistics.html';
 	}
-	
+	//获取成绩类型为“均值”的成绩项
+	function getScourType(){
+		var par = {};
+		par.courseId = $PrefsUtils.receive('courseId');
+		$httpUtils.post('score/getScoreType',par,function(data){
+			if (null != data && data.length>0) {
+				var st = $('#scoreType');
+				for ( var i in data) {
+					var html = "<input type='radio' name='radiobutton' id="+data[i].scoreId+">"+data[i].scoreName+";"
+					st.append(html);
+				}
+				var fc = data[0].scoreId;
+				$("#"+fc).attr("checked", "checked");
+			}
+		});
+	}
 	//获取学期列表
 	function getCurrentTerm(){
 		var currentTerm = JSON.parse($PrefsUtils.getPref('currentTerm'));
@@ -65,8 +80,10 @@
 		$PrefsUtils.transfer('courseId' , courseId);
 		if(courseId != currentCourseId){
 			getSignInData(courseId , 1);
+			getScourType();
 		}else{
 			getSignInData(currentCourseId , 0);
+			getScourType();
 		}
 	}
     //获取课程列表
@@ -81,6 +98,7 @@
         $httpUtils.post('teacher/course/getCourseByTerm', params, function(ret) {
             if (ret && ret.length > 0) {
             	cId = ret[0].courseId;
+            	$PrefsUtils.transfer('courseId' , cId);
             	var option = $("#courseSelect");
             	for ( var i in ret) {
                 	var o = "<option value="+ret[i].courseId+">"+ret[i].courseName+"</option>";
@@ -96,25 +114,18 @@
 		$httpUtils.post('course/currentCourse', params, function(ret) {
 			if (null != ret && ret.length>0) {
 				currentCourseId　=　ret[0].courseId;
+				$PrefsUtils.transfer('courseId' , currentCourseId);
 				//将当前正在进行的课程置为“选中”状态
 				var option = $("#courseSelect");
 				var o = "<option selected value="+ret[0].courseId+">"+ret[0].courseName+"</option>";
 				option.append(o);
 				getSignInData(currentCourseId , 0);
+			}else{
+				getSignInData(cId,1);
 			}
-			getSignInData(cId,1);
 		});
+		getScourType();//获取成绩类型为“均值”的成绩项
     }
-  //获取成绩类型为“均值”的成绩项
-	function getScourType(courseId){
-		var par = {};
-		par.courseId = courseId;
-		$httpUtils.post('score/getScoreType',par,function(data){
-			if (null != data && data.length>0) {
-				alert(JSON.stringify(data));
-			}
-		});
-	}
     //获取学生签到数据
 	function getSignInData(courseId,status){
 		var par = {};
@@ -165,9 +176,9 @@
 		        title: '签到次数'
 		    }, {
 		        align: 'center',
-		        title: '出勤率',
+		        title: '出勤率(%)',
 		        formatter : function (value, row, index){
-		        	return (row.signInNum)/(row.courseNum);
+		        	return ((row.signInNum)/(row.courseNum))*100;
 		        }
 		    },  {
 		        title: '操作',
@@ -177,70 +188,134 @@
 		        },
 		        events : {
 		        	'click .glyphicon-check': function (e, value, row, index) {
-		        		$.post('isCourseTime',{courseId:courseId},function(data){
-		        			if(data.startTime){
-		        				$('#courseScorekModal').modal('show');
-			          	 		$('#stuId').val(row.stuId);
-		        			}
-		        			else{
-		        				alert('该功能只能在上课时间使用');
-		        			}
-		        		},'json')
-			            
+						alert("studentId:"+row.studentId);
+		        		$('#stuId').val(row.studentId);
+		        		$('#courseScorekModal').modal('show');
 			        }
 		        }
 		    } ]
 		});
   	}
+  	//单人单次成绩录入
+	function addScore() {
+  		var score = $('#scoreNumber').val();
+		if(score < 1){
+			alert("请输入该生得分");
+		}else if(isNaN(score)){
+			alert("得分需为数字类型");
+		}else if(score < 0 || score > 100){
+			alert("无效的输入");
+		}else{
+			//调用接口，为该同学增加一次分数
+ 			var _o = document.getElementsByName("radiobutton");
+		    for(i=0;i<_o.length;i++)
+		    {
+		        if(_o[i].checked){
+		        	var scoreId = _o[i].id; 
+		        }
+		    }
+			var par = {};
+			par.score = score;
+			par.studentId = $('#stuId').val();
+			par.courseId = $PrefsUtils.receive('courseId');
+			par.scoreId = scoreId;
+			$httpUtils.post('score/addAverageScore', par, function(data) {
+				$('#courseScorekModal').modal('hide');
+				alert("成绩录入成功");
+			});
+		}
+	}
 </script>
 </head>
 <body>
 	<div class="maincont">
-        <div class="title"><span id="tableTitle"></span></div>
-        <div class="enter-message">
-            <table width="100%" border="0" cellpadding="0" cellspacing="0">
-            	<tbody>
-                	<tr>
-                    	<td width="12%" align="left" valign="middle"><label for="xueqi" style="line-height:36px; margin-bottom:0;">学期名称：</label></td>
-                        <td width="30%">
-                        	<select id="termSelect" class="select-control" onchange="updateCourseSelect(this.value)">                            
-                                <!-- <#list termList as term> 
+		<div class="title">
+			<span id="tableTitle"></span>
+		</div>
+		<div class="enter-message">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td width="12%" align="left" valign="middle"><label
+							for="xueqi" style="line-height: 36px; margin-bottom: 0;">学期名称：</label></td>
+						<td width="30%"><select id="termSelect"
+							class="select-control" onchange="updateCourseSelect(this.value)">
+								<!-- <#list termList as term> 
 									<option value="${term.termId}" <#if term.termId == termId?default("")>selected="selected"</#if>>${term.termName}</option>
-								</#list> -->   
-                            </select>                                
-                        </td>
-                        <td width="12%" align="left" valign="middle"><label for="kecheng" style="line-height:36px; margin-bottom:0;">课程名称：</label></td>
-                        <td width="36%">
-                        	<select id="courseSelect" class="select-control" onchange="changeCourse(this.value)">
-                        		<!-- <#list courseList as course> 
+								</#list> -->
+						</select></td>
+						<td width="12%" align="left" valign="middle"><label
+							for="kecheng" style="line-height: 36px; margin-bottom: 0;">课程名称：</label></td>
+						<td width="36%"><select id="courseSelect"
+							class="select-control" onchange="changeCourse(this.value)">
+								<!-- <#list courseList as course> 
 									<option value="${course.courseId}" <#if course.courseId == courseId?default("")>selected="selected"</#if>>${course.courseName}</option>
 								</#list> -->
-                        	</select>                                
-                        </td>
-                        <td width="10%">
-                        	<button type="button" class="btn btn-default btn-sm" onclick="studentTable.bootstrapTable('refresh');">
-								<span class="glyphicon glyphicon-search" aria-hidden="true"></span> 搜索
+						</select></td>
+						<td width="10%">
+							<button type="button" class="btn btn-default btn-sm"
+								onclick="studentTable.bootstrapTable('refresh');">
+								<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+								搜索
 							</button>
 						</td>
-                    </tr>                        
-                </tbody>
-            </table>
-            <div id="toolbar">
-			    <button type="button" class="btn btn-default btn-sm" title="成绩" onclick="viewScore();">
-			        <i class="glyphicon glyphicon-book"></i> 成绩
-			    </button>
-			    <button type="button" class="btn btn-default btn-sm" title="成绩" onclick="viewStatistics();">
-			        <i class="glyphicon glyphicon-th-large"></i> 统计
-			    </button>
-			</div>                          
-            <table id="studentTable"></table>
-        </div>
-    </div>
+					</tr>
+				</tbody>
+			</table>
+			<div id="toolbar">
+				<button type="button" class="btn btn-default btn-sm" title="成绩"
+					onclick="viewScore();">
+					<i class="glyphicon glyphicon-book"></i> 成绩
+				</button>
+				<button type="button" class="btn btn-default btn-sm" title="成绩"
+					onclick="viewStatistics();">
+					<i class="glyphicon glyphicon-th-large"></i> 统计
+				</button>
+			</div>
+			<table id="studentTable"></table>
+		</div>
+	</div>
+	<!-- 打分弹窗 -->
+	<div id="courseScorekModal" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title">课堂提问</h4>
+				</div>
+				<form id="courseScoreForm">
+					<input type="hidden" id="courseId" name="courseId" /> <input
+						type="hidden" id="stuId" name="stuId" />
+					<div class="modal-body" id="scoreType">
+						<div class="message-group">
+							<div class="message-left">分数：</div>
+							<div class="message-right">
+								<input id="scoreNumber" name="scoreNumber" type="number" class="mess-control" value="" />
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+						<!-- <button type="submit" class="btn btn-default">保 存</button> -->
+						<input type="button" onclick="addScore();" value="保存"
+							class="btn btn-default">
+					</div>
+				</form>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
+	<!-- /.modal -->
+
 	<div class="footer">
-        <div class="container">
-            <p>版权所有：河北图灵</p>
-        </div>
-    </div>
+		<div class="container">
+			<p>版权所有：河北图灵</p>
+		</div>
+	</div>
 	<!-- <#include "courseScoreModal.ftl" /> -->
 </body>
 </html>

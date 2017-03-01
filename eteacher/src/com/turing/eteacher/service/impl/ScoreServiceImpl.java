@@ -239,8 +239,7 @@ public class ScoreServiceImpl extends BaseService<Score> implements
 		String courseId = request.getParameter("courseId");
 		if (StringUtil.checkParams(courseId)) {
 			Map<String, Object> map = new HashMap();
-			List<CourseScorePrivate> scoreNames = courseScorePrivateDAO
-					.getListbyCourseId(courseId);
+			List<CourseScorePrivate> scoreNames = courseScorePrivateDAO.getListbyCourseId(courseId);
 			if (null != scoreNames) {
 				map.put("scoreName", scoreNames);
 			}
