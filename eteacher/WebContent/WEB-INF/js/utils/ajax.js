@@ -22,12 +22,12 @@
 	 	params.timeStamp = myDate.getTime();
 	 	params.signature = hex_md5(token + params.timeStamp);
 	 	$.ajax({
-	 		url : 'http://localhost:8080/eteacher/remote/' + url,
+	 		url : 'http://192.168.1.107:8080/eteacher/remote/' + url,
 	 		type : 'POST',
 	 		dataType : 'json',
 	 		data : params,
 	 		error : function(XMLHttpRequest, textStatus, errorThrown) {
-
+	 			
 	 		},
 	 		success : function(data) {
 	 			switch (data.result) {
@@ -90,7 +90,7 @@
 	 */
 	 h.postNormal = function(url, params, fnSuc) {
 	 	$.ajax({
-	 		url : '../remote/' + url,
+	 		url : 'http://192.168.1.107:8080/eteacher/remote/' + url,
 	 		type : 'POST',
 	 		dataType : 'json',
 	 		data : params,

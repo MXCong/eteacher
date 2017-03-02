@@ -10,7 +10,82 @@
 <script type="text/javascript" src="../js/utils/PrefsUtils.js"></script>
 <script type="text/javascript" src="../js/utils/ajax.js"></script>
 <script type="text/javascript">
-	
+	var currentDate = null;
+	//获取今日课程和今日到期作业；
+	$(function(){
+		currentDate = getDate();
+		getSpecialCourseDates();
+		getWorkByDate();
+	});
+	//获取当前服务器时间：年月，年月日
+	function getDate(){
+		var date = new Date();
+		var seperator1 = "-";
+		var month = date.getMonth() + 1;
+		var strDate = date.getDate();
+		if (month >= 1 && month <= 9) {
+			month = "0" + month;
+		}
+		if (strDate >= 0 && strDate <= 9) {
+			strDate = "0" + strDate;
+		}
+		var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate;
+		return currentdate;
+	}
+	function getYearMonth(){
+		var date = new Date();
+		var seperator1 = "-";
+		var month = date.getMonth() + 1;
+		var strDate = date.getDate();
+		if (month >= 1 && month <= 9) {
+			month = "0" + month;
+		}
+		var currentdate = date.getFullYear() + seperator1 + month;
+		return currentdate;
+	}
+	//获取指定月份，上课的日期列表。
+	function getSpecialCourseDates() {
+		var params = {};
+		params.month = getYearMonth();
+		$httpUtils.post('teacher/Course/getWorkday', params, function(ret) {
+			getCoursrByDate(ret);
+		});
+	}
+	//获取指定日期的课程列表
+	function getCoursrByDate(dateLists) {
+		var courseIds = new Array();
+		for (var i = 0; i < dateLists.length; i++) {
+			var d = dateLists[i].date;
+			if (d == currentDate) {
+				courseIds.push(dateLists[i].courseId);
+			}
+		}
+		if (null != courseIds && courseIds.length > 0) {
+			var params = {};
+			params.courseIds = JSON.stringify(courseIds);
+			params.targetDate = currentDate;
+			$httpUtils.post('teacher/course/getCourseInfo', params, function(data) {
+				//alert("今日课程："+JSON.stringify(data));
+				$('#courseList').text(JSON.stringify(data));
+			});
+		} else {
+			//没有课程
+			$('#courseList').text("今天没课，好好放松一下吧！");
+		}
+	}
+	//获取指定日期结束的作业列表
+    function getWorkByDate(){
+       var par = {};
+       par.status = 3;
+       par.date = currentDate;
+      	$httpUtils.post('teacher/work/getWorkList', par, function(ret) {
+      		if(ret){
+      			$('#workList').text(JSON.stringify(ret));
+      		}else{
+      			$('#workList').text("今天没有要处理的作业");
+      		}
+		});
+    } 
 </script>
 </head>
 <body>
@@ -24,13 +99,21 @@
 					<span>1</span>
 				</div>
 				<div class="icase-cont">
-					<h1>课程：</h1>
-					<p>
-						软件工程 1#306软件工程 1#306软件工程 1#306软件工程 1#306软件工程 1#306软件工程 1#306软件工程
-						1#306软件工程 1#306软件工程 1#306软件工程 1#306软件工程 1#306软件工程 1#306软件<br />工程
-						1#306软件工程 1#306
+					<h1>今日课程：</h1>
+					<p id="courseList">
+						
+					</p><br>
+				</div>
+				<div class="icase-title">
+					<span>2</span>
+				</div>
+				<div class="icase-cont">
+					<h1>到期作业：</h1>
+					<p id="workList">
+						
 					</p>
 				</div>
+				
 			</div>
 
 		</div>
