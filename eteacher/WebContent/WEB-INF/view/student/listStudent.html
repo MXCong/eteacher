@@ -24,11 +24,9 @@
 	var currentTermId = null;
 	var currentCourseId = null;//当前正在进行的课程ＩＤ
 	var cId = null;//定义变量，存储用户课程列表中的第一项课程ID
+	var flag = 0;
 	$(function(){
-		getCurrentCourse();//获取目前正在进行的课程
 		getCurrentTerm();//获取学期列表
-		getCouseList();//获取课程的下拉列表
-		
 	});
 	function updateCourseSelect(termId){
 		getCouseList(termId);
@@ -74,16 +72,15 @@
         	}
         	option.append(o);
 		}
+        getCurrentCourse();//获取目前正在进行的课程
 	}
 	//更换课程
 	function changeCourse(courseId){
 		$PrefsUtils.transfer('courseId' , courseId);
 		if(courseId != currentCourseId){
 			getSignInData(courseId , 1);
-			getScourType();
 		}else{
 			getSignInData(currentCourseId , 0);
-			getScourType();
 		}
 	}
     //获取课程列表
@@ -96,13 +93,21 @@
         	params.termId = termId;
         }
         $httpUtils.post('teacher/course/getCourseByTerm', params, function(ret) {
+        	//alert(JSON.stringify(ret));
             if (ret && ret.length > 0) {
-            	cId = ret[0].courseId;
-            	$PrefsUtils.transfer('courseId' , cId);
+            	if(null == currentCourseId){
+	            	cId = ret[0].courseId;
+	            	$PrefsUtils.transfer('courseId' , cId);
+	            	getSignInData(cId , 1);
+            	}
             	var option = $("#courseSelect");
             	for ( var i in ret) {
-                	var o = "<option value="+ret[i].courseId+">"+ret[i].courseName+"</option>";
-                	option.append(o);
+					if(ret[i].courseId == currentCourseId){
+						var o = "<option value="+ret[i].courseId+" selected='selected'>"+ret[i].courseName+"</option>";
+					}else{
+	                	var o = "<option value="+ret[i].courseId+">"+ret[i].courseName+"</option>";
+					}
+	                option.append(o);
         		} 
             }
         });
@@ -110,21 +115,15 @@
     //获取当前正在进行的课程
     function getCurrentCourse(){
 		var params = {};
-		params.termId = currentTermId ;
+		params.termId = currentTermId;
 		$httpUtils.post('course/currentCourse', params, function(ret) {
 			if (null != ret && ret.length>0) {
 				currentCourseId　=　ret[0].courseId;
 				$PrefsUtils.transfer('courseId' , currentCourseId);
-				//将当前正在进行的课程置为“选中”状态
-				var option = $("#courseSelect");
-				var o = "<option selected value="+ret[0].courseId+">"+ret[0].courseName+"</option>";
-				option.append(o);
 				getSignInData(currentCourseId , 0);
-			}else{
-				getSignInData(cId,1);
 			}
+			getCouseList();//获取课程的下拉列表
 		});
-		getScourType();//获取成绩类型为“均值”的成绩项
     }
     //获取学生签到数据
 	function getSignInData(courseId,status){
@@ -132,25 +131,32 @@
 		par.courseId = courseId;
 		par.status = status;
 		$httpUtils.post('course/registDetail' , par , function(data){
-			if (null != data && data.length>0) {
-				list = data;
-				if(status == 0){
+			if(status == 0){
+				if(data){
 					var r = parseInt(data[0].studentNum) - parseInt(data.length);
-					var c = "本堂课程：已签到:" + data.length + "人，   未签到:" + r + "人";
-					$('#tableTitle').text(c);
+					var c = "本堂课程：已签到:" + data.length + "人，   未签到:" + r + "人";	
+				}else{
+					var c = "当前无人签到";
+					data = new Array();
+				}
+				$('#tableTitle').text(c);
+				if(flag == 0){
 					initTable(data);
-					
+					flag = 1;
+				}else{
+					$('#studentTable').bootstrapTable('load' , data);
 				}
 			}else{
 				var c = "本堂课程：已签到: 0人"
 				$('#tableTitle').text(c);
-				initTable(data);
+				$('#studentTable').bootstrapTable('load' , data);
 			}
+			getScourType();//获取成绩类型为“均值”的成绩项
 		});
 	}
   	function initTable(data){
   		if(null == data){
-  			data = {};	
+  			data = {};
   		}
   		studentTable = $('#studentTable').bootstrapTable({
 		    data : data,
@@ -166,6 +172,10 @@
 		        field: 'studentName',
 		        align: 'center',
 		        title: '姓名'
+		    }, {
+		        field: 'signInStatus',
+		        align: 'center',
+		        title: '状态'
 		    }, {
 		    	field: 'courseNum',
 		        align: 'center',
@@ -193,7 +203,7 @@
 		        		$('#courseScorekModal').modal('show');
 			        }
 		        }
-		    } ]
+		    }]
 		});
   	}
   	//单人单次成绩录入

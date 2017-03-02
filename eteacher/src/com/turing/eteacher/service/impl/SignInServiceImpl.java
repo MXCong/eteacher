@@ -247,6 +247,11 @@ public class SignInServiceImpl extends BaseService<SignIn> implements ISignInSer
 				regist.get(i).put("signInNum", m.get("signInNum"));
 				regist.get(i).put("courseNum", courseNum);
 				regist.get(i).put("studentNum", sn.get("studentNum"));
+				if(status.equals("0")){
+					regist.get(i).put("signInStatus", "签到");
+				}else{
+					regist.get(i).put("signInStatus", "未签到");
+				}
 			}
 			return regist;
 		}

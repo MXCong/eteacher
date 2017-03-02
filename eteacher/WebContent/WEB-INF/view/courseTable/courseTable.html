@@ -12,27 +12,12 @@
 <script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
 <script type="text/javascript">
 	$(function(){
-		$('a[href="#courseDiv"]').on('show.bs.tab', function (e) {
-			var type = $(e.target).data('type');
-			var url = 'viewCourseTable?type='+type;
-			if(type=='class'){
-				url += '&classId=' + $(e.target).data('classid');
-			}
-			window.location.href = url;
-		});
-		if('${classId?default("")}'!=''){
-			$('#classLi').addClass('active');
-		}
-		else{
-			$('.userType').addClass('active');
-		}
-		$('#titleSpan').text('${title?default("")}');
 	});
 </script>
 </head>
 <body>
 	<div class="maincont">
-	<div class="title"><span id="titleSpan">课表</span></div>
+	<div class="title"><span id="titleSpan">个人课表</span></div>
         <div class="course-table">
         	<ul class="nav nav-tabs">
         	  <li class="dropdown userType">
@@ -163,6 +148,7 @@
     <div class="container">
        <p>版权所有：河北图灵</p>
     </div>
-</div>
+	</div>
+	</div>
 </body>
 </html>

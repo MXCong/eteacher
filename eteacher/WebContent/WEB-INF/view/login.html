@@ -35,8 +35,8 @@
             var pwd = hex_md5(passWord_value.val());
             params.sign = hex_md5(params.appKey + params.account + params.timeStamp + pwd + params.imei);
             $httpUtils.postNormal('login', params, function(ret) {
-            	$PrefsUtils.savePref('userId', ret.data.userId);
-            	$PrefsUtils.savePref('token', hex_md5(ret.data.token + pwd));
+            	$PrefsUtils.savePref('userId', ret.userId);
+            	$PrefsUtils.savePref('token', hex_md5(ret.token + pwd));
             	getTermList();//获取用户的学期信息并本地存储
             	
             });

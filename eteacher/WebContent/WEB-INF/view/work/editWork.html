@@ -63,11 +63,12 @@
     function updateCourseSelect(courseId){
     	courseID = courseId;
     	var classes = $("#classList");
+    	$('#classItem').remove(); //清空班级
 		for ( var i in courseList) {
 			if(courseList[i].courseId == courseId){
 				var cls = courseList[i].classes;
 				for ( var c in cls) {
-					var span = "<div>"+
+					var span = "<div id='classItem'>"+
 									"<div class='targetClass onetab' name='classes' id="+ cls[c].classId +">"+
 										"<span>"+cls[c].className+"</span>"+
 										"<a class='delet-img' onclick='delScore(this)' href='#' title='删除'></a>"+
@@ -96,6 +97,8 @@
                 
                 var o = "<option value="+workInfo.courseId+">"+workInfo.courseName+"</option>";
                 $('#courseId').html(o);
+
+                targetClass(workInfo.targetClass);//作业的授课班级处理并显示；
                 
                 courseID = workInfo.courseId;
                 getCouseList();//获取课程的下拉列表项
@@ -108,6 +111,19 @@
             }
         });
     }
+	function targetClass(cls){
+		alert(JSON.stringify(cls));
+		var classes = $("#classList");
+			for ( var c in cls) {
+				var span = "<div id='classItem'>"+
+								"<div class='targetClass onetab' name='classes' id="+ cls[c].classId +">"+
+									"<span>"+cls[c].className+"</span>"+
+									"<a class='delet-img' onclick='delScore(this)' href='#' title='删除'></a>"+
+								"</div>"+
+							"</div>";
+				classes.append(span);
+			}
+	}
   	//保存修改后的作业
 	function saveWork(){
 		var title = $('#workTitle').val();
