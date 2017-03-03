@@ -37,8 +37,7 @@ public class CourseItemServiceImpl extends BaseService<CourseItem> implements
 
 	@Override
 	public boolean saveCourseTime(String courseId, String details) {
-		List<Map<String, Object>> jsonList = (List<Map<String, Object>>) JSONUtils
-				.parse(details);
+		List<Map<String, Object>> jsonList = (List<Map<String, Object>>) JSONUtils.parse(details);
 		if (null != jsonList && jsonList.size() > 0) {
 			for (int i = 0; i < jsonList.size(); i++) {
 				Map<String, Object> jsonItem = jsonList.get(i);

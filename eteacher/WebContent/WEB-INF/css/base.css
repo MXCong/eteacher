@@ -274,3 +274,25 @@ a.tabAddbtn, a.tabAddbtn:hover { display:inline-block; margin:0 0 0 10px; width:
 .classCheck label { margin-left:5px; font-weight:normal;}
 .addBtn { width:128px; height:40px; margin:10px auto;}
 .addBtn button { width:128px; height:40px;}
+
+/*课表样式*/
+.classtable { padding:5px 0 10px 0; width:600px; height:auto; overflow:hidden; border-bottom:1px dashed #ccc;}
+.table-one { float:left; margin:10px 0 0 10px; width:280px; height:30px;}
+.table-one label, .table-two label { display:inline-block; float:left; width:60px; height:30px; line-height:30px; color:#999; text-align:right;}
+.table-one input, .table-one select, .table-two input, .table-two select { display:inline-block; float:left; margin-left:5px; width: 100px; height:30px; font-size: 14px; line-height:30px; color: #555555; background: #fff ;border: 1px solid #e3e6f3; border-radius: 3px; box-shadow:none; 
+transition: border .25s linear,color .25s linear,background-color .25s linear;}
+.table-one span, .table-two span { display:inline-block; float:left; margin-left:5px; line-height:30px;}
+.table-btn { float:left; width:70px;}
+a.table-add { float:left; display:block; margin-left:5px; width:30px; height:30px; background:url(../images/add.png) no-repeat; background-size:30px;}
+a.table-delete { float:left; display:block; margin-left:5px; width:30px; height:30px; background:url(../images/delete.png) no-repeat; background-size:30px;}
+
+
+.table-two { float:left; margin:10px 0 0 10px; width:580px;}
+.table-two input.tabaddress { width:480px;}
+.table-two select.tabaddress { width:480px;}
+span.week { float:left; margin:0 0 0 5px; width:28px; height:28px; border-radius:14px; background:#eee; color:#000; text-align:center; line-height:28px;}
+span.week:hover { text-decoration:none;}
+span.weekon { background:#238BC8; color:#fff;}
+
+a.filebtn { display:block; margin:10px auto; width:80px; height:32px; line-height:32px; background:#238BC8; color:#fff; text-align:center; color:#fff; border-radius:5px;}
+a.filebtn:hover { text-decoration:none; color:#fff;}

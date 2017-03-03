@@ -1,6 +1,7 @@
 package com.turing.eteacher.remote;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -471,6 +472,12 @@ public class CourseRemote extends BaseRemote {
 	 */
 	@RequestMapping(value = "teacher/course/addDate", method = RequestMethod.POST)
 	public ReturnBody addDate(HttpServletRequest request) {
+		Enumeration rnames=request.getParameterNames();
+		for (Enumeration e = rnames ; e.hasMoreElements() ;) {
+		       String thisName=e.nextElement().toString();
+		       String thisValue=request.getParameter(thisName);
+		       System.out.println("参数名："+thisName+"-------"+thisValue);
+		} 
 		return courseServiceImpl.addCourseDate(request);
 	}
 
