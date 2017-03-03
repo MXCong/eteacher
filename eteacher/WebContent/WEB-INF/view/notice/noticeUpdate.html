@@ -13,76 +13,7 @@
 <script type="text/javascript" src="../../js/utils/md5.js"></script>
 <script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
 <script type="text/javascript" src="../../js/utils/ajax.js"></script>
-<script type="text/javascript">
-	
-// 	var editFlag = '${editFlag?default("")}';
-	$(function(){
-// 		$('#noticeForm').validatorNormalInit(prepare);
-// 		$('#title').validatorEmpty('通知标题');
-// 		$('#content').validatorEmpty('通知内容');
-// 		$('#courseId').validatorEmpty('课程');
-// 		function prepare(){
-// 			if($('#publishType2').is(':checked')){
-// 				if($('#publishTime').val() == ''){
-// 					alert('发布时间不能为空');
-// 					return false;
-// 				}
-// 			}
-// 			return true;
-// 		}
-		init();
-	});
-	function init(){
-		var params={};
-		params.page=0;
-		$httpUtils.post('teacher/getCourseList', params, function(data) {
-			addOption(data);
-		})
-// 		if(editFlag){
-// 			$.post('getWorkData',{workId:'${workId?default("")}'},function(data){
-// 				$('#noticeForm').json2form({data:data});
-// 				if(data.publishType == '01'){
-// 					$('#publishType1').prop('checked',true);
-// 				}
-// 				else if(data.publishType == '03'){
-// 					$('#publishTime').show();
-// 				}
-// 			},'json');
-// 		}
-	}
-	//下拉列表添加课程
-	function addOption(ret){
-     for(var i=0;i<ret.length;i++){
-     	var zz=	$('<input type="checkbox" value="'+ret[i].courseId+'"/>'+'<span>'+ret[i].courseName+'</span>');
-     	zz.appendTo("#courseId");
-     }
-	}
-	//保存
-	function save(){
-		var title=	    $("#title").val();
-		var content=	$("#content").val();
-		var course=[];
-         $("input[type='checkbox']:checked").each(function(i){
-        	 var v=$(this).val();
-        	 var ce={};
-        	 ce.id=$(this).val();
-        	 course.push(ce);
-         })
-      
-		var publishTime=$("#publishTime").val();
-        var date = new Date(publishTime.replace(/-/,"/")).getTime()/1000;
-		var params={};
-		params.title=title;
-		params.content=content;
-		params.course=JSON.stringify(course);
-		params.publishTime=date;
-		alert(JSON.stringify(params));
-		$httpUtils.post('teacher/notice/addNotice', params, function(data) {
-			history.back();
-		});
-		
-	}
-</script>
+
 </head>
 <body>
 	<div class="maincont">
@@ -119,12 +50,6 @@
                     <div class="message-left">发布时间：</div>
                     <div class="message-right">
                     	<div class="radio">
-<!-- 						  <label> -->
-<!-- 						    <input type="radio" id="publishType1" name="publishType" value="02" checked onclick="$('#publishTime').hide();$('#publishTime').val('')">立即发布 -->
-<!-- 						  </label> -->
-<!-- 						  <label> -->
-<!-- 						    <input type="radio" id="publishType2" name="publishType" value="03" onclick="$('#publishTime').show();">预约发布 -->
-<!-- 						  </label> -->
 						  <input id="publishTime" name="publishTime" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" type="text" class="mess-control" placeholder="请选择发布时间" style="width:37%;"/>         
 						</div>
                     </div>                   	
@@ -137,4 +62,73 @@
         </div>
     </div>
 </body>
+<script type="text/javascript">
+	
+	$(function(){
+		init();
+		getDate();
+		
+		
+	});
+	//加载页面数据
+	function init(){
+		var params={};
+		params.page=0;
+		$httpUtils.post('teacher/getCourseList', params, function(data) {
+			addOption(data);
+		})
+	}
+	//下拉列表添加课程
+	function addOption(ret){
+     for(var i=0;i<ret.length;i++){
+     	var zz=	$('<input type="checkbox" value="'+ret[i].courseId+'"/>'+'<span>'+ret[i].courseName+'</span>');
+     	zz.appendTo("#courseId");
+     }
+	}
+	 //加载通知数据
+    function getDate(){
+   	 var noticeId=$httpUtils.getUrlParam("noticeId");
+   	 var params={};
+   	  params.noticeId=noticeId;
+		$httpUtils.post('teacher/notice/getDetail', params, function(data) {
+				$("#title").val(data.title);
+				$("#content").val(data.content);
+				$("#publishTime").val(data.publishTime);
+				 $("input[type='checkbox']").each(function(i){
+					var _this=$(this);
+		        	var couser=data.courses;
+		        	for(var k=0;couser.length;k++){
+     		        	if(	_this.val()==couser[k].courseId){
+     		        		_this.attr("checked",true);
+     		        	}
+		        	}
+		         })
+			
+		})
+    }
+	//保存
+	function save(){
+		var title=	    $("#title").val();
+		var content=	$("#content").val();
+		var course=[];
+		 var noticeId=$httpUtils.getUrlParam("noticeId");
+         $("input[type='checkbox']:checked").each(function(i){
+        	 var v=$(this).val();
+        	 var ce={};
+        	 ce.id=$(this).val();
+        	 course.push(ce);
+         })
+		var publishTime=$("#publishTime").val();
+        var date = new Date(publishTime.replace(/-/,"/")).getTime()/1000;
+		var params={};
+		params.title=title;
+		params.noticeId=noticeId;
+		params.content=content;
+		params.course=JSON.stringify(course);
+		params.publishTime=date;
+		$httpUtils.post('teacher/notice/addNotice', params, function(data) {
+			history.back();
+		});
+	}
+</script>
 </html>
