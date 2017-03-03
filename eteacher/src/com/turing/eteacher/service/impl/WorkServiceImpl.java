@@ -384,7 +384,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		String cFirstDay = ym + "-01";
 		String sql = "SELECT SUBSTRING(tw.END_TIME,1,10) AS date FROM t_work tw WHERE tw.COURSE_ID IN ( "
 				+ "SELECT tc.COURSE_ID FROM t_course tc WHERE tc.USER_ID = ?) " 
-				+ "AND  tw.END_TIME BETWEEN  ? AND ? AND tw.PUBLISH_TIME IS NOT NULL ";
+				+ "AND  tw.END_TIME BETWEEN  ? AND ? AND tw.PUBLISH_TIME IS NOT NULL AND tw.STATUS = 1";
 		List list = workDAO.findBySql(sql, userId, cFirstDay, cLastDay);
 		return list;
 	}
