@@ -111,6 +111,7 @@ public class NoticeServiceImpl extends BaseService<Notice> implements INoticeSer
 				for (int i = 0; i < list.size(); i++) {
 					int all = workCourseServiceImpl.getStudentCountByWId((String)list.get(i).get("noticeId"));
 					list.get(i).put("all", all);
+					list.get(i).put("publishAlready",0);
 					int statistics = logServiceImpl.getCountByTargetId((String)list.get(i).get("noticeId"));
 					list.get(i).put("statistics", statistics);
 				}
