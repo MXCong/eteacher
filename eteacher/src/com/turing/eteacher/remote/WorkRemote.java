@@ -20,10 +20,13 @@ import com.alibaba.druid.support.json.JSONUtils;
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.CustomFile;
+import com.turing.eteacher.model.TaskModel;
 import com.turing.eteacher.model.Work;
 import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.IWorkService;
+import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.FileUtil;
+import com.turing.eteacher.util.SpringTimerTest;
 import com.turing.eteacher.util.StringUtil;
 
 /**
@@ -53,6 +56,9 @@ public class WorkRemote extends BaseRemote {
 
 	@Autowired
 	private IFileService fileServiceImpl;
+	
+	@Autowired
+	private SpringTimerTest springTimerTest;
 
 	// 学生端操作
 	/**
@@ -237,26 +243,29 @@ public class WorkRemote extends BaseRemote {
 		String workId = request.getParameter("workId");
 		
 		if (StringUtil.checkParams(courseId, content, status)) {
-			if(null == workId){
-				Work work = new Work();
+			Work work = null;
+			String before = null;
+			if(StringUtil.isNotEmpty(workId)){
+				work = workServiceImpl.get(workId);
+				before = work.getPublishTime();
+				work.setContent(content);
+				work.setTitle(title);
+				work.setCourseId(courseId);
+				work.setPublishTime(publishTime);
+				work.setEndTime(endTime);
+				work.setStatus(1);
+				workServiceImpl.update(work);
+				//作业班级关联表的处理。
+				workServiceImpl.addWorkClass(workId , classes);
+			}else{
+				work = new Work();
 				work.setTitle(title);
 				work.setContent(content);
 				work.setCourseId(courseId);
 				work.setPublishTime(publishTime);
 				work.setEndTime(endTime);
 				work.setStatus(Integer.parseInt(status));
-				workId = (String) workServiceImpl.save(work);
-				//作业班级关联表的处理。
-				workServiceImpl.addWorkClass(workId , classes);
-			}else{
-				Work w = workServiceImpl.get(workId);
-				w.setContent(content);
-				w.setTitle(title);
-				w.setCourseId(courseId);
-				w.setPublishTime(publishTime);
-				w.setEndTime(endTime);
-				w.setStatus(1);
-				workServiceImpl.update(w);
+				workServiceImpl.save(work);
 				//作业班级关联表的处理。
 				workServiceImpl.addWorkClass(workId , classes);
 			}
@@ -287,7 +296,7 @@ public class WorkRemote extends BaseRemote {
 									e.printStackTrace();
 								}
 								CustomFile customFile = new CustomFile();
-								customFile.setDataId(workId);
+								customFile.setDataId(work.getWorkId());
 								customFile.setFileName(file.getOriginalFilename());
 								customFile.setServerName(serverName);
 								customFile.setIsCourseFile(2);
@@ -299,6 +308,32 @@ public class WorkRemote extends BaseRemote {
 				} catch (Exception e) {
 					e.printStackTrace();
 					return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
+				}
+			}
+			
+			if(StringUtil.isNotEmpty(workId)){
+				if (DateUtil.isBefore(before, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+					if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+						springTimerTest.updateTask(workId,TaskModel.TYPE_HOMEWORK_PUBLISH, publishTime);
+					}else {
+						springTimerTest.deleteTask(workId,TaskModel.TYPE_HOMEWORK_PUBLISH);
+					}
+				}else {
+					if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+						TaskModel model = new TaskModel();
+						model.setId(workId);
+						model.setDate(work.getPublishTime());
+						model.setType(TaskModel.TYPE_HOMEWORK_PUBLISH);
+						springTimerTest.addTask(model);
+					}
+				}
+			}else{
+				if (DateUtil.isBefore(publishTime, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD)+" 23:59", DateUtil.YYYYMMDDHHMM)) {
+					TaskModel model = new TaskModel();
+					model.setId(work.getWorkId());
+					model.setDate(work.getPublishTime());
+					model.setType(TaskModel.TYPE_HOMEWORK_PUBLISH);
+					springTimerTest.addTask(model);
 				}
 			}
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS);
