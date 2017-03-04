@@ -68,9 +68,10 @@
         	 ce.id=$(this).val();
         	 course.push(ce);
          })
-      
 		var publishTime=$("#publishTime").val();
-        var date = new Date(publishTime.replace(/-/,"/")).getTime()/1000;
+        //alert("publishTime:"+publishTime);
+        //var date = new Date(publishTime.replace(/-/,"/")).getTime()/1000;
+        var date = Date.parse(new Date(publishTime)) / 1000;
 		var params={};
 		params.title=title;
 		params.content=content;
@@ -94,7 +95,7 @@
             	<div class="message-group">
                     <div class="message-left">通知标题：</div>
                     <div class="message-right">
-                        <input id="title" name="title" maxlength="40" type="text" class="mess-control" />
+                        <input id="title" name="title" placeholder="请输入通知标题" maxlength="40" type="text" class="mess-control" />
                     </div>                   	
                 </div>
                 <div class="message-group">
@@ -125,7 +126,7 @@
 <!-- 						  <label> -->
 <!-- 						    <input type="radio" id="publishType2" name="publishType" value="03" onclick="$('#publishTime').show();">预约发布 -->
 <!-- 						  </label> -->
-						  <input id="publishTime" name="publishTime" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" type="text" class="mess-control" placeholder="请选择发布时间" style="width:37%;"/>         
+						  <input id="publishTime" name="publishTime" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm'})" type="text" class="mess-control" placeholder="请选择发布时间" style="width:37%;"/>         
 						</div>
                     </div>                   	
                 </div> 

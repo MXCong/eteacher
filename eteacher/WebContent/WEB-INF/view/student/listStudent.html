@@ -140,15 +140,15 @@
 					data = new Array();
 				}
 				$('#tableTitle').text(c);
-				if(flag == 0){
-					initTable(data);
-					flag = 1;
-				}else{
-					$('#studentTable').bootstrapTable('load' , data);
-				}
 			}else{
-				var c = "本堂课程：已签到: 0人"
+				var c = "历史签到统计";
 				$('#tableTitle').text(c);
+				$('#studentTable').bootstrapTable('load' , data);
+			}
+			if(flag == 0){
+				initTable(data);
+				flag = 1;
+			}else{
 				$('#studentTable').bootstrapTable('load' , data);
 			}
 			getScourType();//获取成绩类型为“均值”的成绩项
