@@ -120,6 +120,8 @@
    },   
    'click .glyphicon-list-alt': function (e, value, row, index) {
      courseId = row.courseId;
+     initTypeStr();
+     $('.classtable').append(typeStr);
    },
    'click .glyphicon-trash': function (e, value, row, index) {
     if(confirm("确定删除")){
