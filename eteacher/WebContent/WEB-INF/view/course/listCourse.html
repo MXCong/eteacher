@@ -25,13 +25,14 @@
    var options = '';
    var courseId;
    $(function(){
+    $httpUtils.checkParams();
     $.get('courseTableModal.html', function(content) {
       $('body').after(content);
   		//获取当前学期
   		getCurrentTerm();
     });
 
-		$('#termSelect').change(function(){ 
+    $('#termSelect').change(function(){ 
 			currentTermId = $(this).children('option:selected').val();//这就是selected的值 
       for (var i = 0;i< termList.length;i++) {
         var temp = termList[i];
@@ -42,7 +43,7 @@
       initWeekStr();
       refreshList();
     });
-	});
+  });
 
    function refreshList(){
     $httpUtils.post('teacher/course/getCourseByTerm', {termId:currentTermId}, function(ret) {

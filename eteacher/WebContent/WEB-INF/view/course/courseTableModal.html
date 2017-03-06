@@ -4,8 +4,8 @@
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">课程课表</h4>
-      </div>
-      <div style="height:400px; overflow: scroll;">
+    </div>
+    <div style="height:400px; overflow: scroll;">
         <div class="classtable">
           <!--重复类型
           <div class="scheduleBlock">
@@ -37,11 +37,11 @@
               </div>
           </div>
           <!--end-->
-        </div>
-        <a href="#" onclick="saveClick();" class="filebtn">保存</a>
-      </div><!-- /.modal-content -->
-    </div>
-  </div><!-- /.modal-dialog -->
+      </div>
+      <a href="#" onclick="saveClick();" class="filebtn">保存</a>
+  </div><!-- /.modal-content -->
+</div>
+</div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 <script>
 /**
@@ -52,137 +52,139 @@ var weekRepeatBlock= "";
 /**
 *周重复
 **/
-    function initWeekStr(){
+function initWeekStr(){
               //初始化天重复
-        dayRepeatBlock = "<div class=\"dayRepeatBlock\">"+
-        "            <div class=\"table-two\">"+
-        "              <label>起止时间</label>"+
-        "              <input type=\"text\" class=\"startDate\" readonly onClick=\"WdatePicker({dateFmt:\'yyyy-MM-dd\', minDate:\'"+cTerm.startDate+"\',maxDate:\'"+cTerm.endDate+"\'})\" value=\"\" placeholder=\"\" />"+
-        "              <span>~</span>"+
-        "              <input type=\"text\" class=\"endDate\" onClick=\"WdatePicker({dateFmt:\'yyyy-MM-dd\', minDate:\'"+cTerm.startDate+"\',maxDate:\'"+cTerm.endDate+"\'})\"  value=\"\" placeholder=\"\" />"+
-        "              <div class=\"table-btn\">"+
-        "                <a href=\"#\" class=\"table-add\" onclick=\"addDayRepeatBlock(this);\"></a>"+
-        "                <a href=\"#\" class=\"table-delete\" onclick=\"delDayRepeatBlock(this);\"></a>"+
-        "              </div>"+
-        "            </div>"+
-        "            <!--end-->"+
-        "            <!--上课时间-->"+
-        "            <div class=\"timeRepeatBlock\">"+
-        "              <div class=\"table-two \">"+
-        "                <label>上课时间</label>"+
-        "                <input class=\"startTime\" onClick=\"WdatePicker({dateFmt:\'HH:mm\'})\" type=\"text\" name=\"\" value=\"\" placeholder=\"\" />"+
-        "                <span>~</span>"+
-        "                <input class=\"endTime\" type=\"text\" onClick=\"WdatePicker({dateFmt:\'HH:mm\'})\" name=\"\" value=\"\" placeholder=\"\" />"+
-        "                <div class=\"table-btn\">"+
-        "                  <a href=\"#\" onclick=\"addTimeRepeatBlock(this);\" class=\"table-add\"></a>"+
-        "                  <a href=\"#\" onclick=\"delTimeRepeatBlock(this);\" class=\"table-delete\"></a>"+
-        "                </div>"+
-        "              </div>"+
-        "              <!--end-->"+
-        "              <div class=\"table-two\">"+
-        "                <label>上课地点</label>"+
-        "                <input class=\"classRoom tabaddress\" type=\"text\" name=\"\" value=\"\" placeholder=\"\" />"+
-        "              </div>"+
-        "            </div>"+
-        "          </div>";
+              dayRepeatBlock = "<div class=\"dayRepeatBlock\">"+
+              "            <div class=\"table-two\">"+
+              "              <label>起止时间</label>"+
+              "              <input type=\"text\" class=\"startDate\" readonly onClick=\"WdatePicker({dateFmt:\'yyyy-MM-dd\', minDate:\'"+cTerm.startDate+"\',maxDate:\'"+cTerm.endDate+"\'})\" value=\"\" placeholder=\"\" />"+
+              "              <span>~</span>"+
+              "              <input type=\"text\" class=\"endDate\" onClick=\"WdatePicker({dateFmt:\'yyyy-MM-dd\', minDate:\'"+cTerm.startDate+"\',maxDate:\'"+cTerm.endDate+"\'})\"  value=\"\" placeholder=\"\" />"+
+              "              <div class=\"table-btn\">"+
+              "                <a href=\"#\" class=\"table-add\" onclick=\"addDayRepeatBlock(this);\"></a>"+
+              "                <a href=\"#\" class=\"table-delete\" onclick=\"delDayRepeatBlock(this);\"></a>"+
+              "              </div>"+
+              "            </div>"+
+              "            <!--end-->"+
+              "            <!--上课时间-->"+
+              "            <div class=\"timeRepeatBlock\">"+
+              "              <div class=\"table-two \">"+
+              "                <label>上课时间</label>"+
+              "                <input class=\"startTime\" onClick=\"WdatePicker({dateFmt:\'HH:mm\'})\" type=\"text\" name=\"\" value=\"\" placeholder=\"\" />"+
+              "                <span>~</span>"+
+              "                <input class=\"endTime\" type=\"text\" onClick=\"WdatePicker({dateFmt:\'HH:mm\'})\" name=\"\" value=\"\" placeholder=\"\" />"+
+              "                <div class=\"table-btn\">"+
+              "                  <a href=\"#\" onclick=\"addTimeRepeatBlock(this);\" class=\"table-add\"></a>"+
+              "                  <a href=\"#\" onclick=\"delTimeRepeatBlock(this);\" class=\"table-delete\"></a>"+
+              "                </div>"+
+              "              </div>"+
+              "              <!--end-->"+
+              "              <div class=\"table-two\">"+
+              "                <label>上课地点</label>"+
+              "                <input class=\"classRoom tabaddress\" type=\"text\" name=\"\" value=\"\" placeholder=\"\" />"+
+              "              </div>"+
+              "            </div>"+
+              "          </div>";
 
 
               //初始化周重复
               options = '';
               for (var i = 0; i < cTerm.weekCount; i++) {
                 options += "<option value="+(i+1)+">"+(i+1)+"</option>";
-              }
-              weekRepeatBlock =  "<div class=\"weekRepeatBlock\">"+
-        "            <div class=\"table-two\">"+
-        "              <label>起止周</label>"+
-        "              <select class=\"startWeek\" onchange=\"getMonday(this)\">";
-              weekRepeatBlock += options;
-              weekRepeatBlock += "</select>"+
-        "              <span>~</span>"+
-        "              <select class=\"endWeek\" onchange=\"getSunday(this)\" >";
-              weekRepeatBlock += options;
-              weekRepeatBlock += "</select>"+
-        "              <div class=\"table-btn\">"+
-        "                <a href=\"#\" onclick=\"addWeekRepeatBlock(this);\" class=\"table-add\"></a>"+
-        "                <a href=\"#\" onclick=\"delWeekRepeatBlock(this);\" class=\"table-delete\"></a>"+
-        "              </div>"+
-        "            </div>"+
-        "            <div class=\"weekBlock\">"+
-        "              <div class=\"table-two\">"+
-        "                <label>星期</label>"+
-        "                <span onclick=\"dayClick(this);\" week=\'1\' check=\"false\" class=\"week\">一</span>"+
-        "                <span onclick=\"dayClick(this);\" week=\'2\' check=\"false\" class=\"week\">二</span>"+
-        "                <span onclick=\"dayClick(this);\" week=\'3\' check=\"false\" class=\"week\">三</span>"+
-        "                <span onclick=\"dayClick(this);\" week=\'4\' check=\"false\" class=\"week\">四</span>"+
-        "                <span onclick=\"dayClick(this);\" week=\'5\' check=\"false\" class=\"week\">五</span>"+
-        "                <span onclick=\"dayClick(this);\" week=\'6\' check=\"false\" class=\"week\">六</span>"+
-        "                <span onclick=\"dayClick(this);\" week=\'7\' check=\"false\" class=\"week\">日</span>"+
-        "                <div class=\"table-btn\">"+
-        "                  <a href=\"#\" onclick=\"addWeekBlock(this);\" class=\"table-add\"></a>"+
-        "                  <a href=\"#\" onclick=\"delWeekBlock(this);\" class=\"table-delete\"></a>"+
-        "                </div>"+
-        "              </div>"+
-        "              <div class=\"timeRepeatBlock\">"+
-        "                <div class=\"table-two\">"+
-        "                  <label>上课时间</label>"+
-        "                  <input type=\"text\" class=\"startTime\" onClick=\"WdatePicker({dateFmt:\'HH:mm\'})\" name=\"\" value=\"\" placeholder=\"\" />"+
-        "                  <span>~</span>"+
-        "                  <input type=\"text\" class=\"endTime\" onClick=\"WdatePicker({dateFmt:\'HH:mm\'})\" name=\"\" value=\"\" placeholder=\"\" />"+
-        "                  <div class=\"table-btn\">"+
-        "                    <a href=\"#\" onclick=\"addTimeRepeatBlock(this);\"  class=\"table-add\"></a>"+
-        "                    <a href=\"#\" onclick=\"delTimeRepeatBlock(this);\" class=\"table-delete\"></a>"+
-        "                  </div>"+
-        "                </div>"+
-        "                <div class=\"table-two\">"+
-        "                  <label>上课地点</label>"+
-        "                  <input class=\"classRoom tabaddress\" type=\"text\" name=\"\" value=\"\" placeholder=\"\" />       "+
-        "                </div>"+
-        "              </div>"+
-        "            </div>"+
-        "          </div>";
-    }
-    var typeStr = "";
-    function initTypeStr(){
-        typeStr = "<div class=\"scheduleBlock\">"+
-        "              <div class=\"table-one\">"+
-        "                <label>重复类型</label>"+
-        "                <select class=\"repeatType\" onchange=\"repeatTypeChanged(this)\">"+
-        "                  <option value=\"01\">天</option>"+
-        "                  <option value=\"02\">周</option>"+
-        "                </select>        "+
-        "              </div>"+
-        "              <div class=\"table-one\">"+
-        "                <label>重复周期</label>"+
-        "                <select class=\"repeatNumber\">"+
-        "                  <option>1</option>"+
-        "                  <option>2</option>"+
-        "                  <option>3</option>"+
-        "                  <option>4</option>"+
-        "                  <option>5</option>"+
-        "                  <option>6</option>"+
-        "                  <option>7</option>"+
-        "                  <option>8</option>"+
-        "                  <option>9</option>"+
-        "                  <option>10</option>"+
-        "                </select>"+
-        "                <div class=\"table-btn\">"+
-        "                  <a href=\"#\" class=\"table-add\" onclick=\"addScheduleBlock(this);\"></a>"+
-        "                  <a href=\"#\" class=\"table-delete\" onclick=\"delScheduleBlock(this)\"></a>"+
-        "                </div>"+
-        "            </div>"+
-                  dayRepeatBlock+
-        "          </div>";
-    }
-    
+            }
+            weekRepeatBlock =  "<div class=\"weekRepeatBlock\">"+
+            "            <div class=\"table-two\">"+
+            "              <label>起止周</label>"+
+            "              <select class=\"startWeek\" onchange=\"getMonday(this)\">";
+            weekRepeatBlock += options;
+            weekRepeatBlock += "</select>"+
+            "              <span>~</span>"+
+            "              <select class=\"endWeek\" onchange=\"getSunday(this)\" >";
+            weekRepeatBlock += options;
+            weekRepeatBlock += "</select>"+
+            "              <div class=\"table-btn\">"+
+            "                <a href=\"#\" onclick=\"addWeekRepeatBlock(this);\" class=\"table-add\"></a>"+
+            "                <a href=\"#\" onclick=\"delWeekRepeatBlock(this);\" class=\"table-delete\"></a>"+
+            "              </div>"+
+            "            </div>"+
+            "            <div class=\"weekBlock\">"+
+            "              <div class=\"table-two\">"+
+            "                <label>星期</label>"+
+            "                <span onclick=\"dayClick(this);\" week=\'1\' check=\"false\" class=\"week\">一</span>"+
+            "                <span onclick=\"dayClick(this);\" week=\'2\' check=\"false\" class=\"week\">二</span>"+
+            "                <span onclick=\"dayClick(this);\" week=\'3\' check=\"false\" class=\"week\">三</span>"+
+            "                <span onclick=\"dayClick(this);\" week=\'4\' check=\"false\" class=\"week\">四</span>"+
+            "                <span onclick=\"dayClick(this);\" week=\'5\' check=\"false\" class=\"week\">五</span>"+
+            "                <span onclick=\"dayClick(this);\" week=\'6\' check=\"false\" class=\"week\">六</span>"+
+            "                <span onclick=\"dayClick(this);\" week=\'7\' check=\"false\" class=\"week\">日</span>"+
+            "                <div class=\"table-btn\">"+
+            "                  <a href=\"#\" onclick=\"addWeekBlock(this);\" class=\"table-add\"></a>"+
+            "                  <a href=\"#\" onclick=\"delWeekBlock(this);\" class=\"table-delete\"></a>"+
+            "                </div>"+
+            "              </div>"+
+            "              <div class=\"timeRepeatBlock\">"+
+            "                <div class=\"table-two\">"+
+            "                  <label>上课时间</label>"+
+            "                  <input type=\"text\" class=\"startTime\" onClick=\"WdatePicker({dateFmt:\'HH:mm\'})\" name=\"\" value=\"\" placeholder=\"\" />"+
+            "                  <span>~</span>"+
+            "                  <input type=\"text\" class=\"endTime\" onClick=\"WdatePicker({dateFmt:\'HH:mm\'})\" name=\"\" value=\"\" placeholder=\"\" />"+
+            "                  <div class=\"table-btn\">"+
+            "                    <a href=\"#\" onclick=\"addTimeRepeatBlock(this);\"  class=\"table-add\"></a>"+
+            "                    <a href=\"#\" onclick=\"delTimeRepeatBlock(this);\" class=\"table-delete\"></a>"+
+            "                  </div>"+
+            "                </div>"+
+            "                <div class=\"table-two\">"+
+            "                  <label>上课地点</label>"+
+            "                  <input class=\"classRoom tabaddress\" type=\"text\" name=\"\" value=\"\" placeholder=\"\" />       "+
+            "                </div>"+
+            "              </div>"+
+            "            </div>"+
+            "          </div>";
+        }
+        var typeStr = "";
+        function initTypeStr(){
+            typeStr = "<div class=\"scheduleBlock\">"+
+            "              <div class=\"table-one\">"+
+            "                <label>重复类型</label>"+
+            "                <select class=\"repeatType\" onchange=\"repeatTypeChanged(this)\">"+
+            "                  <option value=\"01\">天</option>"+
+            "                  <option value=\"02\">周</option>"+
+            "                </select>        "+
+            "              </div>"+
+            "              <div class=\"table-one\">"+
+            "                <label>重复周期</label>"+
+            "                <select class=\"repeatNumber\">"+
+            "                  <option>1</option>"+
+            "                  <option>2</option>"+
+            "                  <option>3</option>"+
+            "                  <option>4</option>"+
+            "                  <option>5</option>"+
+            "                  <option>6</option>"+
+            "                  <option>7</option>"+
+            "                  <option>8</option>"+
+            "                  <option>9</option>"+
+            "                  <option>10</option>"+
+            "                </select>"+
+            "                <div class=\"table-btn\">"+
+            "                  <a href=\"#\" class=\"table-add\" onclick=\"addScheduleBlock(this);\"></a>"+
+            "                  <a href=\"#\" class=\"table-delete\" onclick=\"delScheduleBlock(this)\"></a>"+
+            "                </div>"+
+            "            </div>"+
+            dayRepeatBlock+
+            "          </div>";
+        }
+
 //关闭后清空表单
 $('#courseTablekModal').on('hidden.bs.modal', function (e) {
   $('.classtable').html("");
 })
-
+$(function() {
+    $httpUtils.checkParams();
+});
   /**
      *获取 指定日期cDate，weeks周后的周一
      */
-    function getMonday(tag){
+     function getMonday(tag){
         weeks = $(tag).val();
         var  objDate;
         objDate = new Date(cTerm.startDate);
@@ -200,15 +202,15 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
     /**
      *获取 指定日期cDate，weeks周后的周日
      */
-    function getSunday(tag){
-       weeks = $(tag).val();
-        var  objDate;
-        objDate = new Date(cTerm.endDate);
-        var weekFirstDay = getWeekFirstDay(objDate);
-        var objDate2 = new Date(weekFirstDay);
-        objDate2.setDate(weekFirstDay.getDate() + (weeks) * 7 -1);
-        var times = objDate2.getFullYear() + "-" + (objDate2.getMonth() + 1) + "-" + objDate2.getDate();
-        if (isBefore(cTerm.endDate,times)) {
+     function getSunday(tag){
+         weeks = $(tag).val();
+         var  objDate;
+         objDate = new Date(cTerm.endDate);
+         var weekFirstDay = getWeekFirstDay(objDate);
+         var objDate2 = new Date(weekFirstDay);
+         objDate2.setDate(weekFirstDay.getDate() + (weeks) * 7 -1);
+         var times = objDate2.getFullYear() + "-" + (objDate2.getMonth() + 1) + "-" + objDate2.getDate();
+         if (isBefore(cTerm.endDate,times)) {
             return cTerm.endDate;
         } else {
             return times;
@@ -218,7 +220,7 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
     /**
      *date1是否在date2前
      */
-    function isBefore(start, end) {
+     function isBefore(start, end) {
         var arrDate, objDate1, objDate2;
         objDate1 = new Date(start);
         objDate2 = new Date(end);
@@ -232,7 +234,7 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
     /**
      *返回Nowdate所在周的第一天
      */
-    function getWeekFirstDay(Nowdate) {
+     function getWeekFirstDay(Nowdate) {
         var WeekFirstDay = new Date(Nowdate - (Nowdate.getDay() - 1) * 86400000);
         return WeekFirstDay;
     }
@@ -240,7 +242,7 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
     /**
      *创建 
      */
-    function saveClick(){
+     function saveClick(){
         if(checkParams()){
             save();
         }
@@ -250,15 +252,15 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
    /**
      *保存课表 
      */
-    function save(){
+     function save(){
         var params = {};
         params.courseId = courseId;
         var schedule = new Array();
         $('.scheduleBlock').each(function(i) {
-                var scheduleItem = {};
-                scheduleItem.repeatNumber = $(this).find(".repeatNumber").val();
-                scheduleItem.repeatType = $(this).find(".repeatType").val();
-                var dateRepeat = new Array();
+            var scheduleItem = {};
+            scheduleItem.repeatNumber = $(this).find(".repeatNumber").val();
+            scheduleItem.repeatType = $(this).find(".repeatType").val();
+            var dateRepeat = new Array();
                 if($(this).find(".repeatType").val() == '01'){//天重复
                     $($(this).find('.dayRepeatBlock')).each(function(i){
                         var dateRepeatItem = {};
@@ -313,18 +315,18 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
                 scheduleItem.dateRepeat = dateRepeat;
                 schedule.push(scheduleItem);
             });
-            params.schedule = JSON.stringify(schedule) ;
-            $httpUtils.post('teacher/course/addDate',params,function(ret){
-                if(ret){
-                    alert(ret);
-                }
-            });
+        params.schedule = JSON.stringify(schedule) ;
+        $httpUtils.post('teacher/course/addDate',params,function(ret){
+            if(ret){
+                alert(ret);
+            }
+        });
     }
 
         /**
      *检查填入的参数 
      */
-    function checkParams(){
+     function checkParams(){
         try{
             $('.scheduleBlock').each(function(i) {
                 if(!$(this).find(".repeatNumber").val()){
@@ -348,26 +350,26 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
                         if (isBefore($(this).find('.endDate').val(),$(this).find('.startDate').val())) {
                           throw '课程开始日期不能小于结束日期'
                           return;
+                      }
+                      $($(this).find('.timeRepeatBlock')).each(function(i){
+                        if(!$(this).find('.startTime').val()){
+                            throw '课程开始时间不能为空！';
+                            return;
                         }
-                        $($(this).find('.timeRepeatBlock')).each(function(i){
-                            if(!$(this).find('.startTime').val()){
-                                throw '课程开始时间不能为空！';
-                                return;
-                            }
-                            if(!$(this).find('.endTime').val()){
-                                throw '课程结束时间不能为空！';
-                                return;
-                            }
-                            if(!$(this).find('.classRoom').val()){
-                                throw '上课地点不能为空！';
-                                return;
-                            }
+                        if(!$(this).find('.endTime').val()){
+                            throw '课程结束时间不能为空！';
+                            return;
+                        }
+                        if(!$(this).find('.classRoom').val()){
+                            throw '上课地点不能为空！';
+                            return;
+                        }
                             // if(startTime>endTime){
                             //        throw '上课结束时间不能小于上课开始时间！';
                             //        return;               
                             // }
                         });
-                    });
+                  });
                 }else{//周重复
                     $($(this).find('.weekRepeatBlock')).each(function(i){
                         if(!$(this).find('.startWeek').val()){
@@ -382,35 +384,35 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
                         if ($(this).find('.endWeek').val() < $(this).find('.startWeek').val()) {
                           throw '结束周不能小于开始周';
                           return;
+                      }
+                      getSunday($(this).find('.endWeek'));
+                      $($(this).find('.weekBlock')).each(function(i){
+                        var weekId = "";
+                        $($(this).find('.week')).each(function(i){
+                            if ($(this).attr("check") == 'true') {
+                               weekId += $(this).attr('week') + ',';
+                           }
+                       });
+                        if(weekId.length <= 0){
+                            throw '请指定上课星期！';
+                            return;
                         }
-                        getSunday($(this).find('.endWeek'));
-                        $($(this).find('.weekBlock')).each(function(i){
-                            var weekId = "";
-                            $($(this).find('.week')).each(function(i){
-                                if ($(this).attr("check") == 'true') {
-                                     weekId += $(this).attr('week') + ',';
-                                }
-                            });
-                            if(weekId.length <= 0){
-                                throw '请指定上课星期！';
+                        $($(this).find('.timeRepeatBlock')).each(function(i){
+                            if(!$(this).find('.startTime').val()){
+                                throw '课程开始时间不能为空！';
                                 return;
                             }
-                            $($(this).find('.timeRepeatBlock')).each(function(i){
-                                if(!$(this).find('.startTime').val()){
-                                    throw '课程开始时间不能为空！';
-                                    return;
-                                }
-                                if(!$(this).find('.endTime').val()){
-                                    throw '课程结束时间不能为空！';
-                                    return;
-                                }
-                                if(!$(this).find('.classRoom').val()){
-                                    throw '上课地点不能为空！';
-                                    return;
-                                }
-                            });
+                            if(!$(this).find('.endTime').val()){
+                                throw '课程结束时间不能为空！';
+                                return;
+                            }
+                            if(!$(this).find('.classRoom').val()){
+                                throw '上课地点不能为空！';
+                                return;
+                            }
                         });
                     });
+                  });
                 }
             });
             return true;
@@ -418,7 +420,7 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
             alert(e);  
             return false;  
         }  
-    
+
     }
 
     function repeatTypeChanged(tag){
@@ -438,11 +440,11 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
       if($(tag).attr('check') == 'false'){
         $(tag).attr('check',true);
         $(tag).addClass('weekon');
-      }else{
-       $(tag).attr('check',false);
-       $(tag).removeClass('weekon');
-     }
-   }
+    }else{
+     $(tag).attr('check',false);
+     $(tag).removeClass('weekon');
+ }
+}
 
     /**
      *添加星期选择块 
@@ -450,39 +452,39 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
      function addWeekBlock(tag){
       var addItem = $(tag).parent().parent().parent().clone(true);
       $(tag).parent().parent().parent().parent().append(addItem);
-    }
+  }
     /**
      *删除星期选择块 
      */
      function delWeekBlock(tag){
       if($(tag).parent().parent().parent().parent().find(".weekBlock").size() == 1){
         return;
-      };
-      $(tag).parent().parent().parent().remove();
-    }
+    };
+    $(tag).parent().parent().parent().remove();
+}
     /**
      *添加周选择重复块 
      */
      function addWeekRepeatBlock(tag){
       var addItem = $(tag).parent().parent().parent().clone(true);
       $(tag).parent().parent().parent().parent().append(addItem);
-    }
+  }
     /**
      *删除周选择重复块 
      */
      function delWeekRepeatBlock(tag){
       if($(tag).parent().parent().parent().parent().find(".weekRepeatBlock").size() == 1){
         return;
-      };
-      $(tag).parent().parent().parent().remove();
-    }
+    };
+    $(tag).parent().parent().parent().remove();
+}
 
     /**
      *增加课表 
      */
      function addScheduleBlock(tag){
       $(tag).parent().parent().parent().parent().append(typeStr);
-    }
+  }
 
     /**
      *删除课表 
@@ -490,9 +492,9 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
      function delScheduleBlock(tag){
       if($('.scheduleBlock').size() == 1){
         return;
-      }
-      $(tag).parent().parent().parent().remove();
     }
+    $(tag).parent().parent().parent().remove();
+}
 
     /**
      *删除天重复块 
@@ -500,9 +502,9 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
      function delDayRepeatBlock(tag){
       if($(tag).parent().parent().parent().parent().find(".dayRepeatBlock").size() == 1){
         return;
-      };
-      $(tag).parent().parent().parent().remove();
-    }
+    };
+    $(tag).parent().parent().parent().remove();
+}
 
     /**
      *添加天重复块 
@@ -510,7 +512,7 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
      function addDayRepeatBlock(tag){
       var addItem = $(tag).parent().parent().parent().clone(true);
       $(tag).parent().parent().parent().parent().append(addItem);
-    }
+  }
 
     /**
      *添加时间重复块 
@@ -518,14 +520,14 @@ $('#courseTablekModal').on('hidden.bs.modal', function (e) {
      function addTimeRepeatBlock(tag){
       var addItem = $(tag).parent().parent().parent().clone(true);
       $(tag).parent().parent().parent().parent().append(addItem);
-    }
+  }
     /**
      *删除时间重复块 
      */
      function delTimeRepeatBlock(tag){
       if($(tag).parent().parent().parent().parent().find(".timeRepeatBlock").size() == 1){
         return;
-      };
-      $(tag).parent().parent().parent().remove();
-    }
-  </script>
+    };
+    $(tag).parent().parent().parent().remove();
+}
+</script>

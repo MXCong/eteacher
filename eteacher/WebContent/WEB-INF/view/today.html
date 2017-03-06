@@ -13,6 +13,7 @@
 	var currentDate = null;
 	//获取今日课程和今日到期作业；
 	$(function(){
+		$httpUtils.checkParams();
 		currentDate = getDate();
 		getSpecialCourseDates();
 		getWorkByDate();

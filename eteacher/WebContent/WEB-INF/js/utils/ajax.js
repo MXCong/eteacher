@@ -59,6 +59,7 @@
 					}
 					break;
 					case '400':
+					alert("aaaa");
 					alert(data.msg);
 					// 请求失败
 					if (fnErr) {
@@ -107,12 +108,14 @@
 
 					case '900':
 					// 请求超时
+					alert(data.msg);
 					if (fnErr) {
 						fnErr(XMLHttpRequest.msg);
 					}
 					break;
 					case '406':
 					// 非法请求
+					alert(data.msg);
 					if (fnErr) {
 						fnErr(XMLHttpRequest.msg);
 					}
@@ -120,19 +123,22 @@
 					case '401':
 					// 用户不存在
 					goLogin();
+					alert(data.msg);
 					if (fnErr) {
 						fnErr(XMLHttpRequest.msg);
 					}
 					break;
 					case '400':
 					// 请求失败
+					alert(data.msg);
 					if (fnErr) {
 						fnErr(XMLHttpRequest.msg);
 					}
 					break;
 					case '201':
 					// token过期
-					goLogin();
+					alert(data.msg);	
+					h.goLogin();
 					if (fnErr) {
 						fnErr(XMLHttpRequest.msg);
 					}
@@ -142,6 +148,31 @@
 
 		});
 	 }
+	/**
+	*跳转到登录页
+	**/
+	h.goLogin = function(){
+		localStorage.clear();
+            //获取当前网址，如： http://localhost:8083/uimcardprj/share/meun.jsp
+            var curWwwPath = window.document.location.href;
+            //获取主机地址之后的目录，如： uimcardprj/share/meun.jsp
+            var pathName = window.document.location.pathname;
+            var pos = curWwwPath.indexOf(pathName);
+            //获取主机地址，如： http://localhost:8083
+            var localhostPaht = curWwwPath.substring(0, pos);
+            //获取带"/"的项目名，如：/uimcardprj
+            var projectName = pathName.substring(0, pathName.substr(1).indexOf('/') + 1);
+            window.location.href = localhostPaht+projectName+'/view/login.html';
+        }
+	/**
+	*检查当前是否为登录状态
+	**/
+	h.checkParams = function(){
+		if (!localStorage.getItem("userId") || !localStorage.getItem("token")) {
+			h.goLogin();
+		}
+	}
+
 	// 生成数字串，模拟移动端的设备码
 	$.IMEI = function randomString(len) {
 		len = len || 15;

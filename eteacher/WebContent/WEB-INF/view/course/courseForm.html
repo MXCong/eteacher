@@ -63,6 +63,7 @@
 		var termId = null;
 		var courseId = null;
 		$(function() {
+			$httpUtils.checkParams();
 			termId = $httpUtils.getUrlParam('termId');
 			courseId = $httpUtils.getUrlParam('courseId');
 			if(courseId){
