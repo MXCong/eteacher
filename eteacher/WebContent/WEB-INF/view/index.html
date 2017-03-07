@@ -87,6 +87,7 @@
 		$httpUtils.checkParams();
 		var name = $PrefsUtils.getPref('name');
 		document.getElementById("userName").innerHTML=name;
+		$('iframe').attr('src', 'today.html');
 	})(jQuery);
 
 	function jump(url, a) {
