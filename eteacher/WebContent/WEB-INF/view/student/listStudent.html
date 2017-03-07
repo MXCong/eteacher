@@ -42,13 +42,14 @@
 	}
 	//获取成绩类型为“均值”的成绩项
 	function getScourType(){
+		$('#scoreType').empty();
 		var par = {};
 		par.courseId = $PrefsUtils.receive('courseId');
 		$httpUtils.post('score/getScoreType',par,function(data){
 			if (null != data && data.length>0) {
 				var st = $('#scoreType');
 				for ( var i in data) {
-					var html = "<input type='radio' name='radiobutton' id="+data[i].scoreId+">"+data[i].scoreName+";"
+					var html = "<input class='radios' type='radio' name='radiobutton' id="+data[i].scoreId+">"+data[i].scoreName
 					st.append(html);
 				}
 				var fc = data[0].scoreId;
@@ -198,7 +199,6 @@
 		        },
 		        events : {
 		        	'click .glyphicon-check': function (e, value, row, index) {
-						alert("studentId:"+row.studentId);
 		        		$('#stuId').val(row.studentId);
 		        		$('#courseScorekModal').modal('show');
 			        }
@@ -235,6 +235,15 @@
 			});
 		}
 	}
+	//打开时初始化数据
+	$('#courseScorekModal').on('show.bs.modal', function (e) {
+		$('#courseId').val(courseId);
+		$('#courseScoreForm .input_error').removeClass('input_error');
+	})
+	//关闭后清空表单
+	$('#courseScorekModal').on('hidden.bs.modal', function (e) {
+	  	document.getElementById("courseScoreForm").reset();
+	})
 </script>
 </head>
 <body>
@@ -262,13 +271,12 @@
 									<option value="${course.courseId}" <#if course.courseId == courseId?default("")>selected="selected"</#if>>${course.courseName}</option>
 								</#list> -->
 						</select></td>
-						<td width="10%">
-							<button type="button" class="btn btn-default btn-sm"
-								onclick="studentTable.bootstrapTable('refresh');">
+						<!-- <td width="10%">
+							<button type="button" class="btn btn-default btn-sm" onclick="studentTable.bootstrapTable('refresh');">
 								<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
 								搜索
 							</button>
-						</td>
+						</td> -->
 					</tr>
 				</tbody>
 			</table>
@@ -290,28 +298,27 @@
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"
-						aria-label="Close">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
 					<h4 class="modal-title">课堂提问</h4>
 				</div>
 				<form id="courseScoreForm">
-					<input type="hidden" id="courseId" name="courseId" /> <input
-						type="hidden" id="stuId" name="stuId" />
-					<div class="modal-body" id="scoreType">
+					<input type="hidden" id="courseId" name="courseId" /> 
+					<inpue type="hidden" id="stuId" name="stuId" />
+					<div class="modal-body">
 						<div class="message-group">
 							<div class="message-left">分数：</div>
 							<div class="message-right">
 								<input id="scoreNumber" name="scoreNumber" type="number" class="mess-control" value="" />
 							</div>
+							<div id="scoreType"></div>
 						</div>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
 						<!-- <button type="submit" class="btn btn-default">保 存</button> -->
-						<input type="button" onclick="addScore();" value="保存"
-							class="btn btn-default">
+						<input type="button" onclick="addScore();" value="保存" class="btn btn-default">
 					</div>
 				</form>
 			</div>
