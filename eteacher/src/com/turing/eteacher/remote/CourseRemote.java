@@ -327,7 +327,8 @@ public class CourseRemote extends BaseRemote {
 									//判断课程的开始结束时间是否与本月有交集
 									if (DateUtil.isOverlap(cFirstDay, cLastDay, (String)map.get("startDay"), (String)map.get("endDay"))) {
 										//课程重复天数
-										int repeatNumber = Integer.parseInt((String)map.get("repeatNumber"));
+										//int repeatNumber = Integer.parseInt((String)map.get("repeatNumber"));
+										int repeatNumber = (int) map.get("repeatNumber");
 										//该课程一共有多少天
 										int distance = DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay"));
 										//一共上几次课
