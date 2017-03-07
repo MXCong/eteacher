@@ -10,6 +10,7 @@
 <script type="text/javascript" src="../../js/json2form.js"></script>
 <script type="text/javascript" src="../../js/My97DatePicker/WdatePicker.js"></script>
 
+<script type="text/javascript" src="../../js/layer.js"></script>
 <script type="text/javascript" src="../../js/utils/md5.js"></script>
 <script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
 <script type="text/javascript" src="../../js/utils/ajax.js"></script>
@@ -77,7 +78,6 @@
 		params.content=content;
 		params.course=JSON.stringify(course);
 		params.publishTime=date;
-		alert(JSON.stringify(params));
 		$httpUtils.post('teacher/notice/addNotice', params, function(data) {
 			history.back();
 		});

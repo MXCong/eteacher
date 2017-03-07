@@ -83,7 +83,7 @@
 		params.endDate = endDate;
 		params.weekCount = weekCount;
 		$httpUtils.post('teacher/term/addTerm', params, function(data) {
-			alert(data);
+			history.back();
 		});
 	};
 </script>

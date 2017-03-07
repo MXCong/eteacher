@@ -90,9 +90,9 @@
             };
         } */
         params.status = 1;
-        alert(JSON.stringify(params));
         $httpUtils.post('teacher/work/addWork',params,function(date){
-            alert("作业创建成功");
+            //alert("作业创建成功");
+            history.back();
         });
 	}
 	//获取课程列表
