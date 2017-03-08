@@ -112,7 +112,6 @@
         });
     }
 	function targetClass(cls){
-		alert(JSON.stringify(cls));
 		var classes = $("#classList");
 			for ( var c in cls) {
 				var span = "<div id='classItem'>"+
@@ -147,11 +146,13 @@
             alert("班级不能为空！");
             return;
         }
+        var timestamp1 = Date.parse(new Date(publishTime)) / 1000;
+        var timestamp2 = Date.parse(new Date(endTime)) / 1000;
         var params = {};
         params.workId = workId;
         params.courseId = courseID;
-        params.publishTime = publishTime;
-        params.endTime = endTime;
+        params.publishTime = timestamp1;
+        params.endTime = timestamp2;
         params.title = title;
         params.content = content;
         params.targetClass = cls;
@@ -165,7 +166,6 @@
             };
         } */
         params.status = 1;
-        alert(JSON.stringify(params));
         $httpUtils.post('teacher/work/addWork',params,function(date){
             alert("作业修改成功");
         });

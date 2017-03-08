@@ -2,6 +2,8 @@ package com.turing.eteacher.remote;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -242,7 +244,11 @@ public class WorkRemote extends BaseRemote {
 		String status = request.getParameter("status");
 		String deleted = request.getParameter("deleted");
 		String workId = request.getParameter("workId");
-
+		System.out.println("目标班级："+classes);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        publishTime = simpleDateFormat.format(new Date(Long.parseLong(publishTime)*1000));
+        endTime = simpleDateFormat.format(new Date(Long.parseLong(endTime)*1000));
+        
 		if (StringUtil.checkParams(courseId, content, status)) {
 			Work work = null;
 			String before = null;

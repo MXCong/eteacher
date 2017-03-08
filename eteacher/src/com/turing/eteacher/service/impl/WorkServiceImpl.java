@@ -423,9 +423,9 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 
 	@Override
 	public List<Map> getClassIdByWorkId(String noticeId) {
-		String sql = "SELECT DISTINCT tcc.CLASS_ID AS classId "
-				+ "FROM t_course_class tcc, t_course tc, t_work tw ,t_work_class twc "
-				+ "WHERE tcc.COURSE_ID = twc.COURSE_ID " + "AND tw.WORK_ID = twc.WORK_ID " + "AND tw.WORK_ID = ? ";
+		String sql = "SELECT DISTINCT twc.CLASS_ID AS classId "
+				+ "FROM t_work_class twc "
+				+ "WHERE twc.WORK_ID = ? ";
 		return workDAO.findBySql(sql, noticeId);
 	}
 

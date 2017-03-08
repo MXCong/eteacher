@@ -1,5 +1,7 @@
 package com.turing.eteacher.remote;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,10 @@ public class NoteRemote extends BaseRemote {
 		String isKey = request.getParameter("isKey");
 		String courseId = request.getParameter("courseId");
 		if (StringUtil.checkParams(isKey, createTime, courseId)) {
+			
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			createTime = simpleDateFormat.format(new Date(Long.parseLong(createTime)*1000));
+	        
 			Note note = new Note();
 			note.setTitle(title);
 			note.setContent(content);

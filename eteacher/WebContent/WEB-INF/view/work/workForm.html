@@ -52,15 +52,17 @@
 	}
 	//创建作业点击时间
 	function createWork(){
+		var cls = new Array();
 		var title = $('#workTitle').val();
         var publishTime = $('#publishTime').val();
         var endTime = $('#endTime').val();
         var content = $('#workContent').val();
         var targetClass = document.getElementsByClassName('targetClass');
-        var cls = new Array();
+        
         for (var i = 0; i < targetClass.length; i++) {
-        	cls.push(targetClass[i].id);
+        	cls.push("\""+targetClass[i].id+"\"");
         }
+       	cls = "["+cls.toString()+"]";
         if(!content){
             alert("请填写作业内容！");
             return;
@@ -73,23 +75,18 @@
             alert("班级不能为空！");
             return;
         }
+        var timestamp1 = Date.parse(new Date(publishTime)) / 1000;
+        var timestamp2 = Date.parse(new Date(endTime)) / 1000;
         var params = {};
         params.courseId = courseID;
-        params.publishTime = publishTime;
-        params.endTime = endTime;
+        params.publishTime = timestamp1;
+        params.endTime = timestamp2;
         params.title = title;
         params.content = content;
         params.targetClass = cls;
-        /* if($('#fileList').children.length > 0){
-            var file = new Array();
-            for(var i = 0;i < $('#fileList').children.length; i++){
-                file.push($('#fileList').children[i].id)
-            }
-            params.files  = {
-                file : file
-            };
-        } */
+        
         params.status = 1;
+        alert("--"+JSON.stringify(params.cls));
         $httpUtils.post('teacher/work/addWork',params,function(date){
             //alert("作业创建成功");
             history.back();
