@@ -24,6 +24,7 @@ import com.turing.eteacher.model.TaskModel;
 import com.turing.eteacher.model.Work;
 import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.IWorkService;
+import com.turing.eteacher.util.CustomIdGenerator;
 import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.FileUtil;
 import com.turing.eteacher.util.SpringTimerTest;
@@ -241,7 +242,7 @@ public class WorkRemote extends BaseRemote {
 		String status = request.getParameter("status");
 		String deleted = request.getParameter("deleted");
 		String workId = request.getParameter("workId");
-		
+
 		if (StringUtil.checkParams(courseId, content, status)) {
 			Work work = null;
 			String before = null;
@@ -256,7 +257,7 @@ public class WorkRemote extends BaseRemote {
 				work.setStatus(1);
 				workServiceImpl.update(work);
 				//作业班级关联表的处理。
-				workServiceImpl.addWorkClass(workId , classes);
+				workServiceImpl.addWorkClass(workId, classes);
 			}else{
 				work = new Work();
 				work.setTitle(title);
@@ -265,9 +266,9 @@ public class WorkRemote extends BaseRemote {
 				work.setPublishTime(publishTime);
 				work.setEndTime(endTime);
 				work.setStatus(Integer.parseInt(status));
-				workServiceImpl.save(work);
+				String nworkId = (String) workServiceImpl.save(work);
 				//作业班级关联表的处理。
-				workServiceImpl.addWorkClass(workId , classes);
+				workServiceImpl.addWorkClass(nworkId, classes);
 			}
 			// 删除已有的附件
 			if (StringUtil.isNotEmpty(deleted)) {

@@ -432,18 +432,19 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	@Override
 	public void addWorkClass(String workId , String classes) {
 		//查询workId是否存在对应数据，若有，则删除原数据。
-		String ql = "delete WorkClass wc where wc.workId = ?";
+		String ql = "delete from WorkClass wc where wc.workId = ?";
 		workDAO.executeHql(ql, workId);
 		//重新插入关联数据
 		if(null != classes && classes.length()>0){
 			String c = classes.substring(1, classes.length()-1);
 			String [] cls = c.split(",");
-			String sql = "INSERT INTO t_work_class (WC_ID , WORK_ID , CLASS_ID) values (? , ? , ?)";
+			String sql = "INSERT INTO t_work_class (WC_ID , WORK_ID , CLASS_ID) values (?,?,?)";
 			for(int i=0;i<cls.length;i++){
-				workDAO.executeBySql(sql, CustomIdGenerator.generateShortUuid() , workId , cls[i].substring(1 , cls[i].length()-1));
+				String id = CustomIdGenerator.generateShortUuid();
+				String clsId = cls[i].substring(1 , cls[i].length()-1);
+				workDAO.executeBySql(sql, id , workId , clsId);
 			}
 		}
-		
 	}
 	/**
 	 * 学生端功能：改变作业状态（未完成作业-->已完成作业；已完成作业-->未完成作业）
