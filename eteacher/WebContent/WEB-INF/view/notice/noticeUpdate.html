@@ -13,6 +13,7 @@
 <script type="text/javascript" src="../../js/utils/md5.js"></script>
 <script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
 <script type="text/javascript" src="../../js/utils/ajax.js"></script>
+<script type="text/javascript" src="../../js/ajaxfileupload.js"></script>
 
 </head>
 <body>
@@ -20,6 +21,9 @@
         <div class="title"><span>通知信息</span></div>
         <div class="enter-message">
             <form id="noticeForm" method="post" action="saveNotice">
+            	<input type="button" onclick="addfile()" value="添加文件"/>
+            	<div class="message-group" id="fileDiv">  
+                </div>
             	<input type="hidden" id="isDraft" name="isDraft" value="" />
             	<input type="hidden" name="noticeId" value="${noticeId?default("")}" />
             	<div class="message-group">
@@ -54,6 +58,8 @@
 						</div>
                     </div>                   	
                 </div> 
+                <div class="btnsub" id="bus">
+                </div>
                 <div class="btnsub">
                     <button type="button" class="btn-submit" style="float:left;" onclick="save()">发布</button>
                     <button type="button" class="btn-submit" style="float:right;" onclick="history.back();">返回</button>
@@ -67,9 +73,13 @@
 	$(function(){
 		init();
 		getDate();
-		
-		
 	});
+	//生成input框
+	 var f=0;
+	 function addfile(){
+		$("#fileDiv").append('<input type="file" name="file" id="fileName'+f+'"/>');	
+		f++;
+	}
 	//加载页面数据
 	function init(){
 		var params={};
@@ -94,15 +104,30 @@
 				$("#title").val(data.title);
 				$("#content").val(data.content);
 				$("#publishTime").val(data.publishTime);
-				 $("input[type='checkbox']").each(function(i){
-					var _this=$(this);
-		        	var couser=data.courses;
-		        	for(var k=0;couser.length;k++){
-     		        	if(	_this.val()==couser[k].courseId){
-     		        		_this.attr("checked",true);
-     		        	}
-		        	}
-		         })
+			 $("input[type='checkbox']").each(function(i){
+				var _this=$(this);
+				var couser=data.courses;
+	        	for(var k=0;k<couser.length;k++){
+    		        	if(	_this.val()==couser[k].courseId){
+    		        		_this.attr("checked",true);
+    		        	}
+	        	}
+	         })
+	         if(data.files!=null){
+	        	 var files= data.files;
+		         for(var i=0;i<files.length;i++){
+		        	var filePath= files[i].filePath;
+		        	filePath=filePath.replace(' ','');
+// 		         var zzz=$('<a href="'+filePath+'">'+files[i].fileName+'</a>');
+                      
+		         var zzz=$('<a href="http://localhost:8080/eteacher/remote/teacher/notice/dwloade?filePath='+filePath+'&filename='+files[i].fileName+'">'+files[i].fileName+'</a>');
+// 		         window.location.href = 'http://localhost:8080/eteacher/remote/teacher/notice/dwloade';
+// 		       		  zzz.text(files[i].fileName);
+		       		  zzz.appendTo($("#bus"));
+		         } 
+	         }	
+		       	     
+		         
 			
 		})
     }
@@ -126,7 +151,13 @@
 		params.content=content;
 		params.course=JSON.stringify(course);
 		params.publishTime=date;
-		$httpUtils.post('teacher/notice/addNotice', params, function(data) {
+		var fileIds=[];
+		$("input[type='file']").each(function(i){
+			 var id=$(this).attr("id");
+			 fileIds.push(id);
+		})
+		params.fileIds=fileIds;
+		$httpUtils.postUp('teacher/notice/addNotice', params, function(data) {
 			history.back();
 		});
 	}

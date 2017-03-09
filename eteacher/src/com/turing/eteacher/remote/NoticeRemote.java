@@ -1,13 +1,19 @@
 package com.turing.eteacher.remote;
 
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +74,63 @@ public class NoticeRemote extends BaseRemote {
 					ReturnBody.ERROR_MSG);
 		}
 	}
+	
+	
+	/**
+	 * 下载
+	 * 
+	 * @param request
+	 * @return 
+	 * @return
+	 */
+	@RequestMapping(value = "teacher/notice/dwloade", method = RequestMethod.GET)
+	public void dwloade(String filePath,String filename ,HttpServletResponse response) {
+		try {
+			String suffixes="";
+//		       FileUtil.getUploadPath()
+			if(StringUtil.isNotEmpty(filePath)){
+				 suffixes=filePath.substring(filePath.lastIndexOf("download")+8);
+				
+			}
+			
+			
+//			String suffixes = "";
+//			String fileName=filePath.replaceAll("/",".");
+//			if (StringUtil.isNotEmpty(fileName) && fileName.indexOf(".") != -1) {
+//				suffixes = fileName.substring(fileName.lastIndexOf("."));
+//			}
+			String path=FileUtil.getUploadPath()+suffixes;
+			
+		    //获取文件名  
+//		    String filename = path.substring(path.lastIndexOf("\\")+1);  
+		    response.setCharacterEncoding("UTF-8");  
+		    //将文件名进行URL编码  
+		    filename = URLEncoder.encode(filename,"utf-8");  
+		    //告诉浏览器用下载的方式打开图片  
+		    response.setHeader("content-disposition", "attachment;filename="+filename);  
+		    //返回类型
+		    response.setContentType("application/octet-stream");
+		    InputStream is=new FileInputStream(path);
+		    OutputStream out = response.getOutputStream();  
+		   
+		    byte[] buffer = new byte[1024];  
+		    int len = 0;  		
+		    while((len=is.read(buffer))!=-1){  	
+		    	 System.out.println(new String(buffer));  
+		        out.write(buffer, 0, len);  
+		    }  
+		    out.flush();     
+		    is.close();
+		    out.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	
+	
+	
+	
 
 	// 教师端接口的实现
 	/**

@@ -87,7 +87,9 @@ public class FileUtil {
 	 */
 	public static String makeFileName(String filename) { // 2.jpg
 		// 为防止文件覆盖的现象发生，要为上传文件产生一个唯一的文件名
-		return CustomIdGenerator.generateShortUuid() + "_" + filename;
+	 
+		String lastName=getSuffixes(filename);
+		return CustomIdGenerator.generateShortUuid() + "." + lastName;
 	}
 
 	/**
