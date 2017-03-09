@@ -112,23 +112,6 @@ public class NoteRemote extends BaseRemote {
 	 * @param noteId
 	 * @return
 	 */
-	// {
-	// result : 'success',//成功success，失败failure
-	// data : [
-	// {
-	// noteId : '笔记ID',
-	// content : '笔记内容',
-	// files : [
-	// {
-	// fileId : '附件ID',
-	// fileName : '附件名称',
-	// serverName : 'upload/abc.jpg'
-	// }
-	// ]
-	// },
-	// ],
-	// msg : '提示信息XXX'
-	// }
 	@RequestMapping(value = "date/{date}/notes", method = RequestMethod.GET)
 	public ReturnBody noteData(HttpServletRequest request,
 			@PathVariable String date) {

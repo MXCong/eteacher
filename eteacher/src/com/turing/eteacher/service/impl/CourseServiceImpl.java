@@ -1128,7 +1128,7 @@ public class CourseServiceImpl extends BaseService<Course> implements
 
 	@Override
 	public List<Map> getCourseList(String userId) {
-		String sql = "SELECT CONCAT(ttp.TERM_NAME,tc.COURSE_NAME) AS courseName, "+
+		String sql = "SELECT CONCAT(tc.COURSE_NAME,'(',ttp.TERM_NAME,')') AS courseName, "+
 				"tc.COURSE_ID AS courseId "+
 				"FROM t_course tc,t_term_private ttp "+
 				"WHERE tc.TERM_ID = ttp.TP_ID "+
@@ -1531,5 +1531,26 @@ public class CourseServiceImpl extends BaseService<Course> implements
 		}else {
 			return ReturnBody.getParamError();
 		}
+	}
+
+	@Override
+	public List<Map> getCurrentCoursebyClassId(String classId, String start,
+			String end) {
+		String sql = "SELECT tc.COURSE_ID AS courseId, "+
+				"CONCAT(tc.COURSE_NAME,'(',ttp.TERM_NAME,')') AS courseName, "+
+				"tci.CI_ID AS ciId, "+
+				"tci.START_DAY AS startDay, "+
+				"tci.END_DAY AS endDay, "+
+				"tci.REPEAT_TYPE AS repeatType "+
+				"FROM t_course tc, t_course_item tci, t_term_private ttp "+
+				"WHERE tc.`COURSE_ID` IN ("+
+				"SELECT tcc.`COURSE_ID` "+
+				"FROM t_course_class tcc  "+
+				"WHERE tcc.`CLASS_ID` = ?) "+
+				"AND tc.TERM_ID = ttp.TP_ID "+
+				"AND tc.`COURSE_ID` = tci.`COURSE_ID` "+
+				"AND tci.START_DAY <= ?  "+
+				"AND DATE_ADD(tci.END_DAY,INTERVAL 1 DAY) > ? ";
+		return courseDAO.findBySql(sql, classId,start,end);
 	}
 }

@@ -2,6 +2,7 @@ package com.turing.eteacher.remote;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +20,17 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
+import com.turing.eteacher.constants.EteacherConstants;
+import com.turing.eteacher.model.CourseCell;
 import com.turing.eteacher.model.Student;
+import com.turing.eteacher.model.TaskModel;
+import com.turing.eteacher.service.ICourseCellService;
 import com.turing.eteacher.service.ICourseService;
 import com.turing.eteacher.service.IStudentService;
 import com.turing.eteacher.util.BeanUtils;
+import com.turing.eteacher.util.DateUtil;
 import com.turing.eteacher.util.FileUtil;
+import com.turing.eteacher.util.StringUtil;
 
 @RestController
 @RequestMapping("remote")
@@ -35,6 +42,8 @@ public class StudentRemote extends BaseRemote {
 	@Autowired
 	private ICourseService courseServiceImpl;
 	
+	@Autowired
+	private ICourseCellService courseCellServiceImpl;
 	
 	/**
 	 * 获取当前学期的课程列表
@@ -202,5 +211,89 @@ public class StudentRemote extends BaseRemote {
 	@RequestMapping(value = "student/saveInfo", method = RequestMethod.POST)
 	public ReturnBody saveCourse(HttpServletRequest request) {
 		return studentServiceImpl.saveInfo(request);
+	}
+	
+	@RequestMapping(value = "student/getCurrentCourse",method  = RequestMethod.POST)
+	public ReturnBody getCurrentCourse(HttpServletRequest request){
+		String classId = request.getParameter("classId");
+		Student student = getCurrentStudent(request);
+		if (null != student) {
+			String now = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD);
+			List<Map> list2 = courseServiceImpl.getCurrentCoursebyClassId(student.getClassId(),now, now);;
+			if (null != list2) {
+				for (int j = 0; j < list2.size(); j++) {
+					Map map = list2.get(j);
+					//天循环的课程
+					if (map.get("repeatType").equals("01")) {
+						//课程重复天数
+						int repeatNumber = Integer.parseInt((String)map.get("repeatNumber"));
+						//该课程一共有多少天
+						int distance = DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay"));
+						//一共上几次课
+						int repeat = distance / repeatNumber;
+						for (int k = 0; k <= repeat; k++) {
+							//每次上课的具体日期
+							String date = DateUtil.addDays((String)map.get("startDay"), k*repeatNumber);
+							//判断是否上课时间为今天
+							if (date.equals(now)) {
+								//获取课程的重复规律
+								List<CourseCell> list3 = courseCellServiceImpl.getCells((String)map.get("ciId"));
+								if (null != list3 && list3.size() > 0) {
+									for (int l = 0; l < list3.size(); l++) {
+										String courseStart = now +" "+list3.get(l).getStartTime();
+										String courseEnd = now + " "+list3.get(l).getEndTime();
+										if (DateUtil.isInRange(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM), courseStart, courseEnd,DateUtil.YYYYMMDDHHMM)) {
+											Map<String , String> result  = new HashMap<>();
+											result.put("courseId", (String)map.get("courseId"));
+											result.put("courseName", (String)map.get("courseName"));
+											return new ReturnBody(result);
+										}
+									}
+								}
+						   }
+						}
+					}else{
+						//获取课程的重复规律
+						List<CourseCell> list3 = courseCellServiceImpl.getCells((String)map.get("ciId"));
+						if (null != list3) {
+							for (int k = 0; k < list3.size(); k++) {
+								CourseCell cell = list3.get(k);
+								if (null != cell.getWeekDay()) {
+									//查看具体课程在周几上课
+									String[] week = cell.getWeekDay().split(",");
+									for (int l = 0; l < week.length; l++) {
+										//课程的间隔周期
+										int repeatNumber = Integer.parseInt((String)map.get("repeatNumber"));
+										//课程一共上几周
+										int repeatCount = (DateUtil.getDayBetween((String)map.get("startDay"), (String)map.get("endDay")))/(repeatNumber*7);
+										for (int m = 0; m <= repeatCount; m++) {
+											//获取课程具体在指定星期的上课时间
+											String dateStr = DateUtil.getWeek((String)map.get("startDay"), m*repeatNumber, Integer.parseInt(week[l]));
+											if (null != dateStr) {
+												//如果上课时间在学期内&&在所指定的月份内
+												if (dateStr.equals(now)) {
+													//获取上课时间集合
+													String courseStart = now +" "+cell.getStartTime();
+													String courseEnd = now + " "+list3.get(l).getEndTime();
+													if (DateUtil.isInRange(DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM), courseStart, courseEnd,DateUtil.YYYYMMDDHHMM)) {
+														Map<String , String> result  = new HashMap<>();
+														result.put("courseId", (String)map.get("courseId"));
+														result.put("courseName", (String)map.get("courseName"));
+														return new ReturnBody(result);
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}else{
+			return ReturnBody.getParamError();
+		}
+		return null;
 	}
 }

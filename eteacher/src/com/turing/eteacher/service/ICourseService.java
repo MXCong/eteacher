@@ -217,4 +217,13 @@ public interface ICourseService extends IService<Course> {
 	 * @return
 	 */
 	public ReturnBody delCourse(HttpServletRequest request);
+	/**
+	 * 通过班级ID获取时间段内正在上课的课程
+	 * @param classId
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	public List<Map> getCurrentCoursebyClassId(String classId, String start,
+			String end);
 }
