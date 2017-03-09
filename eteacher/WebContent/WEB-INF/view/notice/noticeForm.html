@@ -10,27 +10,13 @@
 <script type="text/javascript" src="../../js/json2form.js"></script>
 <script type="text/javascript" src="../../js/My97DatePicker/WdatePicker.js"></script>
 
-<script type="text/javascript" src="../../js/layer.js"></script>
 <script type="text/javascript" src="../../js/utils/md5.js"></script>
 <script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
 <script type="text/javascript" src="../../js/utils/ajax.js"></script>
+<script type="text/javascript" src="../../js/ajaxfileupload.js"></script>
 <script type="text/javascript">
 	
-// 	var editFlag = '${editFlag?default("")}';
-	$(function(){
-// 		$('#noticeForm').validatorNormalInit(prepare);
-// 		$('#title').validatorEmpty('通知标题');
-// 		$('#content').validatorEmpty('通知内容');
-// 		$('#courseId').validatorEmpty('课程');
-// 		function prepare(){
-// 			if($('#publishType2').is(':checked')){
-// 				if($('#publishTime').val() == ''){
-// 					alert('发布时间不能为空');
-// 					return false;
-// 				}
-// 			}
-// 			return true;
-// 		}
+	$(function(){ 	
 		init();
 	});
 	function init(){
@@ -39,17 +25,6 @@
 		$httpUtils.post('teacher/getCourseList', params, function(data) {
 			addOption(data);
 		})
-// 		if(editFlag){
-// 			$.post('getWorkData',{workId:'${workId?default("")}'},function(data){
-// 				$('#noticeForm').json2form({data:data});
-// 				if(data.publishType == '01'){
-// 					$('#publishType1').prop('checked',true);
-// 				}
-// 				else if(data.publishType == '03'){
-// 					$('#publishTime').show();
-// 				}
-// 			},'json');
-// 		}
 	}
 	//下拉列表添加课程
 	function addOption(ret){
@@ -58,6 +33,30 @@
      	zz.appendTo("#courseId");
      }
 	}
+// 	//保存 
+// 	function save(){
+// 		var title=	    $("#title").val();
+// 		var content=	$("#content").val();
+// 		var course=[];
+//          $("input[type='checkbox']:checked").each(function(i){
+//         	 var v=$(this).val();
+//         	 var ce={};
+//         	 ce.id=$(this).val();
+//         	 course.push(ce);
+//          })
+      
+// 		var publishTime=$("#publishTime").val();
+//         var date = new Date(publishTime.replace(/-/,"/")).getTime()/1000;
+// 		var params={};
+// 		params.title=title;
+// 		params.content=content;
+// 		params.course=JSON.stringify(course);
+// 		params.publishTime=date;
+// 		$httpUtils.post('teacher/notice/addNotice', params, function(data) {
+// 			history.back();
+// 		});
+		
+// 	}
 	//保存
 	function save(){
 		var title=	    $("#title").val();
@@ -70,32 +69,46 @@
         	 course.push(ce);
          })
 		var publishTime=$("#publishTime").val();
-        //alert("publishTime:"+publishTime);
-        //var date = new Date(publishTime.replace(/-/,"/")).getTime()/1000;
-        var date = Date.parse(new Date(publishTime)) / 1000;
+        var date = new Date(publishTime.replace(/-/,"/")).getTime()/1000;
 		var params={};
 		params.title=title;
 		params.content=content;
 		params.course=JSON.stringify(course);
 		params.publishTime=date;
-		$httpUtils.post('teacher/notice/addNotice', params, function(data) {
+		
+		var fileIds=[];
+		$("input[type='file']").each(function(i){
+			 var id=$(this).attr("id");
+			 fileIds.push(id);
+		})
+		params.fileIds=fileIds;
+		$httpUtils.postUp('teacher/notice/addNotice', params, function(data) {
 			history.back();
 		});
 		
 	}
+//生成input框
+ var f=0;
+ function addfile(){
+	$("#fileDiv").append('<input type="file" name="file" id="fileName'+f+'"/>');	
+	f++;
+}
 </script>
 </head>
 <body>
 	<div class="maincont">
         <div class="title"><span>通知信息</span></div>
         <div class="enter-message">
-            <form id="noticeForm" method="post" action="saveNotice">
+            <form id="pi" method="post" action="saveNotice">
+                <input type="button" onclick="addfile()" value="添加文件"/>
+                <div class="message-group" id="fileDiv">  
+                </div>
             	<input type="hidden" id="isDraft" name="isDraft" value="" />
             	<input type="hidden" name="noticeId" value="${noticeId?default("")}" />
             	<div class="message-group">
                     <div class="message-left">通知标题：</div>
                     <div class="message-right">
-                        <input id="title" name="title" placeholder="请输入通知标题" maxlength="40" type="text" class="mess-control" />
+                        <input id="title" name="title" maxlength="40" type="text" class="mess-control" />
                     </div>                   	
                 </div>
                 <div class="message-group">
