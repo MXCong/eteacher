@@ -87,12 +87,22 @@
 		});
 		
 	}
-//生成input框
+	
  var f=0;
- function addfile(){
-	$("#fileDiv").append('<input type="file" name="file" id="fileName'+f+'"/>');	
-	f++;
-}
+ function addFile(btn){
+	 f++;
+	var zz= $(btn).parent().parent().clone();                 
+	 zz.find("input[type='file']").attr("id","fileName"+f); 
+	 zz.appendTo('#filesDiv');
+	}
+function delFile(btn){
+	if($('#filesDiv').children('.fileDiv').length > 1){
+		$(btn).parent().parent().remove();
+	}
+	else{
+		$(btn).parent().prev().val('');
+	}
+} 
 </script>
 </head>
 <body>
@@ -100,9 +110,6 @@
         <div class="title"><span>通知信息</span></div>
         <div class="enter-message">
             <form id="pi" method="post" action="saveNotice">
-                <input type="button" onclick="addfile()" value="添加文件"/>
-                <div class="message-group" id="fileDiv">  
-                </div>
             	<input type="hidden" id="isDraft" name="isDraft" value="" />
             	<input type="hidden" name="noticeId" value="${noticeId?default("")}" />
             	<div class="message-group">
@@ -113,20 +120,25 @@
                 </div>
                 <div class="message-group">
                     <div class="message-left">通知内容：</div>
-                    <div class="message-right">
+                    <div class="message-right"  id="filesDiv">
                     	<textarea id="content" name="content" placeholder="通知内容" style="margin-bottom:10px;"></textarea>
-                    </div>                   	
+                    	<div class="message-wrap fileDiv" id="fileList">
+	                        <input name="file" type="file" class="mess-control" style="width:65%;float:left;" id="fileName"/>
+	                        <div id="toolbar" class="btn-group" style="float:left;margin-left:5px">
+							    <button type="button" class="btn btn-default" style="height:34px;" title="新增" onclick="addFile(this);">
+							        <i class="glyphicon glyphicon-plus"></i>
+							    </button>
+							    <button type="button" class="btn btn-default" style="height:34px;" title="删除" onclick="delFile(this);">
+							        <i class="glyphicon glyphicon-remove"></i>
+							    </button>
+							</div>
+						</div>
+                    </div>    
                 </div>
                 <div class="message-group">
                     <div class="message-left">选择课程：</div>
                     <div class="message-right" id="courseId">           
                           
-<!--                         <select id="courseId" name="courseId"> -->
-<!--                             <option value="">--请选择课程--</option> -->
-                            <!-- <#list courseList as course> 
-								<option value="${course.courseId}" <#if course.courseId == courseId?default("")>selected="selected"</#if>>${course.courseName}</option>
-							</#list> -->
-<!--                         </select> -->
                     </div>                   	
                 </div>
                 <div class="message-group">
