@@ -1,5 +1,6 @@
 package com.turing.eteacher.remote;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
+import com.turing.eteacher.model.QuestionRecord;
+import com.turing.eteacher.service.IQuestionRecordService;
 import com.turing.eteacher.service.IQuestionService;
 import com.turing.eteacher.util.StringUtil;
 
@@ -20,6 +23,9 @@ import com.turing.eteacher.util.StringUtil;
 public class QuestionRemote extends BaseRemote {
 	@Autowired
 	private IQuestionService questionServiceImpl;
+	
+	@Autowired
+	private IQuestionRecordService questionRecordServiceImpl;
 
 	@RequestMapping(value = "teacher/getAlternative", method = RequestMethod.POST)
 	public ReturnBody getAlternative(HttpServletRequest request) {
@@ -47,6 +53,23 @@ public class QuestionRemote extends BaseRemote {
 			return new ReturnBody(result);
 		}else{
 			return ReturnBody.getSystemError();
+		}
+	}
+	
+	@RequestMapping(value = "teacher/sendQuestion", method = RequestMethod.POST)
+	public ReturnBody sendQuestion(HttpServletRequest request) {
+		String courseId = request.getParameter("courseId");
+		String questionId = request.getParameter("questionId");
+		if (StringUtil.checkParams(courseId,questionId)) {
+			QuestionRecord record = new QuestionRecord();
+			record.setQuestionId(questionId);
+			record.setUserId(getCurrentUserId(request));
+			questionRecordServiceImpl.save(record);
+			Map<String, String> result = new HashMap<String, String>();
+			result.put("recordId", record.getPublishId());
+			return new ReturnBody(result);
+		}else{
+			return ReturnBody.getParamError();
 		}
 	}
 	
