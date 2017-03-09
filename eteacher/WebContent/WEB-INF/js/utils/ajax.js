@@ -148,7 +148,8 @@
 
 		});
 	 }
-	/**
+	 
+	 /**
 	*跳转到登录页
 	**/
 	h.goLogin = function(){
@@ -172,7 +173,82 @@
 			h.goLogin();
 		}
 	}
+	 
+	 	//上传ajax
+		 h.postUp = function(url, params, fnSuc) {
+		 	if (!params) {
+		 		params = {};
+		 	}
+		 	var myDate = new Date();
+		 	params.appKey = '20161001_ITEACHER';
+		 	params.userId = localStorage.getItem("userId");
+//		 	var token = localStorage.getItem("token");
+		 	params.timeStamp = myDate.getTime();
+//		 	params.signature = hex_md5(token + params.timeStamp);
+		 	$.ajaxFileUpload({ 
+	            url:'http://localhost:8080/eteacher/remote/' + url, 
+	            type: 'post',
+	            secureuri:false,  
+	            fileElementId:params.fileIds,                        //文件选择框的id属性 
+	            dataType:'text',
+	            data:params,
+	            success: function(data, status){ 
+//	            	alert('data:'+JSON.stringify(data));
+	            	var str=JSON.stringify(data);
+	            	var json = eval('(' + str + ')'); 
+//	            	alert(json);
+//	            	alert($(json).text());
+	            	var zz=$(json).text();
+	                var obj = eval('(' + zz + ')');
+//	            	alert(obj.result);
+	            	switch (obj.result) {
+					case '200':
+					if (fnSuc) {
+						fnSuc(data.data);
+					}
+					break;
 
+					case '900':
+					// 请求超时
+					if (fnErr) {
+						fnErr(XMLHttpRequest.msg);
+					}
+					break;
+					case '406':
+					// 非法请求
+					if (fnErr) {
+						fnErr(XMLHttpRequest.msg);
+					}
+					break;
+					case '401':
+					// 用户不存在
+					goLogin();
+					if (fnErr) {
+						fnErr(XMLHttpRequest.msg);
+					}
+					break;
+					case '400':
+					// 请求失败
+					if (fnErr) {
+						fnErr(XMLHttpRequest.msg);
+					}
+					break;
+					case '201':
+					// token过期
+					goLogin();
+					if (fnErr) {
+						fnErr(XMLHttpRequest.msg);
+					}
+					break;
+				}
+	              },error: function (data, status, e){ 
+	            	  
+	            }  
+	        });
+		 }
+	 
+	 
+	 
 	// 生成数字串，模拟移动端的设备码
 	$.IMEI = function randomString(len) {
 		len = len || 15;
