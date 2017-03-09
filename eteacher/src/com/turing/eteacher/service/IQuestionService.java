@@ -20,5 +20,29 @@ public interface IQuestionService extends IService<Question> {
 	 * @return
 	 */
 	public List<Map> getknowledgeTree(String userId);
-
+	/**
+	 * 获取特定用户的问题列表列表
+	 * @author macong
+	 * @param userId
+	 * @return
+	 */
+	List<Map> getQuestionType(String userId);
+	
+	/**
+	 * 获取特定问题类型下的知识点列表,及该列表下的问题数量、被标记问题数量
+	 * @time 2017年3月9日13:31:43
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	List<Map> getKonwledgePoint(String typeId);
+	
+	/**
+	 * 获取特定知识点（一个或多个）下的问题列表
+	 * @time 2017年3月9日14:54:50
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	List<Map> getQuestionByPointIds(String pointList);
 }

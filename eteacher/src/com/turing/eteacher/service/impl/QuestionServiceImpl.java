@@ -89,7 +89,7 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 				"qt.typeName as typeName " +
 				"from QuestionType qt " +
 				"where qt.userId = ?";
-		result = questionTypeDAO.findMap(hql, userId);
+		result = knowledgePointDAO.findMap(hql, userId);
 		if (null != result && result.size() > 0) {
 			for (int i = 0; i < result.size(); i++) {
 				String hql2 = "select tk.knowledgeId as knowledgeId," +
@@ -103,5 +103,96 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 		}
 		return result;
 	}
+	@Override
+	public List<Map> getQuestionType(String userId) {
+		String hql = "select qt.typeId as typeId , qt.typeName as typeName "
+				+ "from QuestionType qt where qt.userId = ? ";
+		String hql2 = "select count(*) as totalNum from Question q "
+				+ "where q.typeId = ? ";
+		String hql3 = "select count(*) as flagNum from Question q "
+				+ "where q.typeId = ? and q.status = 1";
+		List<Map> list = questionDAO.findMap(hql, userId);
+		if(null != list && list.size() > 0){
+			String typeId = null;
+			for (int i = 0; i < list.size(); i++) {
+				typeId = (String) list.get(i).get("typeId");
+				List<Map> total = questionDAO.findMap(hql2, typeId);
+				if(null != total && total.size()>0){
+					list.get(i).put("totalNum", total.get(0).get("totalNum"));
+				}else{
+					list.get(i).put("totalNum", 0);
+				}
+				List<Map> flag = questionDAO.findMap(hql3, typeId);
+				if(null != flag && flag.size()>0){
+					list.get(i).put("flagNum", flag.get(0).get("flagNum"));
+				}else{
+					list.get(i).put("flagNum", 0);
+				}
+			}
+		}
+		return list;
+	}
 
+	@Override
+	public List<Map> getKonwledgePoint(String typeId) {
+		String hql = "select qt.knowledgeId as pointId , qt.knowledgeName as pointName "
+				+ "from KnowledgePoint qt where qt.typeId = ? ";
+		String hql2 = "select count(*) as totalNum from Question q " + "where q.knowledgeId = ? ";
+		String hql3 = "select count(*) as flagNum from Question q " + "where q.knowledgeId = ? and q.status = 1";
+		List<Map> list = questionDAO.findMap(hql, typeId);
+		if (null != list && list.size() > 0) {
+			String knowledgeId = null;
+			for (int i = 0; i < list.size(); i++) {
+				knowledgeId = (String) list.get(i).get("pointId");
+				List<Map> total = questionDAO.findMap(hql2, knowledgeId);
+				if (null != total && total.size() > 0) {
+					list.get(i).put("totalNum", total.get(0).get("totalNum"));
+				} else {
+					list.get(i).put("totalNum", 0);
+				}
+				List<Map> flag = questionDAO.findMap(hql3, knowledgeId);
+				if (null != flag && flag.size() > 0) {
+					list.get(i).put("flagNum", flag.get(0).get("flagNum"));
+				} else {
+					list.get(i).put("flagNum", 0);
+				}
+			}
+		}
+		return list;
+	}
+
+	@Override
+	public List<Map> getQuestionByPointIds(String pointList) {
+		String hql = "select distinct q.questionId as questionId , q.typeId as typeId , "
+				+ "q.knowledgeId as pointId , q.content as content , q.status as status "
+				+ "from Question q "
+				+ "where q.knowledgeId = ? ";
+		String hql2 = "select o.optionType as optionType , o.optionValue as optionValue "
+				+ "from Options o where o.questionId = ? "
+				+ "and o.flag = 1 ";
+		List<Map> list = new ArrayList<>() ;
+		String pointIds = pointList.substring(1, pointList.length()-1);
+		String [] ids = pointIds.split(",");
+		for (int i = 0; i < ids.length; i++) {
+			String pointId = ids[i].substring(1, ids[i].length()-1);
+			List<Map> r = questionDAO.findMap(hql, pointId);
+			if(null != r && r.size()>0){
+				for (int j = 0; j < r.size(); j++) {
+					List<Map> m = questionDAO.findMap(hql2, r.get(j).get("questionId"));
+					if(null != m && m.size()>0){
+						r.get(j).put("optionType", m.get(0).get("optionType"));
+						r.get(j).put("optionValue", m.get(0).get("optionValue"));
+					}else{
+						r.get(j).put("optionType", "");
+						r.get(j).put("optionValue", "正确答案未设置");
+					}
+				}
+			}
+			list.addAll(r);
+		}
+		if(null != list && list.size()>0 ){
+			return list;
+		}
+		return null;
+	}
 }
