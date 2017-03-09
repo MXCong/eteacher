@@ -399,6 +399,28 @@ public class DateUtil {
 		}
 		return (_date.getTime() >= _start.getTime()) && (_date.getTime() <= _end.getTime());
 	}
+	/**
+	 * 判断给定日期是否在日期区间内
+	 * 
+	 * @param date
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	public static boolean isInRange(String date, String start, String end,String formateStr) {
+		SimpleDateFormat format = new SimpleDateFormat(formateStr);
+		Date _date = null;
+		Date _start = null;
+		Date _end = null;
+		try {
+			_date = format.parse(date);
+			_start = format.parse(start);
+			_end = format.parse(end);
+		} catch (ParseException e) {
+			return false;
+		}
+		return (_date.getTime() >= _start.getTime()) && (_date.getTime() <= _end.getTime());
+	}
 	
 	/**
 	 * date1是否小于date2

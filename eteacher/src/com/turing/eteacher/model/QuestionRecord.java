@@ -16,7 +16,6 @@ import com.turing.eteacher.base.CreateTimeModel;
 public class QuestionRecord extends CreateTimeModel implements Serializable {
 
 	private static final long serialVersionUID = -5182897582168460669L;
-	
 	private String publishId;
 	private String userId;//出题用户ID
 	private String questionId;
