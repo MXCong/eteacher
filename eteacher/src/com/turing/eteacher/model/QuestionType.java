@@ -21,7 +21,7 @@ public class QuestionType extends CreateTimeModel implements Serializable {
 	
 	private String typeId;
 	private String typeName;
-	private String userID;
+	private String userId;
 	
 	
 	@Id
@@ -43,11 +43,11 @@ public class QuestionType extends CreateTimeModel implements Serializable {
 		this.typeName = typeName;
 	}
 	@Column(name = "USER_ID")
-	public String getUserID() {
-		return userID;
+	public String getUserId() {
+		return userId;
 	}
-	public void setUserID(String userID) {
-		this.userID = userID;
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 	
 	

@@ -43,7 +43,7 @@ public class Question extends BaseModel implements Serializable {
 	public void setTypeId(String typeId) {
 		this.typeId = typeId;
 	}
-	@Column(name = "KNOWKLEDGE_ID")
+	@Column(name = "KNOWLEDGE_ID")
 	public String getKnowledgeId() {
 		return knowledgeId;
 	}
