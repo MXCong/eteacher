@@ -23,7 +23,7 @@ import com.turing.eteacher.util.StringUtil;
 public class QuestionRemote extends BaseRemote {
 	@Autowired
 	private IQuestionService questionServiceImpl;
-	
+
 	@Autowired
 	private IQuestionRecordService questionRecordServiceImpl;
 
@@ -45,36 +45,56 @@ public class QuestionRemote extends BaseRemote {
 			return ReturnBody.getParamError();
 		}
 	}
-	
+
 	@RequestMapping(value = "teacher/getknowledgeTree", method = RequestMethod.POST)
 	public ReturnBody getknowledgeTree(HttpServletRequest request) {
-		List<Map> result = questionServiceImpl.getknowledgeTree(getCurrentUserId(request));
+		List<Map> result = questionServiceImpl
+				.getknowledgeTree(getCurrentUserId(request));
 		if (null != result) {
 			return new ReturnBody(result);
-		}else{
+		} else {
 			return ReturnBody.getSystemError();
 		}
 	}
-	
+
 	@RequestMapping(value = "teacher/sendQuestion", method = RequestMethod.POST)
 	public ReturnBody sendQuestion(HttpServletRequest request) {
 		String courseId = request.getParameter("courseId");
 		String questionId = request.getParameter("questionId");
-		if (StringUtil.checkParams(courseId,questionId)) {
+		if (StringUtil.checkParams(courseId, questionId)) {
 			QuestionRecord record = new QuestionRecord();
 			record.setQuestionId(questionId);
 			record.setUserId(getCurrentUserId(request));
+			record.setStatus(1);
 			questionRecordServiceImpl.save(record);
 			Map<String, String> result = new HashMap<String, String>();
 			result.put("recordId", record.getPublishId());
 			return new ReturnBody(result);
-		}else{
+		} else {
 			return ReturnBody.getParamError();
 		}
 	}
-	
+
+	@RequestMapping(value = "teacher/stopQuestion", method = RequestMethod.POST)
+	public ReturnBody stopQuestion(HttpServletRequest request) {
+		String recordId = request.getParameter("recordId");
+		if (StringUtil.checkParams(recordId)) {
+			QuestionRecord record = questionRecordServiceImpl.get(recordId);
+			if (null != record) {
+				record.setStatus(0);
+				questionRecordServiceImpl.update(record);
+				return new ReturnBody("答题已结束！");
+			} else {
+				return ReturnBody.getParamError();
+			}
+		} else {
+			return ReturnBody.getParamError();
+		}
+	}
+
 	/**
 	 * 获取特定用户的题目分类列表,及该列表下的问题数量、被标记问题数量
+	 * 
 	 * @time 2017年3月9日10:29:47
 	 * @author macong
 	 * @param request
@@ -92,8 +112,10 @@ public class QuestionRemote extends BaseRemote {
 					ReturnBody.ERROR_MSG);
 		}
 	}
+
 	/**
 	 * 获取特定问题类型下的知识点列表,及该列表下的问题数量、被标记问题数量
+	 * 
 	 * @time 2017年3月9日13:31:43
 	 * @author macong
 	 * @param request
@@ -111,9 +133,10 @@ public class QuestionRemote extends BaseRemote {
 					ReturnBody.ERROR_MSG);
 		}
 	}
-	
+
 	/**
 	 * 获取特定知识点（一个或多个）下的问题列表
+	 * 
 	 * @time 2017年3月9日14:54:50
 	 * @author macong
 	 * @param request
@@ -123,11 +146,13 @@ public class QuestionRemote extends BaseRemote {
 	public ReturnBody getQuestionByPointIds(HttpServletRequest request) {
 		try {
 			String pointList = request.getParameter("pointList");
-			List<Map> result = questionServiceImpl.getQuestionByPointIds(pointList);
+			List<Map> result = questionServiceImpl
+					.getQuestionByPointIds(pointList);
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
+			return new ReturnBody(ReturnBody.RESULT_FAILURE,
+					ReturnBody.ERROR_MSG);
 		}
 	}
 }
