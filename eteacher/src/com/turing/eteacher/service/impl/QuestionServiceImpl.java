@@ -45,22 +45,24 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 		String sql = "";
 		if(StringUtil.isNotEmpty(knowledgeId)){
 			sql = "SELECT DISTINCT tq.`CONTENT` AS content,"+
-					"CONCAT (toption.`OPTION_TYPE`,"+ "toption.`OPTION_VALUE`) AS opt ,"+
+					"CONCAT (toption.`OPTION_TYPE`,"+ "toption.`OPTION_VALUE`) AS answer ,"+
 					"tq.`QUESTION_ID` AS questionId "+
 					"FROM t_question tq LEFT JOIN t_options toption "+
 					"ON tq.`QUESTION_ID` = toption.`QUESTION_ID` "+
 					"WHERE tq.`KNOWLEDGE_ID` = ? "+
+					"AND tq.`STATUS` = '1' "+
 					"AND toption.`FLAG` = '1'";
 			return questionDAO.findBySqlAndPage(sql, page*20, 20, knowledgeId);
 		}else if (StringUtil.isNotEmpty(courseId)) {
 			Course course = courseDAO.get(courseId);
 			if (null != course) {
 				sql = "select DISTINCT tq.`CONTENT` as content, "+
-						"concat (toption.`OPTION_TYPE`, "+ "toption.`OPTION_VALUE`) as opt , "+
+						"concat (toption.`OPTION_TYPE`, "+ "toption.`OPTION_VALUE`) as answer , "+
 						"tq.`QUESTION_ID` as questionId "+
 						"from t_question tq left join t_options toption "+
 						"on tq.`QUESTION_ID` = toption.`QUESTION_ID` "+
 						"where toption.`FLAG` = '1' "+
+						"AND tq.`STATUS` = '1' "+
 						"and tq.`USER_ID` = ? "+
 						"and tq.`TYPE_ID` = ( "+
 						"select tqt.`TYPE_ID` "+
@@ -71,11 +73,12 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 		}
 		if (null == result || result.size() == 0) {
 			sql = "select DISTINCT tq.`CONTENT` as content, "+
-					"concat (toption.`OPTION_TYPE`, "+ "toption.`OPTION_VALUE`) as opt , "+
+					"concat (toption.`OPTION_TYPE`, "+ "toption.`OPTION_VALUE`) as answer , "+
 					"tq.`QUESTION_ID` as questionId "+
 					"from t_question tq left join t_options toption "+
 					"on tq.`QUESTION_ID` = toption.`QUESTION_ID` "+
 					"where toption.`FLAG` = '1' "+
+					"AND tq.`STATUS` = '1' "+
 					"and tq.`USER_ID` = ? ";
 			result = questionDAO.findBySqlAndPage(sql, page*20,20 , userId);
 		}
@@ -89,13 +92,14 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 				"qt.typeName as typeName " +
 				"from QuestionType qt " +
 				"where qt.userId = ?";
-		result = knowledgePointDAO.findMap(hql, userId);
+		result = questionTypeDAO.findMap(hql, userId);
 		if (null != result && result.size() > 0) {
 			for (int i = 0; i < result.size(); i++) {
 				String hql2 = "select tk.knowledgeId as knowledgeId," +
 						"tk.knowledgeName as knowledgeName " +
-						"from KnowledgePoint tk where tk.typeId = ";
+						"from KnowledgePoint tk where tk.typeId = ?";
 				List list = knowledgePointDAO.findMap(hql2, (String)result.get(i).get("typeId"));
+				System.out.println("list:"+list.toString());
 				if (null != list) {
 					result.get(i).put("knowledges", list);
 				}

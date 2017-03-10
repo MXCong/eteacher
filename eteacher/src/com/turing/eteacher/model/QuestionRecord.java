@@ -19,6 +19,7 @@ public class QuestionRecord extends CreateTimeModel implements Serializable {
 	private String publishId;
 	private String userId;//出题用户ID
 	private String questionId;
+	private int status;
 	
 	@Id
 	@GeneratedValue(generator = "customId")
@@ -43,6 +44,13 @@ public class QuestionRecord extends CreateTimeModel implements Serializable {
 	}
 	public void setQuestionId(String questionId) {
 		this.questionId = questionId;
+	}
+	@Column(name = "STATUS")
+	public int getStatus() {
+		return status;
+	}
+	public void setStatus(int status) {
+		this.status = status;
 	}
 	
 }
