@@ -1,5 +1,6 @@
 package com.turing.eteacher.remote;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.QuestionRecord;
+import com.turing.eteacher.service.ICourseClassService;
 import com.turing.eteacher.service.IQuestionRecordService;
 import com.turing.eteacher.service.IQuestionService;
+import com.turing.eteacher.util.FileUtil;
+import com.turing.eteacher.util.JPushUtils;
+import com.turing.eteacher.util.NotifyBody;
+import com.turing.eteacher.util.PushBody;
 import com.turing.eteacher.util.StringUtil;
 
 @RestController
@@ -26,6 +32,9 @@ public class QuestionRemote extends BaseRemote {
 
 	@Autowired
 	private IQuestionRecordService questionRecordServiceImpl;
+	
+	@Autowired
+	private ICourseClassService courseClassServiceImpl; 
 
 	@RequestMapping(value = "teacher/getAlternative", method = RequestMethod.POST)
 	public ReturnBody getAlternative(HttpServletRequest request) {
@@ -48,8 +57,7 @@ public class QuestionRemote extends BaseRemote {
 
 	@RequestMapping(value = "teacher/getknowledgeTree", method = RequestMethod.POST)
 	public ReturnBody getknowledgeTree(HttpServletRequest request) {
-		List<Map> result = questionServiceImpl
-				.getknowledgeTree(getCurrentUserId(request));
+		List<Map> result = questionServiceImpl.getknowledgeTree(getCurrentUserId(request));
 		if (null != result) {
 			return new ReturnBody(result);
 		} else {
@@ -69,9 +77,25 @@ public class QuestionRemote extends BaseRemote {
 			questionRecordServiceImpl.save(record);
 			Map<String, String> result = new HashMap<String, String>();
 			result.put("recordId", record.getPublishId());
+			sendQuestionPush(record.getPublishId(),courseId);
 			return new ReturnBody(result);
 		} else {
 			return ReturnBody.getParamError();
+		}
+	}
+	
+	private void sendQuestionPush(String recordId,String courseId){
+		List<Map> classesList  = courseClassServiceImpl.getClassByCourseId(courseId);
+		if (null != classesList && classesList.size() > 0) {
+			List<String> tags = new ArrayList<>();
+			for (int i = 0; i < classesList.size(); i++) {
+				tags.add((String)classesList.get(i).get("classId"));
+			}
+			Map<String,String> extra = new HashMap<>();
+			extra.put("recordId", recordId);
+			NotifyBody noBody = NotifyBody.getNotifyBody("提示", "课上练习开始啦！", 15, extra);
+			PushBody pBody = PushBody.buildPushBody_student_by_tag_or(tags, noBody);
+			JPushUtils.pushMessage(pBody);
 		}
 	}
 
@@ -84,6 +108,25 @@ public class QuestionRemote extends BaseRemote {
 				record.setStatus(0);
 				questionRecordServiceImpl.update(record);
 				return new ReturnBody("答题已结束！");
+			} else {
+				return ReturnBody.getParamError();
+			}
+		} else {
+			return ReturnBody.getParamError();
+		}
+	}
+	@RequestMapping(value = "teacher/questionResult", method = RequestMethod.POST)
+	public ReturnBody questionResult(HttpServletRequest request) {
+		String recordId = request.getParameter("recordId");
+		if (StringUtil.checkParams(recordId)) {
+			QuestionRecord record = questionRecordServiceImpl.get(recordId);
+			if (null != record) {
+				Map map = questionRecordServiceImpl.getQuestion(recordId,FileUtil.getRequestUrl(request));
+				if(null != map){
+					return new ReturnBody(map);
+				}else{
+					return ReturnBody.getSystemError();
+				}
 			} else {
 				return ReturnBody.getParamError();
 			}

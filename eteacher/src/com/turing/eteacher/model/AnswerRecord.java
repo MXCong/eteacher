@@ -15,7 +15,7 @@ import com.turing.eteacher.base.CreateTimeModel;
 
 @Entity
 @Table(name = "T_ANSWER_RECORD")
-public class AnswerRecord extends CreateTimeModel implements Serializable {
+public class AnswerRecord implements Serializable {
 
 	private static final long serialVersionUID = -8791677874651954634L;
 	
@@ -49,7 +49,7 @@ public class AnswerRecord extends CreateTimeModel implements Serializable {
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
-	@Column(name = "OPTION_ID")
+	@Column(name = "OPTIONS_ID")
 	public String getOptionId() {
 		return optionId;
 	}
