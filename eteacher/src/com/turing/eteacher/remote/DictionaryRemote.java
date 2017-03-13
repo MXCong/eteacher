@@ -80,7 +80,6 @@ public class DictionaryRemote extends BaseRemote{
 			String userId = request.getParameter("userId");
 			String dId = request.getParameter("itemId");
 			boolean result = dictionary2PrivateServiceImpl.deleteItem(type, userId, dId);
-			System.out.println("aaaa");
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
 		} catch (Exception e) {
 			e.printStackTrace();

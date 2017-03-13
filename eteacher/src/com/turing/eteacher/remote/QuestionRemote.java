@@ -198,4 +198,81 @@ public class QuestionRemote extends BaseRemote {
 					ReturnBody.ERROR_MSG);
 		}
 	}
+	/**
+	 * 增加问题分类
+	 * @time 2017年3月13日10:33:28
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "question/addType", method = RequestMethod.POST)
+	public ReturnBody addQuestionType(HttpServletRequest request) {
+		try {
+			String userId = getCurrentUserId(request);
+			String typeName = request.getParameter("typeName");
+			boolean result = questionServiceImpl.addType(userId,typeName);
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE,
+					ReturnBody.ERROR_MSG);
+		}
+	}
+	/**
+	 * 删除问题分类
+	 * @time 2017年3月13日11:29:02
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "question/delType", method = RequestMethod.POST)
+	public ReturnBody delQuestionType(HttpServletRequest request) {
+		try {
+			String typeId = request.getParameter("typeId");
+			String questions = request.getParameter("questions");
+			boolean result = questionServiceImpl.delType(typeId);
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
+		}
+	}
+	/**
+	 * 增加问题分类
+	 * @time 2017年3月13日16:13:35
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "question/addKnowledgePoint", method = RequestMethod.POST)
+	public ReturnBody addKnowledgePoint(HttpServletRequest request) {
+		try {
+			String typeId = request.getParameter("typeId");
+			String pointName = request.getParameter("pointName");
+			boolean result = questionServiceImpl.addKnowledgePoint(typeId,pointName);
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE,
+					ReturnBody.ERROR_MSG);
+		}
+	}
+	/**
+	 * 删除问题的知识点分类
+	 * @time 2017年3月13日11:29:02
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "question/delKnowledgePoint", method = RequestMethod.POST)
+	public ReturnBody delKnowledgePoint(HttpServletRequest request) {
+		try {
+			String pointId = request.getParameter("pointId");
+			boolean result = questionServiceImpl.delKnowledgePoint(pointId);
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
+		}
+	}
 }
