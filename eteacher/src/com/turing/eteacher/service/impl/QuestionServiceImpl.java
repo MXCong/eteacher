@@ -12,6 +12,7 @@ import com.turing.eteacher.base.BaseService;
 import com.turing.eteacher.model.Course;
 import com.turing.eteacher.model.Question;
 import com.turing.eteacher.service.IQuestionService;
+import com.turing.eteacher.util.CustomIdGenerator;
 import com.turing.eteacher.util.StringUtil;
 import com.turing.eteacher.dao.CourseDAO;
 import com.turing.eteacher.dao.KnowledgePointDAO;
@@ -198,5 +199,49 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 			return list;
 		}
 		return null;
+	}
+
+	@Override
+	public boolean addType(String userId, String typeName) {
+		String typeId = CustomIdGenerator.generateShortUuid();
+		String sql = "INSERT INTO t_question_type (TYPE_ID, TYPE_NAME,USER_ID) VALUES (?,?,?)";
+		int result = questionDAO.executeBySql(sql,typeId,typeName,userId);
+		if(result == 1){
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean delType(String typeId) {
+		String sql = "DELETE FROM t_question_type WHERE t_question_type.TYPE_ID = ?";
+		int result = questionDAO.executeBySql(sql, typeId);
+		if(result == 1){
+			return true;
+		}
+		return false;
+	}
+	
+	
+
+	@Override
+	public boolean delKnowledgePoint(String pointId) {
+		String sql = "DELETE FROM t_knowledge_point WHERE t_knowledge_point.KNOWLEDGE_ID = ?";
+		int result = questionDAO.executeBySql(sql, pointId);
+		if(result == 1){
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean addKnowledgePoint(String typeId, String pointName) {
+		String knowledgeId = CustomIdGenerator.generateShortUuid();
+		String sql = "INSERT INTO t_knowledge_point (KNOWLEDGE_ID, KNOWLEDGE_NAME,TYPE_ID) VALUES (?,?,?)";
+		int result = questionDAO.executeBySql(sql,knowledgeId,pointName,typeId);
+		if(result == 1){
+			return true;
+		}
+		return false;
 	}
 }

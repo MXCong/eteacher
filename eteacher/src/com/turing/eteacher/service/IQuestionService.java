@@ -45,4 +45,40 @@ public interface IQuestionService extends IService<Question> {
 	 * @return
 	 */
 	List<Map> getQuestionByPointIds(String pointList);
+	
+	/**
+	 * 增加问题分类
+	 * @time 2017年3月13日10:33:28
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	public boolean addType(String userId, String typeName);
+	/**
+	 * 删除问题分类
+	 * @time 2017年3月13日13:33:28
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	public boolean delType(String typeId);
+	
+	/**
+	 * 删除问题的知识点分类
+	 * @time 2017年3月13日10:33:28
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	
+	public boolean delKnowledgePoint(String pointId);
+	/**
+	 * 增加问题的知识点分类
+	 * @time 2017年3月13日16:15:25
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	public boolean addKnowledgePoint(String typeId, String pointName);
+	
 }
