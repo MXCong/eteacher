@@ -10,10 +10,12 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
+import com.turing.eteacher.model.Question;
 import com.turing.eteacher.model.QuestionRecord;
 import com.turing.eteacher.service.ICourseClassService;
 import com.turing.eteacher.service.IQuestionRecordService;
@@ -270,6 +272,37 @@ public class QuestionRemote extends BaseRemote {
 			String pointId = request.getParameter("pointId");
 			boolean result = questionServiceImpl.delKnowledgePoint(pointId);
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
+		}
+	}
+	/**
+	 * 新增问题
+	 * @time 2017年3月14日10:39:09
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "question/add", method = RequestMethod.POST)
+	public ReturnBody addQuestion(HttpServletRequest request,Question question) {
+		try {
+			String userId = getCurrentUserId(request);
+			String knowledgeId = request.getParameter("knowledgeId");
+			String content = request.getParameter("content");
+			String typeId = request.getParameter("typeId");
+			String options = request.getParameter("options");
+			String answer = request.getParameter("answer");
+			if(StringUtil.checkParams(content)){
+				question.setContent(content);
+				question.setKnowledgeId(knowledgeId);
+				question.setTypeId(typeId);
+				question.setUserId(userId);
+				question.setStatus("0");
+				String questionId = (String) questionServiceImpl.add(question);//存储问题实体
+				questionServiceImpl.addOption(questionId,options,answer);
+			}
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, true);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);

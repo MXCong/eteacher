@@ -1,21 +1,31 @@
 package com.turing.eteacher.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.druid.support.json.JSONUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonArrayFormatVisitor;
+import com.google.gson.JsonArray;
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
 import com.turing.eteacher.model.Course;
+import com.turing.eteacher.model.Options;
 import com.turing.eteacher.model.Question;
 import com.turing.eteacher.service.IQuestionService;
 import com.turing.eteacher.util.CustomIdGenerator;
+import com.turing.eteacher.util.JsonUtil;
 import com.turing.eteacher.util.StringUtil;
 import com.turing.eteacher.dao.CourseDAO;
 import com.turing.eteacher.dao.KnowledgePointDAO;
+import com.turing.eteacher.dao.OptionsDAO;
 import com.turing.eteacher.dao.QuestionDAO;
 import com.turing.eteacher.dao.QuestionTypeDAO;
 
@@ -24,6 +34,9 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 	
 	@Autowired
 	private QuestionDAO questionDAO;
+	
+	@Autowired
+	private OptionsDAO optionDAO;
 	
 	@Autowired
 	private CourseDAO courseDAO;
@@ -36,7 +49,6 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 	
 	@Override
 	public BaseDAO<Question> getDAO() {
-		// TODO Auto-generated method stub
 		return questionDAO;
 	}
 
@@ -226,8 +238,12 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 
 	@Override
 	public boolean delKnowledgePoint(String pointId) {
+		//删除知识点分类
 		String sql = "DELETE FROM t_knowledge_point WHERE t_knowledge_point.KNOWLEDGE_ID = ?";
 		int result = questionDAO.executeBySql(sql, pointId);
+		//后续处理，将原本知识点分类为要删除的知识点类别的问题，知识点ID置为null
+		String hql = "update Question q set q.knowledgeId = null where q.knowledgeId = ?";
+		questionDAO.executeHql(hql, pointId);
 		if(result == 1){
 			return true;
 		}
@@ -243,5 +259,29 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public void addOption(String questionId, String options ,String answer) {
+		//将字符串类型的options转换为List<Map>类型
+		try {
+			List<Options> list = Arrays.asList(new ObjectMapper().readValue(options, Options[].class));
+			for (int i = 0; i < list.size(); i++) {
+				Options opt = new Options();
+				opt.setOptionType((String)list.get(i).getOptionType());
+				opt.setOptionValue((String)list.get(i).getOptionValue());
+				opt.setQuestionId(questionId);
+				if((boolean)list.get(i).getOptionType().equals(answer)){
+					opt.setFlag(1);
+				}else{
+					opt.setFlag(0);
+				}
+				optionDAO.save(opt);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 }

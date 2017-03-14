@@ -1,8 +1,11 @@
 package com.turing.eteacher.service;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import com.turing.eteacher.base.IService;
 import com.turing.eteacher.model.Question;
 
@@ -80,5 +83,17 @@ public interface IQuestionService extends IService<Question> {
 	 * @return
 	 */
 	public boolean addKnowledgePoint(String typeId, String pointName);
+	/**
+	 * 创建问题时，保存问题的选择项
+	 * @author macong
+	 * 时间： 2017年3月14日11:00:37
+	 * @param questionId
+	 * @param options
+	 * @param answer 
+	 * @throws FileNotFoundException 
+	 * @throws JsonSyntaxException 
+	 * @throws JsonIOException 
+	 */
+	public void addOption(String questionId, String options, String answer) throws JsonIOException, JsonSyntaxException, FileNotFoundException;
 	
 }

@@ -90,7 +90,6 @@
 		}
 	}
 	function changeOpt(val) {
-		alert(val);
 		$("#answer option[value=" + val + "]").attr("selected", "selected");
 	}
 	//获取用户的问题分类列表
@@ -155,9 +154,44 @@
 			}
 		});
 	}
-	$('#saveBtn').on('click',function(){
+	//创建问题
+	function save(flag){
+		var content = $('#workTitle').val();
+		var answer = $('#answer').val();
+		var typeId = $('#questionType').attr('pId');
+		var pointId = $('#knowledgePoint').attr('pId');
+		var options = new Array();
+		var optKeys = $(".optionKey");
+		var optValues = $(".optionValue");
+		if(optKeys.size() == optValues.size()){
+			for (var i = 0; i < optKeys.size(); i++) {
+				var opt = {};
+				opt.optionType = optKeys.eq(i).val();
+				opt.optionValue = optValues.eq(i).val();
+				options.push(opt);
+			}
+		}else{
+			alert("请检查您添加的数据的正确性！");
+		}
+		if(!content){
+			alert("问题不能为空");
+			return;
+		}
+		var params = {};
+		params.content = content;
+		params.typeId = typeId;
+		params.knowledgeId = pointId;
+		params.options = JSON.stringify(options);
+		params.answer = answer;
 		
-	});
+		$httpUtils.post('question/add', params, function(data) {
+			if(flag == 1){
+				history.back();
+			}else{
+				location.reload();
+			}
+		});
+	}
 	var f = 0;
 	function addFile(btn) {
 		f++;
@@ -195,7 +229,7 @@
 						<div class="message-wrap optionDiv">
 							<input type="text" value="A" disabled="disabled"
 								class="optionKey mess-control" style="width: 6%; float: left;" />
-							<input type="text" class="mess-control"
+							<input type="text" class="optionValue mess-control"
 								style="width: 55%; float: left; margin-left: 5px;" />
 							<div id="toolbar" class="btn-group"
 								style="float: left; margin-left: 5px">
@@ -214,7 +248,9 @@
 				<div class="message-group">
 					<div class="message-left">正确答案：</div>
 					<div class="message-right" style="width: 67%;">
-						<select id="answer"></select>
+						<select id="answer">
+							<option vlaue=""></option>
+						</select>
 					</div>
 				</div>
 				<div class="message-group">
@@ -222,7 +258,8 @@
 					<div class="message-right" id="filesDiv">
 						<div class="message-wrap fileDiv" id="fileList">
 							<input name="file" type="file" class="mess-control"
-								style="width: 65%; float: left;" id="fileName" />
+								style="width: 65%; float: left;" id="fileName" 
+								accept="image/gif,image/jpeg,image/jpg,image/png,image/svg"/>
 							<div id="toolbar" class="btn-group"
 								style="float: left; margin-left: 5px">
 								<button type="button" class="btn btn-default"
@@ -255,7 +292,8 @@
 				</div>
 			</form>
 			<div class="btnsub">
-				<button id="saveBtn" class="btn-submit" style="float:left;">保存</button>
+				<input type="button"  class="btn-submit" style="float:left;"  onclick="save(0);" value="继续添加">
+				<input type="button"  class="btn-submit" style="float:left;"  onclick="save(1);" value="保存">
 				<button type="button" class="btn-submit" style="float:right;" onclick="history.back();">返回</button>
 			</div>
 		</div>
