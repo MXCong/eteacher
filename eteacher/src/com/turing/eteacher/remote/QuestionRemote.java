@@ -1,6 +1,7 @@
 package com.turing.eteacher.remote;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.Question;
@@ -332,4 +334,27 @@ public class QuestionRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
 		}
 	}
+	/**
+	 * 设置为备选题
+	 * @author xu
+	 * @return
+	 */
+	@RequestMapping(value = "question/updateStatus", method = RequestMethod.POST)
+	public ReturnBody updateStatus(HttpServletRequest request) {
+		try {
+			String questionIds = request.getParameter("questionIds");
+			List<Question> list = Arrays.asList(new ObjectMapper().readValue
+												(questionIds, Question[].class));
+			 questionServiceImpl.updateStatus(list);
+			 
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE , 
+
+ReturnBody.ERROR_MSG);
+		}
+	}
+	
+	
 }

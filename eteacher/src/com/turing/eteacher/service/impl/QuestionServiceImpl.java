@@ -298,4 +298,18 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 		}
 		return null;
 	}
+
+	@Override
+	public void updateStatus(List<Question> questionIds) {
+		for(int i=0;i<questionIds.size();i++){
+			Question  question=questionIds.get(i);
+			Question question1=questionDAO.get(question.getQuestionId());
+			if(question.getStatus().equals("1")){
+				question1.setStatus("1");
+			}else{
+				question1.setStatus("0");
+			}
+			questionDAO.update(question1);
+		}
+	}
 }

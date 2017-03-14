@@ -104,5 +104,10 @@ public interface IQuestionService extends IService<Question> {
 	 * @return
 	 */
 	public List<Map> getQuestionList(String userId);
-	
+	/**
+	 * 修改status状态 设置备课
+	 * @param questionIds
+	 * @return
+	 */
+	public void updateStatus(List<Question> questionIds);
 }
