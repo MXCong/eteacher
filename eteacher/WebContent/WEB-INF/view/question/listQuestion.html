@@ -17,8 +17,17 @@
 
 <script type="text/javascript">
 	$(function(){
+		getDatas();//获取用户创建的问题列表
+	});
+	//获取用户创建的问题列表
+	function getDatas(){
+		$httpUtils.post('question/getQuestionList',null,function(data){
+			initTale(data);
+		});
+	}
+	function initTale(datas){
 		var classTable = $('#classTable').bootstrapTable({
-		    url: 'getClassListData',
+			data : datas,
 		    striped : true,
 		    toolbar : '#toolbar',
 		    columns: [{
@@ -28,20 +37,31 @@
 		        	return index + 1;
 		        }
 		    },{
-		        field: 'className',
+		        field: 'content',
 		        halign: 'center',
-		        title: '班级名称'
+		        title: '问题内容'
 		    }, {
-		        field: 'grade',
+		        field: 'typeName',
 		        halign: 'center',
-		        title: '年级'
+		        title: '分类'
 		    }, {
-		        field: 'majorName',
+		        field: 'pointName',
 		        halign: 'center',
-		        title: '专业'
+		        title: '知识点'
+		    }, {
+		        field: 'status',
+		        halign: 'center',
+		        title: '是否标记',
+		        formatter : function (value, row, index){
+		        	if(row.status == 0){
+		        		return '<span class="label label-primary">未标记</span>';
+		        	}else if(row.status == 1){
+		        		return '<span class="label label-success">备选题</span>';
+		        	}
+		        }
 		    }, {
 		        title: '操作',
-		        field: 'classId',
+		        field: 'questionId',
 		        align: 'center',
 		        formatter : function (value, row, index){
 		        	return '<i style="cursor: pointer;" title="编辑" class="glyphicon glyphicon-edit"></i> &nbsp;'
@@ -64,7 +84,7 @@
 		        }
 		    } ]
 		});
-	});
+	}
 </script>
 </head>
 <body>

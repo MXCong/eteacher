@@ -308,4 +308,28 @@ public class QuestionRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
 		}
 	}
+	/**
+	 * 获取用户创建的问题列表（WEB端功能）
+	 * @time 2017年3月14日16:47:05
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	 /* "data": {
+        "content": "为什么会有污染",
+        "typeName": "环境",
+        "pointName": "污染治理",
+        "status": "标记"
+    	}*/
+	@RequestMapping(value = "question/getQuestionList", method = RequestMethod.POST)
+	public ReturnBody getQuestionList(HttpServletRequest request) {
+		try {
+			String userId = getCurrentUserId(request);
+			List<Map> result = questionServiceImpl.getQuestionList(userId);
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
+		}
+	}
 }

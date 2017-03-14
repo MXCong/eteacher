@@ -279,9 +279,23 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 				optionDAO.save(opt);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+	}
+
+	@Override
+	public List<Map> getQuestionList(String userId) {
+		String hql = "select distinct q.content as content , qt.typeName as typeName , "
+				+ "kp.knowledgeName as pointName , q.status as status , "
+				+ "q.questionId as questionId "
+				+ "from Question q , QuestionType qt , KnowledgePoint kp "
+				+ "where q.typeId = qt.typeId and q.knowledgeId = kp.knowledgeId "
+				+ "and q.userId = ? ";
+		List<Map> list = questionDAO.findMap(hql, userId , userId);
+		if(null != list && list.size()>0){
+			return list;
+		}
+		return null;
 	}
 }

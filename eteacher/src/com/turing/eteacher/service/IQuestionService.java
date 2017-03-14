@@ -96,4 +96,13 @@ public interface IQuestionService extends IService<Question> {
 	 */
 	public void addOption(String questionId, String options, String answer) throws JsonIOException, JsonSyntaxException, FileNotFoundException;
 	
+	/**
+	 * 获取用户创建的问题列表（WEB端功能）
+	 * @time 2017年3月14日16:47:05
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	public List<Map> getQuestionList(String userId);
+	
 }
