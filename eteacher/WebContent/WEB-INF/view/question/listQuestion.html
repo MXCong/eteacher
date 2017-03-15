@@ -77,7 +77,7 @@
 		        		updateStatus(value,row.status);//标记问题/取消标记
 			        },
 		        	'click .glyphicon-edit': function (e, value, row, index) {
-			            window.location.href = 'viewEditClass?classId=' + value;
+			            window.location.href = 'questionUpdate.html?questionId=' + value;
 			        },
 			        'click .glyphicon-trash': function (e, value, row, index) {
 			        	deleteQuestion(value);
