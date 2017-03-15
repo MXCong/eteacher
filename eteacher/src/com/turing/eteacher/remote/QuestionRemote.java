@@ -36,9 +36,9 @@ public class QuestionRemote extends BaseRemote {
 
 	@Autowired
 	private IQuestionRecordService questionRecordServiceImpl;
-	
+
 	@Autowired
-	private ICourseClassService courseClassServiceImpl; 
+	private ICourseClassService courseClassServiceImpl;
 
 	@RequestMapping(value = "teacher/getAlternative", method = RequestMethod.POST)
 	public ReturnBody getAlternative(HttpServletRequest request) {
@@ -61,7 +61,8 @@ public class QuestionRemote extends BaseRemote {
 
 	@RequestMapping(value = "teacher/getknowledgeTree", method = RequestMethod.POST)
 	public ReturnBody getknowledgeTree(HttpServletRequest request) {
-		List<Map> result = questionServiceImpl.getknowledgeTree(getCurrentUserId(request));
+		List<Map> result = questionServiceImpl
+				.getknowledgeTree(getCurrentUserId(request));
 		if (null != result) {
 			return new ReturnBody(result);
 		} else {
@@ -81,24 +82,27 @@ public class QuestionRemote extends BaseRemote {
 			questionRecordServiceImpl.save(record);
 			Map<String, String> result = new HashMap<String, String>();
 			result.put("recordId", record.getPublishId());
-			sendQuestionPush(record.getPublishId(),courseId);
+			sendQuestionPush(record.getPublishId(), courseId);
 			return new ReturnBody(result);
 		} else {
 			return ReturnBody.getParamError();
 		}
 	}
-	
-	private void sendQuestionPush(String recordId,String courseId){
-		List<Map> classesList  = courseClassServiceImpl.getClassByCourseId(courseId);
+
+	private void sendQuestionPush(String recordId, String courseId) {
+		List<Map> classesList = courseClassServiceImpl
+				.getClassByCourseId(courseId);
 		if (null != classesList && classesList.size() > 0) {
 			List<String> tags = new ArrayList<>();
 			for (int i = 0; i < classesList.size(); i++) {
-				tags.add((String)classesList.get(i).get("classId"));
+				tags.add((String) classesList.get(i).get("classId"));
 			}
-			Map<String,String> extra = new HashMap<>();
+			Map<String, String> extra = new HashMap<>();
 			extra.put("recordId", recordId);
-			NotifyBody noBody = NotifyBody.getNotifyBody("提示", "课上练习开始啦！", 15, extra);
-			PushBody pBody = PushBody.buildPushBody_student_by_tag_or(tags, noBody);
+			NotifyBody noBody = NotifyBody.getNotifyBody("提示", "课上练习开始啦！", 15,
+					extra);
+			PushBody pBody = PushBody.buildPushBody_student_by_tag_or(tags,
+					noBody);
 			JPushUtils.pushMessage(pBody);
 		}
 	}
@@ -119,18 +123,35 @@ public class QuestionRemote extends BaseRemote {
 			return ReturnBody.getParamError();
 		}
 	}
+
 	@RequestMapping(value = "teacher/questionResult", method = RequestMethod.POST)
 	public ReturnBody questionResult(HttpServletRequest request) {
 		String recordId = request.getParameter("recordId");
 		if (StringUtil.checkParams(recordId)) {
 			QuestionRecord record = questionRecordServiceImpl.get(recordId);
 			if (null != record) {
-				Map map = questionRecordServiceImpl.getQuestion(recordId,FileUtil.getRequestUrl(request));
-				if(null != map){
+				Map map = questionRecordServiceImpl.getQuestion(recordId,
+						FileUtil.getRequestUrl(request));
+				if (null != map) {
 					return new ReturnBody(map);
-				}else{
+				} else {
 					return ReturnBody.getSystemError();
 				}
+			} else {
+				return ReturnBody.getParamError();
+			}
+		} else {
+			return ReturnBody.getParamError();
+		}
+	}
+
+	@RequestMapping(value = "teacher/questionDetail", method = RequestMethod.POST)
+	public ReturnBody questionDetail(HttpServletRequest request) {
+		String questionId = request.getParameter("questionId");
+		if (StringUtil.checkParams(questionId)) {
+			Map map = questionServiceImpl.getQuestiondetail(questionId,FileUtil.getRequestUrl(request));
+			if (null != map) {
+				return new ReturnBody(map);
 			} else {
 				return ReturnBody.getParamError();
 			}
@@ -202,8 +223,10 @@ public class QuestionRemote extends BaseRemote {
 					ReturnBody.ERROR_MSG);
 		}
 	}
+
 	/**
 	 * 增加问题分类
+	 * 
 	 * @time 2017年3月13日10:33:28
 	 * @author macong
 	 * @param request
@@ -214,7 +237,7 @@ public class QuestionRemote extends BaseRemote {
 		try {
 			String userId = getCurrentUserId(request);
 			String typeName = request.getParameter("typeName");
-			boolean result = questionServiceImpl.addType(userId,typeName);
+			boolean result = questionServiceImpl.addType(userId, typeName);
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -222,8 +245,10 @@ public class QuestionRemote extends BaseRemote {
 					ReturnBody.ERROR_MSG);
 		}
 	}
+
 	/**
 	 * 删除问题分类
+	 * 
 	 * @time 2017年3月13日11:29:02
 	 * @author macong
 	 * @param request
@@ -238,11 +263,14 @@ public class QuestionRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
+			return new ReturnBody(ReturnBody.RESULT_FAILURE,
+					ReturnBody.ERROR_MSG);
 		}
 	}
+
 	/**
 	 * 增加问题分类
+	 * 
 	 * @time 2017年3月13日16:13:35
 	 * @author macong
 	 * @param request
@@ -253,7 +281,8 @@ public class QuestionRemote extends BaseRemote {
 		try {
 			String typeId = request.getParameter("typeId");
 			String pointName = request.getParameter("pointName");
-			boolean result = questionServiceImpl.addKnowledgePoint(typeId,pointName);
+			boolean result = questionServiceImpl.addKnowledgePoint(typeId,
+					pointName);
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -261,8 +290,10 @@ public class QuestionRemote extends BaseRemote {
 					ReturnBody.ERROR_MSG);
 		}
 	}
+
 	/**
 	 * 删除问题的知识点分类
+	 * 
 	 * @time 2017年3月13日11:29:02
 	 * @author macong
 	 * @param request
@@ -276,7 +307,8 @@ public class QuestionRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
+			return new ReturnBody(ReturnBody.RESULT_FAILURE,
+					ReturnBody.ERROR_MSG);
 		}
 	}
 	/**

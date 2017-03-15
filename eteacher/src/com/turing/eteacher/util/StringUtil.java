@@ -1,6 +1,7 @@
 package com.turing.eteacher.util;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.List;
 
 public class StringUtil {
@@ -49,5 +50,29 @@ public class StringUtil {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * 两个数相除获取百分数
+	 * 
+	 * @param arg1
+	 * @param arg2
+	 * @return
+	 */
+	public static String getPercent(String arg1, String arg2) {
+		if (checkParams(arg1, arg2)) {
+			// 这里的数后面加“D”是表明它是Double类型，否则相除的话取整，无法正常使用
+			double percent = Double.valueOf(arg1 + "") / Double.valueOf(arg2 + "");
+			// 输出一下，确认你的小数无误
+			System.out.println("小数：" + percent);
+			// 获取格式化对象
+			NumberFormat nt = NumberFormat.getPercentInstance();
+			// 设置百分数精确度2即保留两位小数
+			nt.setMinimumFractionDigits(2);
+			// 最后格式化并输出
+			return nt.format(percent);
+		} else {
+			return null;
+		}
 	}
 }

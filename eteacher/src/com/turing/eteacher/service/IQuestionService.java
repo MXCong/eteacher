@@ -84,6 +84,12 @@ public interface IQuestionService extends IService<Question> {
 	 */
 	public boolean addKnowledgePoint(String typeId, String pointName);
 	/**
+	 * 获取问题详情
+	 * @param questionId
+	 * @return
+	 */
+	public Map getQuestiondetail(String questionId,String path);
+	/**
 	 * 创建问题时，保存问题的选择项
 	 * @author macong
 	 * 时间： 2017年3月14日11:00:37
@@ -95,7 +101,6 @@ public interface IQuestionService extends IService<Question> {
 	 * @throws JsonIOException 
 	 */
 	public void addOption(String questionId, String options, String answer) throws JsonIOException, JsonSyntaxException, FileNotFoundException;
-	
 	/**
 	 * 获取用户创建的问题列表（WEB端功能）
 	 * @time 2017年3月14日16:47:05
