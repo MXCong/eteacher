@@ -110,6 +110,15 @@ public interface IQuestionService extends IService<Question> {
 	 */
 	public List<Map> getQuestionList(String userId);
 	/**
+	 * 删除问题
+	 * @time 2017年3月15日10:11:11
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	public void deleteQuestion(String questionId);
+	
+	/**
 	 * 修改status状态 设置备课
 	 * @param questionIds
 	 * @return

@@ -16,6 +16,7 @@
 <script type="text/javascript" src="../../js/utils/ajax.js"></script>
 
 <script type="text/javascript">
+    var classTable = null;
 	$(function(){
 		getDatas();//获取用户创建的问题列表
 	});
@@ -26,9 +27,11 @@
 		});
 	}
 	function initTale(datas){
-		var classTable = $('#classTable').bootstrapTable({
+			classTable = $('#classTable').bootstrapTable({
 			data : datas,
 		    striped : true,
+		    search : true,
+		    showRefresh : true,
 		    toolbar : '#toolbar',
 		    columns: [{
 		        title: '序号',
@@ -64,7 +67,8 @@
 		        field: 'questionId',
 		        align: 'center',
 		        formatter : function (value, row, index){
-		        	return '<i style="cursor: pointer;" title="编辑" class="glyphicon glyphicon-edit"></i> &nbsp;'
+		        	return '<i style="cursor: pointer;" title="标记/取消" class="glyphicon-collapse-up icon-chevron-up"></i> &nbsp;'
+		        		 + '<i style="cursor: pointer;" title="编辑" class="glyphicon glyphicon-edit"></i> &nbsp;'
 		        		 + '<i style="cursor: pointer;" title="删除" class="glyphicon glyphicon-trash"></i>';
 		        },
 		        events : {
@@ -72,18 +76,23 @@
 			            window.location.href = 'viewEditClass?classId=' + value;
 			        },
 			        'click .glyphicon-trash': function (e, value, row, index) {
-			        	if(confirm("确定删除")){
-			            	$.post('deleteClass',{classId : value},function(data){
-			            		if(data!='success'){
-			            			alert(data);
-			            		}
-				            	classTable.bootstrapTable('refresh');
-				            });
-			            }
+			        	deleteQuestion(value);
 			        }
 		        }
 		    } ]
 		});
+	}
+	//删除问题
+	function deleteQuestion(value){
+		if(confirm("确定删除")){
+    		var params = {};
+    		params.questionId = value;
+    		$httpUtils.post('question/delete',params,function(data){
+    			$httpUtils.post('question/getQuestionList',null,function(data){
+    				$('#classTable').bootstrapTable('load', data);
+    			});
+            });
+        }
 	}
 </script>
 </head>

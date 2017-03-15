@@ -370,19 +370,42 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 
 	@Override
 	public List<Map> getQuestionList(String userId) {
+		//问题有分类，知识点
 		String hql = "select distinct q.content as content , qt.typeName as typeName , "
 				+ "kp.knowledgeName as pointName , q.status as status , "
 				+ "q.questionId as questionId "
 				+ "from Question q , QuestionType qt , KnowledgePoint kp "
 				+ "where q.typeId = qt.typeId and q.knowledgeId = kp.knowledgeId "
 				+ "and q.userId = ? ";
-		List<Map> list = questionDAO.findMap(hql, userId, userId);
+		//问题无分类
+		String hql2 = "select distinct q.content as content , q.status as status , "
+				+ "q.questionId as questionId from Question q where q.userId = ? "
+				+ "and q.typeId = null";
+		//问题有分类，但无知识点分类
+		String hql3 = "select distinct q.content as content , qt.typeName as typeName , "
+				+ "q.status as status , q.questionId as questionId "
+				+ "from Question q , QuestionType qt "
+				+ "where q.typeId = qt.typeId and q.knowledgeId = null "
+				+ "and q.userId = ? ";
+		List<Map> list = questionDAO.findMap(hql, userId);
+		List<Map> list2 = questionDAO.findMap(hql2, userId);
+		List<Map> list3 = questionDAO.findMap(hql3, userId);
+		list.addAll(list2);
+		list.addAll(list3);
+		if(null != list && list.size()>0){
 		if (null != list && list.size() > 0) {
+			System.out.println(list.toString());
 			return list;
 		}
-		return null;
 	}
-
+		return null;
+}
+	@Override
+	public void deleteQuestion(String questionId) {
+		questionDAO.deleteById(questionId);
+		String sql = "DELETE FROM t_options WHERE t_options.QUESTION_ID = ?";
+		int result = questionDAO.executeBySql(sql, questionId);
+	}
 	@Override
 	public void updateStatus(List<Question> questionIds) {
 		for (int i = 0; i < questionIds.size(); i++) {

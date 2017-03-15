@@ -367,6 +367,25 @@ public class QuestionRemote extends BaseRemote {
 		}
 	}
 	/**
+	 * 删除问题
+	 * @time 2017年3月15日10:11:11
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "question/delete", method = RequestMethod.POST)
+	public ReturnBody deleteQuestion(HttpServletRequest request) {
+		try {
+			String questionId = request.getParameter("questionId");
+			questionServiceImpl.deleteQuestion(questionId);
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
+		}
+	}
+	
+	/**
 	 * 设置为备选题
 	 * @author xu
 	 * @return
@@ -382,11 +401,7 @@ public class QuestionRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ReturnBody(ReturnBody.RESULT_FAILURE , 
-
-ReturnBody.ERROR_MSG);
+			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
 		}
 	}
-	
-	
 }
