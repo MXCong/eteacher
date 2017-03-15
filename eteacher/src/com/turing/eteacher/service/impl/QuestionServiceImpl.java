@@ -394,7 +394,6 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 		list.addAll(list3);
 		if(null != list && list.size()>0){
 		if (null != list && list.size() > 0) {
-			System.out.println(list.toString());
 			return list;
 		}
 	}
@@ -416,6 +415,7 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 			} else {
 				question1.setStatus("0");
 			}
+			System.out.println("---:"+question1.toString());
 			questionDAO.update(question1);
 		}
 	}

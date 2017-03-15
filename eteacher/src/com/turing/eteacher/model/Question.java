@@ -71,4 +71,10 @@ public class Question extends BaseModel implements Serializable {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+	@Override
+	public String toString() {
+		return "Question [questionId=" + questionId + ", typeId=" + typeId + ", knowledgeId=" + knowledgeId
+				+ ", userId=" + userId + ", content=" + content + ", status=" + status + "]";
+	}
+	
 }

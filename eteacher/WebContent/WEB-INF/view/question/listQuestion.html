@@ -72,6 +72,10 @@
 		        		 + '<i style="cursor: pointer;" title="删除" class="glyphicon glyphicon-trash"></i>';
 		        },
 		        events : {
+		        	'click .glyphicon-collapse-up': function (e, value, row, index) {
+			            //alert(e+'--'+value+'---'+row.status+'---'+index);
+		        		updateStatus(value,row.status);//标记问题/取消标记
+			        },
 		        	'click .glyphicon-edit': function (e, value, row, index) {
 			            window.location.href = 'viewEditClass?classId=' + value;
 			        },
@@ -88,11 +92,32 @@
     		var params = {};
     		params.questionId = value;
     		$httpUtils.post('question/delete',params,function(data){
-    			$httpUtils.post('question/getQuestionList',null,function(data){
-    				$('#classTable').bootstrapTable('load', data);
-    			});
+    			refreshPage();	
             });
         }
+	}
+	//刷新页面数据
+	function refreshPage(){
+		$httpUtils.post('question/getQuestionList',null,function(data){
+			$('#classTable').bootstrapTable('load', data);
+		});
+	}
+	//标记问题、取消标记
+	function updateStatus(id,status){
+		var questionIds=[];
+		var map = {};
+		map.questionId = id;
+		if(status == 0){
+			map.status = 1;
+		}else{
+			map.status = 0;
+		}
+		questionIds.push(map);
+		var params={};
+ 		params.questionIds=JSON.stringify(questionIds);
+		$httpUtils.post('question/updateStatus',params,function(ret){
+			refreshPage();	
+		});
 	}
 </script>
 </head>
