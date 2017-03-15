@@ -11,14 +11,15 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
+import com.turing.eteacher.model.AnswerRecord;
 import com.turing.eteacher.model.Question;
 import com.turing.eteacher.model.QuestionRecord;
+import com.turing.eteacher.service.IAnswerRecordService;
 import com.turing.eteacher.service.ICourseClassService;
 import com.turing.eteacher.service.IQuestionRecordService;
 import com.turing.eteacher.service.IQuestionService;
@@ -39,6 +40,8 @@ public class QuestionRemote extends BaseRemote {
 
 	@Autowired
 	private ICourseClassService courseClassServiceImpl;
+	@Autowired
+	private IAnswerRecordService answerRecordServiceImpl;
 
 	@RequestMapping(value = "teacher/getAlternative", method = RequestMethod.POST)
 	public ReturnBody getAlternative(HttpServletRequest request) {
@@ -130,7 +133,7 @@ public class QuestionRemote extends BaseRemote {
 		if (StringUtil.checkParams(recordId)) {
 			QuestionRecord record = questionRecordServiceImpl.get(recordId);
 			if (null != record) {
-				Map map = questionRecordServiceImpl.getQuestion(recordId,
+				Map map = questionRecordServiceImpl.getQuestionResult(recordId,
 						FileUtil.getRequestUrl(request));
 				if (null != map) {
 					return new ReturnBody(map);
@@ -155,6 +158,49 @@ public class QuestionRemote extends BaseRemote {
 			} else {
 				return ReturnBody.getParamError();
 			}
+		} else {
+			return ReturnBody.getParamError();
+		}
+	}
+	
+	@RequestMapping(value = "student/getQuestionDetail", method = RequestMethod.POST)
+	public ReturnBody getQuestionDetail(HttpServletRequest request) {
+		String recordId = request.getParameter("recordId");
+		if (StringUtil.checkParams(recordId)) {
+			QuestionRecord record = questionRecordServiceImpl.get(recordId);
+			if (null != record) {
+				Map map = questionRecordServiceImpl.getQuestion(recordId,
+						FileUtil.getRequestUrl(request));
+				if (null != map) {
+					return new ReturnBody(map);
+				} else {
+					return ReturnBody.getSystemError();
+				}
+			} else {
+				return ReturnBody.getParamError();
+			}
+		} else {
+			return ReturnBody.getParamError();
+		}
+	}
+	@RequestMapping(value = "student/sendResult", method = RequestMethod.POST)
+	public ReturnBody sendResult(HttpServletRequest request) {
+		String optionsId = request.getParameter("optionsId");
+		String publishId = request.getParameter("publishId");
+		if (StringUtil.checkParams(publishId,optionsId)) {
+			QuestionRecord record = questionRecordServiceImpl.get(publishId);
+			Map map = new HashMap<>();
+			if (null != record && record.getStatus() == 1) {
+				AnswerRecord answerRecord = new AnswerRecord();
+				answerRecord.setOptionId(optionsId);
+				answerRecord.setPublishId(publishId);
+				answerRecord.setUserId(getCurrentUserId(request));
+				answerRecordServiceImpl.add(answerRecord);
+				map.put("flag", 0);
+			}else{
+				map.put("flag", 1);
+			}
+			return new ReturnBody(map);
 		} else {
 			return ReturnBody.getParamError();
 		}

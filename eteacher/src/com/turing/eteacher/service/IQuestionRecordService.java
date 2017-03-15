@@ -11,6 +11,13 @@ public interface IQuestionRecordService extends IService<QuestionRecord> {
 	 * @param recordId
 	 * @return
 	 */
-	public Map getQuestion(String recordId,String path);
+	public Map getQuestionResult(String recordId,String path);
+	/**
+	 * 学生端通过发题ID获取问题详情
+	 * @param recordId
+	 * @param requestUrl
+	 * @return
+	 */
+	public Map getQuestion(String recordId, String path);
 
 }

@@ -38,7 +38,7 @@ public class QuestionRecordServiceImpl extends BaseService<QuestionRecord>
 	}
 
 	@Override
-	public Map getQuestion(String recordId, String path) {
+	public Map getQuestionResult(String recordId, String path) {
 		Map map = null;
 		String hql = "select tq.questionId as questionId, tq.content  as content from Question tq,QuestionRecord tqr where tq.questionId = tqr.questionId and tqr.publishId = ?";
 		List<Map> list = questionRecordDAO.findMap(hql, recordId);
@@ -62,6 +62,33 @@ public class QuestionRecordServiceImpl extends BaseService<QuestionRecord>
 					List<AnswerRecord> templist = answerRecordDAO.find(hql4, recordId, (String) ops.get(i).get("optionId"));
 					ops.get(i).put("person", templist.size());
 				}
+				map.put("options", ops);
+			}
+			return map;
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public Map getQuestion(String recordId, String path) {
+		Map map = null;
+		String hql = "select tq.questionId as questionId, tq.content  as content from Question tq,QuestionRecord tqr where tq.questionId = tqr.questionId and tqr.publishId = ?";
+		List<Map> list = questionRecordDAO.findMap(hql, recordId);
+		if (null != list && list.size() > 0) {
+			map = list.get(0);
+			String hql2 = "select CONCAT( ? ,cf.serverName) as imgUrl from CustomFile cf where cf.dataId = ?";
+			List<Map> files = fileDAO.findMap(hql2, path,
+					(String) map.get("questionId"));
+			if (null != files && files.size() > 0) {
+				map.put("files", files);
+			}
+			String hql3 = "select to.optionId as optionId," +
+					" to.optionType as optionType," +
+					" to.optionValue as optionValue, " +
+					" to.questionId as questionId from Options to where to.questionId = ?";
+			List<Map> ops = optionsDAO.findMap(hql3, (String) map.get("questionId"));
+			if (null != ops && ops.size() > 0) {
 				map.put("options", ops);
 			}
 			return map;
