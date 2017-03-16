@@ -9,7 +9,6 @@
 <script type="text/javascript" src="../../js/turingLib/validator.js"></script>
 <script type="text/javascript" src="../../js/json2form.js"></script>
 <script type="text/javascript" src="../../js/My97DatePicker/WdatePicker.js"></script>
-
 <script type="text/javascript" src="../../js/utils/md5.js"></script>
 <script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
 <script type="text/javascript" src="../../js/utils/ajax.js"></script>
@@ -62,14 +61,14 @@
 		var title=	    $("#title").val();
 		var content=	$("#content").val();
 		var course=[];
-         $("input[type='checkbox']:checked").each(function(i){
+        $("input[type='checkbox']:checked").each(function(i){
         	 var v=$(this).val();
         	 var ce={};
         	 ce.id=$(this).val();
         	 course.push(ce);
-         })
+        })
 		var publishTime=$("#publishTime").val();
-        var date = new Date(publishTime.replace(/-/,"/")).getTime()/1000;
+        var date = Date.parse(new Date(publishTime)) / 1000;
 		var params={};
 		params.title=title;
 		params.content=content;

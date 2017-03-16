@@ -195,10 +195,10 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 				}
 			}
 		}
-		if(null != other && other.size() > 0){
+		if(!other.get(0).get("totalNum").toString().equals("0")){
 			List<Map> l = questionDAO.findMap(hql5, userId);//未分类中被标记的数量
 			Map m = new HashMap<>();
-			m.put("typeId", null);
+			m.put("typeId", "未分类");
 			m.put("typeName", "未分类");
 			m.put("totalNum", other.get(0).get("totalNum"));
 			m.put("flagNum", l.get(0).get("flagNum"));
@@ -208,14 +208,20 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 	}
 
 	@Override
-	public List<Map> getKonwledgePoint(String typeId) {
+	public List<Map> getKonwledgePoint(String typeId,String userId) {
 		String hql = "select qt.knowledgeId as pointId , qt.knowledgeName as pointName "
 				+ "from KnowledgePoint qt where qt.typeId = ? ";
 		String hql2 = "select count(*) as totalNum from Question q "
 				+ "where q.knowledgeId = ? ";
 		String hql3 = "select count(*) as flagNum from Question q "
 				+ "where q.knowledgeId = ? and q.status = 1";
+		String hql4 = "select count(*) as totalNum from Question q "
+				+ "where q.userId = ? and q.knowledgeId is null and q.typeId = ?";
+		String hql5 = "select count(*) as flagNum from Question q "
+				+ "where q.userId = ? and q.knowledgeId is null "
+				+ "and q.typeId = ? and q.status = 1";
 		List<Map> list = questionDAO.findMap(hql, typeId);
+		List<Map> other = questionDAO.findMap(hql4, userId,typeId);
 		if (null != list && list.size() > 0) {
 			String knowledgeId = null;
 			for (int i = 0; i < list.size(); i++) {
@@ -234,30 +240,47 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 				}
 			}
 		}
+		if(!other.get(0).get("totalNum").toString().equals("0")){
+			List<Map> l = questionDAO.findMap(hql5, userId,typeId);//知识点未分类中被标记的数量
+			Map m = new HashMap<>();
+			m.put("pointId", "未分类");
+			m.put("pointName", "未分类");
+			m.put("totalNum", other.get(0).get("totalNum"));
+			m.put("flagNum", l.get(0).get("flagNum"));
+			list.add(m);
+			System.out.println("+++:"+m.toString());
+		}
 		return list;
 	}
 
 	@Override
-	public List<Map> getQuestionByPointIds(String pointList) {
+	public List<Map> getQuestionByPointIds(String pointList,String typeId,String userId) {
 		String hql = "select distinct q.questionId as questionId , q.typeId as typeId , "
 				+ "q.knowledgeId as pointId , q.content as content , q.status as status "
 				+ "from Question q " + "where q.knowledgeId = ? ";
 		String hql2 = "select o.optionType as optionType , o.optionValue as optionValue "
-				+ "from Options o where o.questionId = ? " + "and o.flag = 1 ";
+				+ "from Options o where o.questionId = ? and o.flag = 1 ";
+		String hql3 = "select q.questionId as questionId , q.content as content , "
+				+ "q.status as status from Question q "
+				+ "where q.knowledgeId is null "
+				+ "and q.userId = ? and q.typeId = ?";
 		List<Map> list = new ArrayList<>();
 		String pointIds = pointList.substring(1, pointList.length() - 1);
 		String[] ids = pointIds.split(",");
+		List<Map> r = null;
 		for (int i = 0; i < ids.length; i++) {
 			String pointId = ids[i].substring(1, ids[i].length() - 1);
-			List<Map> r = questionDAO.findMap(hql, pointId);
+			if(pointId.equals("未分类")){
+				r = questionDAO.findMap(hql3,userId,typeId);
+			}else{
+				r = questionDAO.findMap(hql, pointId);
+			}
 			if (null != r && r.size() > 0) {
 				for (int j = 0; j < r.size(); j++) {
-					List<Map> m = questionDAO.findMap(hql2,
-							r.get(j).get("questionId"));
+					List<Map> m = questionDAO.findMap(hql2,r.get(j).get("questionId"));
 					if (null != m && m.size() > 0) {
 						r.get(j).put("optionType", m.get(0).get("optionType"));
-						r.get(j)
-								.put("optionValue", m.get(0).get("optionValue"));
+						r.get(j).put("optionValue", m.get(0).get("optionValue"));
 					} else {
 						r.get(j).put("optionType", "");
 						r.get(j).put("optionValue", "正确答案未设置");
@@ -483,9 +506,36 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 			} else {
 				question1.setStatus("0");
 			}
-			System.out.println("---:"+question1.toString());
 			questionDAO.update(question1);
 		}
+	}
+
+	@Override
+	public List<Map> getUnTypeList(String userId) {
+		String hql = "select distinct q.questionId as questionId , "
+				+ "q.content as content , q.status as status "
+				+ "from Question q where q.userId = ? and q.typeId is null";
+		String hql2 = "select o.optionType as optionType , o.optionValue as optionValue "
+				+ "from Options o where o.questionId = ? and o.flag = 1 ";
+		List<Map> list = new ArrayList<>();
+		List<Map> r = questionDAO.findMap(hql, userId);
+		if (null != r && r.size() > 0) {
+			for (int j = 0; j < r.size(); j++) {
+				List<Map> m = questionDAO.findMap(hql2,r.get(j).get("questionId"));
+				if (null != m && m.size() > 0) {
+					r.get(j).put("optionType", m.get(0).get("optionType"));
+					r.get(j).put("optionValue", m.get(0).get("optionValue"));
+				} else {
+					r.get(j).put("optionType", "");
+					r.get(j).put("optionValue", "正确答案未设置");
+				}
+			}
+			list.addAll(r);
+		}
+		if(null != list && list.size()>0){
+			return list;
+		}
+		return null;
 	}
 
 	@Override

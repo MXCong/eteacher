@@ -241,7 +241,7 @@ public class QuestionRemote extends BaseRemote {
 		try {
 			String typeId = request.getParameter("typeId");
 			String userId = getCurrentUserId(request);
-			List<Map> list = questionServiceImpl.getKonwledgePoint(typeId);
+			List<Map> list = questionServiceImpl.getKonwledgePoint(typeId,userId);
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -262,7 +262,28 @@ public class QuestionRemote extends BaseRemote {
 	public ReturnBody getQuestionByPointIds(HttpServletRequest request) {
 		try {
 			String pointList = request.getParameter("pointList");
-			List<Map> result = questionServiceImpl.getQuestionByPointIds(pointList);
+			String typeId = request.getParameter("typeId");
+			String userId = getCurrentUserId(request);
+			List<Map> result = questionServiceImpl.getQuestionByPointIds(pointList,typeId,userId);
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE,
+					ReturnBody.ERROR_MSG);
+		}
+	}
+	/**
+	 * 获取类别为“未分类”下的问题列表
+	 * @time 2017年3月16日10:13:13
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "question/getUnTypeList", method = RequestMethod.POST)
+	public ReturnBody getUnTypeList(HttpServletRequest request) {
+		try {
+			String userId = getCurrentUserId(request);
+			List<Map> result = questionServiceImpl.getUnTypeList(userId);
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
 		} catch (Exception e) {
 			e.printStackTrace();

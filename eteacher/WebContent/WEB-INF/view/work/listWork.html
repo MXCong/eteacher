@@ -86,8 +86,12 @@
 		        title: '操作',
 		        align: 'center',
 		        formatter : function (value, row, index){
-		        	return '<i style="cursor: pointer;" title="编辑" class="glyphicon glyphicon-edit"></i> &nbsp;'
-		        		 + '<i style="cursor: pointer;" title="删除" class="glyphicon glyphicon-trash"></i>';
+		        	var hint = "";
+		        	if(row.period == '待发布'){
+		        		hint += '<i style="cursor: pointer;" title="编辑" class="glyphicon glyphicon-edit"></i> &nbsp;';
+		        	}
+		        	hint += '<i style="cursor: pointer;" title="删除" class="glyphicon glyphicon-trash"></i>';
+		        	return hint;
 		        },
 		        events : {
 		        	'click .glyphicon-edit': function (e, value, row, index) {

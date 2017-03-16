@@ -13,6 +13,7 @@
 <script type="text/javascript" src="../../js/utils/md5.js"></script>
 <script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
 <script type="text/javascript" src="../../js/utils/ajax.js"></script>
+<script type="text/javascript" src="../../js/ajaxfileupload.js"></script>
 <script type='text/javascript' src='../../js/utils/doT.min.js' charset='utf-8'></script>
 
 <script type="text/javascript">
@@ -93,7 +94,7 @@
             	$('#workTitle').val(workInfo.title);
                 $('#publishTime').val(workInfo.publishTime);
                 $('#endTime').val(workInfo.endTime);
-                $('#workContent').html(workInfo.content);
+                $('#content').html(workInfo.content);
                 
                 var o = "<option value="+workInfo.courseId+">"+workInfo.courseName+"</option>";
                 $('#courseId').html(o);
@@ -102,12 +103,15 @@
                 
                 courseID = workInfo.courseId;
                 getCouseList();//获取课程的下拉列表项
-               /*  if (workInfo.targetClass) {
-                    $('#classes').html(dotClass(workInfo.targetClass));
-                }
                 if (workInfo.files) {
-                    $('#fileList').html(dotFiles(workInfo.files));
-                } */
+                	var n = workInfo.files;
+                	alert(JSON.stringify(n));
+                	for ( var i in n) {
+                		var html = '<div>' + n[i].fileName + '&nbsp;&nbsp;<i style="cursor: pointer;" title="删除" class="glyphicon glyphicon-trash" onclick="removeFile(this,\''+n[i].fileId+'\');"></i></div>';
+        				$('#content').after(html);
+        				//<a href="http://localhost:8080/eteacher/remote/teacher/notice/dwloade?filePath='+filePath+'&filename='+n[i].fileName+'">'+n[i].fileName+'</a>
+					}
+                }
             }
         });
     }
@@ -125,15 +129,16 @@
 	}
   	//保存修改后的作业
 	function saveWork(){
+		var cls = new Array();
 		var title = $('#workTitle').val();
         var publishTime = $('#publishTime').val();
         var endTime = $('#endTime').val();
-        var content = $('#workContent').val();
+        var content = $('#content').val();
         var targetClass = document.getElementsByClassName('targetClass');
-        var cls = new Array();
         for (var i = 0; i < targetClass.length; i++) {
-        	cls.push(targetClass[i].id);
+        	cls.push("\""+targetClass[i].id+"\"");
         }
+       	cls = "["+cls.toString()+"]";
         if(!content){
             alert("请填写作业内容！");
             return;
@@ -156,17 +161,17 @@
         params.title = title;
         params.content = content;
         params.targetClass = cls;
-        /* if($('#fileList').children.length > 0){
-            var file = new Array();
-            for(var i = 0;i < $('#fileList').children.length; i++){
-                file.push($('#fileList').children[i].id)
-            }
-            params.files  = {
-                file : file
-            };
-        } */
+        
+        var fileIds=[];
+		$("input[type='file']").each(function(i){
+			 var id=$(this).attr("id");
+			 fileIds.push(id);
+		})
+		params.fileIds=fileIds;
+		
         params.status = 1;
-        $httpUtils.post('teacher/work/addWork',params,function(date){
+        alert(JSON.stringify(params));
+        $httpUtils.postUp('teacher/work/addWork',params,function(date){
             alert("作业修改成功");
         });
 	}
@@ -185,10 +190,10 @@
                 </div> 
                 <div class="message-group">
                     <div class="message-left">作业内容：</div>
-                    <div class="message-right" id="filesDiv">
-                    	<textarea id="workContent" name="content" maxlength="200" placeholder="作业内容（不超过200字）" style="margin-bottom:10px;"></textarea>
-                    	<!-- <div class="message-wrap fileDiv" id="fileList">
-	                        <input name="file" type="file" class="mess-control" style="width:65%;float:left;" />
+                    <div class="message-right"  id="filesDiv">
+                    	<textarea id="content" name="content" placeholder="通知内容" style="margin-bottom:10px;"></textarea>
+                    	<div class="message-wrap fileDiv" id="fileList">
+	                        <input name="file" type="file" class="mess-control" style="width:65%;float:left;" id="fileName"/>
 	                        <div id="toolbar" class="btn-group" style="float:left;margin-left:5px">
 							    <button type="button" class="btn btn-default" style="height:34px;" title="新增" onclick="addFile(this);">
 							        <i class="glyphicon glyphicon-plus"></i>
@@ -197,8 +202,8 @@
 							        <i class="glyphicon glyphicon-remove"></i>
 							    </button>
 							</div>
-						</div> -->
-                    </div>                   	
+						</div>
+                    </div>                  	
                 </div>
                 <div class="message-group">
                     <div class="message-left">选择课程：</div>

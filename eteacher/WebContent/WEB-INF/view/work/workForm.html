@@ -13,6 +13,7 @@
 <script type="text/javascript" src="../../js/utils/md5.js"></script>
 <script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
 <script type="text/javascript" src="../../js/utils/ajax.js"></script>
+<script type="text/javascript" src="../../js/ajaxfileupload.js"></script>
 <script type='text/javascript' src='../../js/utils/doT.min.js' charset='utf-8'></script>
 <style>
 	.onetab {
@@ -84,9 +85,15 @@
         params.content = content;
         params.targetClass = cls;
         
+        var fileIds=[];
+		$("input[type='file']").each(function(i){
+			 var id=$(this).attr("id");
+			 fileIds.push(id);
+		})
+		params.fileIds=fileIds;
+		
         params.status = 1;
-        alert("--"+JSON.stringify(params.cls));
-        $httpUtils.post('teacher/work/addWork',params,function(date){
+        $httpUtils.postUp('teacher/work/addWork',params,function(date){
             //alert("作业创建成功");
             history.back();
         });

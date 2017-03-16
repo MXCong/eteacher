@@ -38,7 +38,7 @@ public interface IQuestionService extends IService<Question> {
 	 * @param request
 	 * @return
 	 */
-	List<Map> getKonwledgePoint(String typeId);
+	List<Map> getKonwledgePoint(String typeId,String userId);
 	
 	/**
 	 * 获取特定知识点（一个或多个）下的问题列表
@@ -47,7 +47,7 @@ public interface IQuestionService extends IService<Question> {
 	 * @param request
 	 * @return
 	 */
-	List<Map> getQuestionByPointIds(String pointList);
+	List<Map> getQuestionByPointIds(String pointList,String typeId,String userId);
 	
 	/**
 	 * 增加问题分类
@@ -124,6 +124,14 @@ public interface IQuestionService extends IService<Question> {
 	 * @return
 	 */
 	public void updateStatus(List<Question> questionIds);
+	/**
+	 * 获取类别为“未分类”下的问题列表
+	 * @time 2017年3月16日10:13:13
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	public List<Map> getUnTypeList(String userId);
 	/**
 	 * 编辑问题
 	 * @param questionId
