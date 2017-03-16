@@ -171,7 +171,12 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 				+ "where q.typeId = ? ";
 		String hql3 = "select count(*) as flagNum from Question q "
 				+ "where q.typeId = ? and q.status = 1";
+		String hql4 = "select count(*) as totalNum from Question q "
+				+ "where q.userId = ? and q.typeId is null";
+		String hql5 = "select count(*) as flagNum from Question q "
+				+ "where q.userId = ? and q.typeId is null and q.status = 1";
 		List<Map> list = questionDAO.findMap(hql, userId);
+		List<Map> other = questionDAO.findMap(hql4, userId);
 		if (null != list && list.size() > 0) {
 			String typeId = null;
 			for (int i = 0; i < list.size(); i++) {
@@ -189,6 +194,15 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 					list.get(i).put("flagNum", 0);
 				}
 			}
+		}
+		if(null != other && other.size() > 0){
+			List<Map> l = questionDAO.findMap(hql5, userId);//未分类中被标记的数量
+			Map m = new HashMap<>();
+			m.put("typeId", null);
+			m.put("typeName", "未分类");
+			m.put("totalNum", other.get(0).get("totalNum"));
+			m.put("flagNum", l.get(0).get("flagNum"));
+			list.add(m);
 		}
 		return list;
 	}

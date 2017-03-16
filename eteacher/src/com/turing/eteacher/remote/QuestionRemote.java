@@ -216,7 +216,7 @@ public class QuestionRemote extends BaseRemote {
 	 * @return
 	 */
 	@RequestMapping(value = "question/getType", method = RequestMethod.POST)
-	public ReturnBody knowledgePoint(HttpServletRequest request) {
+	public ReturnBody getQuestionType(HttpServletRequest request) {
 		try {
 			String userId = getCurrentUserId(request);
 			List<Map> list = questionServiceImpl.getQuestionType(userId);
@@ -237,9 +237,10 @@ public class QuestionRemote extends BaseRemote {
 	 * @return
 	 */
 	@RequestMapping(value = "question/knowledgePoint", method = RequestMethod.POST)
-	public ReturnBody questionType(HttpServletRequest request) {
+	public ReturnBody getKonwledgePoint(HttpServletRequest request) {
 		try {
 			String typeId = request.getParameter("typeId");
+			String userId = getCurrentUserId(request);
 			List<Map> list = questionServiceImpl.getKonwledgePoint(typeId);
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, list);
 		} catch (Exception e) {
@@ -261,8 +262,7 @@ public class QuestionRemote extends BaseRemote {
 	public ReturnBody getQuestionByPointIds(HttpServletRequest request) {
 		try {
 			String pointList = request.getParameter("pointList");
-			List<Map> result = questionServiceImpl
-					.getQuestionByPointIds(pointList);
+			List<Map> result = questionServiceImpl.getQuestionByPointIds(pointList);
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
 		} catch (Exception e) {
 			e.printStackTrace();
