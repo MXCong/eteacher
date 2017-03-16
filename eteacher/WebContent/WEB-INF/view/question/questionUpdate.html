@@ -55,21 +55,23 @@
 	   	  params.questionId=questionId;
 			$httpUtils.post('teacher/questionDetail', params, function(data) {
 				if(null!=data){
-					for(var i=0;i<data.options.length;i++){
-					       if(i==0){
-					    	  $("#zz").eq(0).find(".optionValue").val(data.options[i].optionValue).attr("optionId",data.options[i].optionId);
-					       }else{
-							var zz = $("#zz").eq(0).clone();
-							zz.find(".optionValue").val(data.options[i].optionValue).attr("optionId",data.options[i].optionId);
-							zz.appendTo('#optionsDiv');
+					if(null!=data.options){
+						for(var i=0;i<data.options.length;i++){
+						       if(i==0){
+						    	  $("#zz").eq(0).find(".optionValue").val(data.options[i].optionValue).attr("optionId",data.options[i].optionId);
+						       }else{
+								var zz = $("#zz").eq(0).clone();
+								zz.find(".optionValue").val(data.options[i].optionValue).attr("optionId",data.options[i].optionId);
+								zz.appendTo('#optionsDiv');
+							}
 						}
-					}
-					//对答案编号进行处理
-					changeOptionKey();
-					updateOptions();
-					for (var i = 0; i < data.options.length; i++) {
-						if (data.options[i].flag == 1) {
-							changeOpt(data.options[i].optionType);
+						//对答案编号进行处理
+						changeOptionKey();
+						updateOptions();
+						for (var i = 0; i < data.options.length; i++) {
+							if (data.options[i].flag == 1) {
+								changeOpt(data.options[i].optionType);
+							}
 						}
 					}
 					$("#questionType").val(data.typeContent).attr("pid",data.typeId);
