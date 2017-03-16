@@ -19,8 +19,14 @@
 <script type="text/javascript">
 	var courseID = null;
 	var workId = null;
+	var flag = 0;
 	$(function(){
 		workId = $PrefsUtils.receive('workId');
+		flag = $PrefsUtils.receive('flag');
+		if(flag == 1){
+			//查看作业详情
+			changeStyle();
+		}
 		getDetail(workId);
 	});
 	
@@ -170,11 +176,16 @@
 		params.fileIds=fileIds;
 		
         params.status = 1;
-        alert(JSON.stringify(params));
+        //alert(JSON.stringify(params));
         $httpUtils.postUp('teacher/work/addWork',params,function(date){
             alert("作业修改成功");
         });
 	}
+  	//查看作业详情，禁止编辑
+  	function changeStyle(){
+  		$('input,select,textarea').attr('readonly',true);
+  		$('#saveBtn').hide();
+  	}
 </script>
 </head>
 <body>
@@ -234,7 +245,7 @@
                     </div>                   	
                 </div>
                 <div class="btnsub">
-                    <input type="button" class="btn-submit" value="保存" onclick="saveWork();">
+                    <input id="saveBtn" type="button" class="btn-submit" value="保存" onclick="saveWork();">
                     <button type="button" class="btn-submit" onclick="history.back();">返回</button>
                 </div>
             </form> 

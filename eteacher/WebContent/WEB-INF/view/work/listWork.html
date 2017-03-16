@@ -59,7 +59,15 @@
 		    },{
 		        field: 'title',
 		        halign: 'center',
-		        title: '作业标题'
+		        title: '作业标题',
+		        formatter : function (value, row , index){
+		        	var id = row.workId;
+		        	return '<a href="#" class="showDetail">'+value+'</a>';
+		        },events : {
+		        	'click .showDetail': function (e, value, row, index) {
+		        		showDetail(row.workId);
+			        },
+		        }
 		    }, {
 		        field: 'content',
 		        halign: 'center',
@@ -161,6 +169,12 @@
         		} 
             }
         });
+    }
+    //查看作业详情
+    function showDetail(workId){
+    	$PrefsUtils.transfer('workId',workId);
+    	$PrefsUtils.transfer('flag',1);
+        window.location.href = 'editWork.html';
     }
 </script>
 </head>

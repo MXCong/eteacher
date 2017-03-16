@@ -82,6 +82,7 @@
 	//答案选项，下拉菜单更新
 	function updateOptions() {
 		$('#answer').empty();
+		$('#answer').append("<option value='null'></option>");
 		var index = $(".optionKey").size();
 		for (var i = 65; i < 65 + index; i++) {
 			key = String.fromCharCode(i);
@@ -249,7 +250,7 @@
 					<div class="message-left">正确答案：</div>
 					<div class="message-right" style="width: 67%;">
 						<select id="answer">
-							<option vlaue=""></option>
+							
 						</select>
 					</div>
 				</div>
