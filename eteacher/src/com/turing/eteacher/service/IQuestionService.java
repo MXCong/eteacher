@@ -16,7 +16,7 @@ public interface IQuestionService extends IService<Question> {
 	 * @param knowledgeId
 	 * @return
 	 */
-	public List<Map> getAlternative(String userId, String courseId, String knowledgeId,int page);
+	public List<Map> getAlternative(String userId, String courseId, String typeId,String knowledgeId,int page);
 	/**
 	 * 获取知识点树
 	 * @param userId

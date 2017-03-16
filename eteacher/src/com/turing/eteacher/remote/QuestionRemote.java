@@ -47,10 +47,11 @@ public class QuestionRemote extends BaseRemote {
 	public ReturnBody getAlternative(HttpServletRequest request) {
 		String courseId = request.getParameter("courseId");
 		String knowledgeId = request.getParameter("knowledgeId");
+		String typeId = request.getParameter("typeId");
 		String page = request.getParameter("page");
 		if (StringUtil.isNotEmpty(page)) {
 			List<Map> result = questionServiceImpl.getAlternative(
-					getCurrentUserId(request), courseId, knowledgeId,
+					getCurrentUserId(request), courseId, typeId,knowledgeId,
 					Integer.parseInt(page));
 			if (null != result) {
 				return new ReturnBody(result);

@@ -71,20 +71,44 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 
 	@Override
 	public List<Map> getAlternative(String userId, String courseId,
-			String knowledgeId, int page) {
+			String typeId,String knowledgeId, int page) {
 		List result = null;
 		String sql = "";
 		if (StringUtil.isNotEmpty(knowledgeId)) {
-			sql = "SELECT DISTINCT tq.`CONTENT` AS content,"
-					+ "CONCAT (toption.`OPTION_TYPE`,"
-					+ "toption.`OPTION_VALUE`) AS answer ,"
-					+ "tq.`QUESTION_ID` AS questionId "
-					+ "FROM t_question tq LEFT JOIN t_options toption "
-					+ "ON tq.`QUESTION_ID` = toption.`QUESTION_ID` "
-					+ "WHERE tq.`KNOWLEDGE_ID` = ? " + "AND tq.`STATUS` = '1' "
-					+ "AND toption.`FLAG` = '1'";
-			return questionDAO
-					.findBySqlAndPage(sql, page * 20, 20, knowledgeId);
+			if (knowledgeId.equals("all")) {
+				sql = "SELECT DISTINCT tq.`CONTENT` AS content,"
+						+ "CONCAT (toption.`OPTION_TYPE`,"
+						+ "toption.`OPTION_VALUE`) AS answer ,"
+						+ "tq.`QUESTION_ID` AS questionId "
+						+ "FROM t_question tq LEFT JOIN t_options toption "
+						+ "ON tq.`QUESTION_ID` = toption.`QUESTION_ID` "
+						+ "WHERE tq.`TYPE_ID` = ? " 
+						+ "AND tq.`STATUS` = 1 "
+						+ "AND toption.`FLAG` = 1";
+				return questionDAO.findBySqlAndPage(sql, page * 20, 20, typeId);
+			}else if (knowledgeId.equals("other")) {
+				sql = "SELECT DISTINCT tq.`CONTENT` AS content,"
+						+ "CONCAT (toption.`OPTION_TYPE`,"
+						+ "toption.`OPTION_VALUE`) AS answer ,"
+						+ "tq.`QUESTION_ID` AS questionId "
+						+ "FROM t_question tq LEFT JOIN t_options toption "
+						+ "ON tq.`QUESTION_ID` = toption.`QUESTION_ID` "
+						+ "WHERE tq.`KNOWLEDGE_ID` IS NULL " 
+						+ "AND tq.`STATUS` = 1 "
+						+ "AND tq.`TYPE_ID` = ? "
+						+ "AND toption.`FLAG` = 1";
+				return questionDAO.findBySqlAndPage(sql, page * 20, 20, typeId);
+			}else{
+				sql = "SELECT DISTINCT tq.`CONTENT` AS content,"
+						+ "CONCAT (toption.`OPTION_TYPE`,"
+						+ "toption.`OPTION_VALUE`) AS answer ,"
+						+ "tq.`QUESTION_ID` AS questionId "
+						+ "FROM t_question tq LEFT JOIN t_options toption "
+						+ "ON tq.`QUESTION_ID` = toption.`QUESTION_ID` "
+						+ "WHERE tq.`KNOWLEDGE_ID` = ? " + "AND tq.`STATUS` = 1 "
+						+ "AND toption.`FLAG` = 1";
+				return questionDAO.findBySqlAndPage(sql, page * 20, 20, knowledgeId);
+			}
 		} else if (StringUtil.isNotEmpty(courseId)) {
 			Course course = courseDAO.get(courseId);
 			if (null != course) {
