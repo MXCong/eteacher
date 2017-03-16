@@ -124,4 +124,19 @@ public interface IQuestionService extends IService<Question> {
 	 * @return
 	 */
 	public void updateStatus(List<Question> questionIds);
+	/**
+	 * 编辑问题
+	 * @param questionId
+	 * @param options
+	 * @param answer
+	 * @throws JsonIOException
+	 * @throws JsonSyntaxException
+	 * @throws FileNotFoundException
+	 */
+	public void updateOption(String questionId, String options, String answer) throws JsonIOException, JsonSyntaxException, FileNotFoundException;
+	/**
+	 * 删除答案
+	 * @param optionId
+	 */
+	public void deleteOption(String optionId);
 }

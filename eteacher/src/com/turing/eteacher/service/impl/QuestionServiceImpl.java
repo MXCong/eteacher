@@ -323,6 +323,7 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 	public Map getQuestiondetail(String questionId, String path) {
 		String sql = "select " + "tq.`QUESTION_ID` as questionId, "
 				+ "tq.`CONTENT` as content, "
+				+ "tq.`STATUS` as status, "
 				+ "tq.`KNOWLEDGE_ID` AS knowledgeId, "
 				+ "tqt.`TYPE_ID` as typeId, "
 				+ "tqt.`TYPE_NAME` as typeContent "
@@ -405,6 +406,35 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 		}
 
 	}
+	
+	@Override
+	public void updateOption(String questionId, String options, String answer) {
+		// 将字符串类型的options转换为List<Map>类型
+		try {
+			List<Options> list = Arrays.asList(new ObjectMapper().readValue(
+					options, Options[].class));
+			for (int i = 0; i < list.size(); i++) {
+				Options opt = new Options();
+				opt.setOptionType((String) list.get(i).getOptionType());
+				opt.setOptionValue((String) list.get(i).getOptionValue());
+				opt.setQuestionId(questionId);
+				if ((boolean) list.get(i).getOptionType().equals(answer)) {
+					opt.setFlag(1);
+				} else {
+					opt.setFlag(0);
+				}
+				if(null!=(String) list.get(i).getOptionId()){
+					opt.setOptionId((String) list.get(i).getOptionId());
+					optionDAO.update(opt);
+				}else{
+					optionDAO.save(opt);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
 
 	@Override
 	public List<Map> getQuestionList(String userId) {
@@ -456,5 +486,11 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 			System.out.println("---:"+question1.toString());
 			questionDAO.update(question1);
 		}
+	}
+
+	@Override
+	public void deleteOption(String optionId) {
+		String sql = "DELETE FROM t_options WHERE t_options.OPTION_ID = ?";
+		int result = questionDAO.executeBySql(sql, optionId);
 	}
 }

@@ -390,6 +390,38 @@ public class QuestionRemote extends BaseRemote {
 		}
 	}
 	/**
+	 * 更新问题
+	 * @param request
+	 * @param question
+	 * @return
+	 */
+	@RequestMapping(value = "question/update", method = RequestMethod.POST)
+	public ReturnBody updateQuestion(HttpServletRequest request,Question question) {
+		try {
+			String userId = getCurrentUserId(request);
+			String knowledgeId = request.getParameter("knowledgeId");
+			String content = request.getParameter("content");
+			String typeId = request.getParameter("typeId");
+			String options = request.getParameter("options");
+			String answer = request.getParameter("answer");
+			String questionId = request.getParameter("questionId");
+			String Status = request.getParameter("status");
+			if(StringUtil.checkParams(content)){
+				question.setContent(content);
+				question.setKnowledgeId(knowledgeId);
+				question.setTypeId(typeId);
+				question.setUserId(userId);
+				question.setStatus(Status);
+				questionServiceImpl.update(question);//存储问题实体
+				questionServiceImpl.updateOption(questionId,options,answer);
+			}
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
+		}
+	}
+	/**
 	 * 获取用户创建的问题列表（WEB端功能）
 	 * @time 2017年3月14日16:47:05
 	 * @author macong
@@ -431,6 +463,26 @@ public class QuestionRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
 		}
 	}
+	
+	
+	/**
+	 * 删除答案
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "question/delOptions", method = RequestMethod.POST)
+	public ReturnBody delOptions(HttpServletRequest request) {
+		try {
+			String optionId = request.getParameter("optionId");
+			questionServiceImpl.deleteOption(optionId);
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
+		}
+	}
+	
+	
 	
 	/**
 	 * 设置为备选题
