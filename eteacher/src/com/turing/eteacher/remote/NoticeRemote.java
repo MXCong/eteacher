@@ -74,7 +74,22 @@ public class NoticeRemote extends BaseRemote {
 					ReturnBody.ERROR_MSG);
 		}
 	}
-	
+	/**
+	 * 删除目录
+	 * @param filePath
+	 */
+	@RequestMapping(value = "teacher/deleteFile", method = RequestMethod.GET)
+	public  void deleteFile(String filePath,String fileId) {
+		String suffixes="";
+		if(StringUtil.isNotEmpty(filePath)){
+			 suffixes=filePath.substring(filePath.lastIndexOf("download")+8);
+		}
+		String path=FileUtil.getUploadPath()+suffixes;
+		File file = new File(path);
+		file.delete();
+		fileServiceImpl.deleteById(fileId);
+		
+	}
 	
 	/**
 	 * 下载

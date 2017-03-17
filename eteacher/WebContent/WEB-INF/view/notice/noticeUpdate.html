@@ -32,8 +32,10 @@
 	}
     
 	li:hover {
+	position:absolute;
     color: #999999;
     text-decoration:none;
+    transform-origin:right top;
 	transform:scale(2, 2); 
 	-moz-transform:scale(2,2); 
 	-webkit-transform:scale(2,2); 
@@ -103,7 +105,7 @@
                     </div>                   	
                 </div> 
                 <div class="message-group" >
-                <div class="message-left">发布时间：</div>
+                <div class="message-left">附件下载：</div>
                 	<div class="radio">
                     <ul id="bus" style="width:600px; height:auto;  overflow:hidden";>
 					</ul> 
@@ -169,7 +171,7 @@
 		        	filePath=filePath.replace(' ','');
 // 		         var zzz=$('<a href="'+filePath+'">'+files[i].fileName+'</a>');
                       
-		         var zzz=$('<li> <a href="http://localhost:8080/eteacher/remote/teacher/notice/dwloade?filePath='+filePath+'&filename='+files[i].fileName+'">'+files[i].fileName+'</a> </li>');
+		         var zzz=$('<li> <a href="http://localhost:8080/eteacher/remote/teacher/deleteFile?filePath='+filePath+'&fileId='+files[i].fileId+'"><img  src="../../images/delet1.png" width="5px" height="5px" style="float:right; z-index:6";  /></a><a href="http://localhost:8080/eteacher/remote/teacher/notice/dwloade?filePath='+filePath+'&filename='+files[i].fileName+'">'+files[i].fileName+'</a> </li>');
 // 		         window.location.href = 'http://localhost:8080/eteacher/remote/teacher/notice/dwloade';
 // 		       		  zzz.text(files[i].fileName);
 		       		  zzz.appendTo($("#bus"));
