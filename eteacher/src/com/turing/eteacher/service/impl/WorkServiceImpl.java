@@ -272,14 +272,6 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 				list.get(a).put("className", classes.substring(0, classes.length() - 1));
 			}
 		}
-		/*
-		 * //2. 一个作业对应多门课程 String wid = (String) list.get(a).get("workId");
-		 * for(int b = 0; b < list.size(); b++){ if(a != b &&
-		 * wid.equals(list.get(b).get("workId"))){ String ncn = (String)
-		 * list.get(a).get("courseName")+"||"+(String)
-		 * list.get(b).get("courseName"); list.remove(b);//去掉重复项
-		 * list.get(a).put("courseName", ncn);//覆盖原有的course为拼接后的值 } } }
-		 */
 		if (null != list && list.size() > 0) {
 			// 判断作业是否存在附件
 			for (int i = 0; i < list.size(); i++) {

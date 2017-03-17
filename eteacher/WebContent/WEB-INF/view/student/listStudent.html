@@ -39,6 +39,9 @@
 	}
 	function viewStatistics(){
 		window.location.href = '../statistics/courseStatistics.html';
+	}	
+	function viewSendQuestion(){
+		window.location.href = '../question/sendQuestion.html';
 	}
 	//获取成绩类型为“均值”的成绩项
 	function getScourType(){
@@ -288,6 +291,10 @@
 				<button type="button" class="btn btn-default btn-sm" title="成绩"
 					onclick="viewStatistics();">
 					<i class="glyphicon glyphicon-th-large"></i> 统计
+				</button>
+				<button type="button" class="btn btn-default btn-sm" title="成绩"
+					onclick="viewSendQuestion();">
+					<i class="glyphicon glyphicon-th-large"></i> 发题
 				</button>
 			</div>
 			<table id="studentTable"></table>

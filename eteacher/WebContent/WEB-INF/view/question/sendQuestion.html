@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>教学系统教师pc端</title>
+	<link href="../../css/base.css" rel="stylesheet" type="text/css">
+	<link href="../../js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+	<link href="../../js/bootstrap-table/bootstrap-table.css" rel="stylesheet" type="text/css">
+	<script type="text/javascript" src="../../js/jquery.min.js"></script>
+	<script type="text/javascript" src="../../js/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table.min.js"></script>
+	<script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+
+	<script type="text/javascript" src="../../js/utils/md5.js"></script>
+	<script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
+	<script type="text/javascript" src="../../js/utils/ajax.js"></script>
+	<script type="text/javascript" src="../../js/echarts.common.min.js"></script>
+
+	<script type="text/javascript">
+		var classTable = null;
+		var typeTree = null;
+		var flag = true;
+		var courseId = null;
+		var recordId = null;
+		$(function(){
+			getDatas();
+			getTypeTree();
+			courseId = $httpUtils.getUrlParam('courseId');
+			courseId = "aaaa";
+			$('#typeSelect').change(function(){ 
+				if ($(this).children('option:selected').val() == 'all'){
+					$('#knowledgeSelect').html("<option value='all'>全部</option>");
+				}else{
+					initKnowledgeSelect();
+				}
+				getDatas();
+			});
+			$('#knowledgeSelect').change(function(){ 
+				getDatas();
+			});
+		});
+	//获取用户创建的问题列表
+	function getDatas(){
+		var params = {};
+		params.page = 0;
+		if ($('#typeSelect').children('option:selected').val() != 'all') {
+			params.typeId = $('#typeSelect').children('option:selected').val();
+			params.knowledgeId = $('#knowledgeSelect').children('option:selected').val();
+		}
+		$httpUtils.post('teacher/getAlternative',params,function(data){
+			if (flag) {
+				initTale(data);
+				flag = false;
+			}else{
+				$('#classTable').bootstrapTable('load', data);
+			}
+		});
+	}
+	/*获取分类*/	
+	function getTypeTree(){
+		$httpUtils.post('teacher/getknowledgeTree',null,function(data){
+			if (data) {
+				typeTree = data;
+				initTypeSelect();
+			}
+		});
+	}
+
+	/*初始化分类*/
+	function initTypeSelect(){
+		$('#typeSelect').html('');
+		$('#typeSelect').append("<option value='all'>全部</option>");
+		for (var i = 0; i < typeTree.length; i++) {
+			var opt = "<option value="+typeTree[i].typeId+">"+typeTree[i].typeName+"</option>";	
+			$('#typeSelect').append(opt);
+		}
+		$('#knowledgeSelect').html("<option value='all'>全部</option>");
+	}
+	/*初始化知识点*/
+	function initKnowledgeSelect(){
+		for (var i = 0; i < typeTree.length; i++) {
+			if ($('#typeSelect').children('option:selected').val() == typeTree[i].typeId) {
+				$('#knowledgeSelect').html('');
+				$('#knowledgeSelect').append("<option value='all'>全部</option>");
+				if (typeTree[i].knowledges) {
+					for (var j = 0; j < typeTree[i].knowledges.length; j++) {
+						var opt = "<option value="+typeTree[i].knowledges[j].knowledgeId+">"+typeTree[i].knowledges[j].knowledgeName+"</option>";
+						$('#knowledgeSelect').append(opt);	
+					}
+				}
+				$('#knowledgeSelect').append("<option value='other'>未分类</option>");
+			}
+		}
+	}
+
+	function initTale(datas){
+		classTable = $('#classTable').bootstrapTable({
+			data : datas,
+			striped : true,
+			search : false,
+			showRefresh : false,
+			toolbar : '#toolbar',
+			columns: [{
+				title: '序号',
+				align: 'center',
+				formatter : function (value, row, index){
+					return index + 1;
+				}
+			},{
+				field: 'content',
+				halign: 'center',
+				title: '问题内容'
+			}, {
+				field: 'answer',
+				halign: 'center',
+				title: '答案'
+			}, {
+				title: '发送',
+				field: 'questionId',
+				align: 'center',
+				formatter : function (value, row, index){
+					return '<i style="cursor: pointer;" title="编辑" class="glyphicon glyphicon-edit"></i> ';
+				},
+				events : {
+					'click .glyphicon-edit': function (e, value, row, index) {
+						var r=confirm("您确认要发送本道习题？");
+						if (r==true){
+							sendQuestion(row.questionId);
+						}
+					}
+				}
+			} ]
+		});
+	}
+	/*发送习题*/
+	function sendQuestion(qId){
+        var params = {};
+        params.courseId = courseId;
+        params.questionId = qId;
+        $httpUtils.post('teacher/sendQuestion', params, function(res) {
+            if (res && res.recordId) {
+                    recordId = res.recordId;
+                    $('#answerModal').modal();
+                    startTimer();
+            }
+        });
+	}
+
+</script>
+</head>
+<body>
+	<div class="maincont">
+		<div class="title"><span>问题列表</span></div>
+		<div class="enter-message">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td width="8%" align="left" valign="middle"><label style="line-height:36px; margin-bottom:0;">分类</label></td>
+						<td>
+							<select id="typeSelect" class="select-control" style="width:30%" >   
+							</select>                                
+						</td>  
+						<td width="8%" align="left" valign="middle"><label style="line-height:36px; margin-bottom:0;">知识点</label></td>
+						<td>
+							<select id="knowledgeSelect" class="select-control" style="width:30%" >   
+							</select>                                
+						</td>                    
+					</tbody>
+				</table>
+				<table id="classTable"></table>
+			</div>
+			<div class="footer">
+				<div class="container">
+					<p>版权所有：河北图灵</p>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript">
+	$.get('answerResult.ftl', function(content) {
+		$('body').after(content);
+	});
+	$.get('answering.ftl', function(content) {
+		$('body').after(content);
+	});
+	</script>
+	</html>

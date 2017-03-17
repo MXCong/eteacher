@@ -65,8 +65,7 @@ public class QuestionRemote extends BaseRemote {
 
 	@RequestMapping(value = "teacher/getknowledgeTree", method = RequestMethod.POST)
 	public ReturnBody getknowledgeTree(HttpServletRequest request) {
-		List<Map> result = questionServiceImpl
-				.getknowledgeTree(getCurrentUserId(request));
+		List<Map> result = questionServiceImpl.getknowledgeTree(getCurrentUserId(request));
 		if (null != result) {
 			return new ReturnBody(result);
 		} else {

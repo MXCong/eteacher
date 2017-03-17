@@ -296,3 +296,75 @@ span.weekon { background:#238BC8; color:#fff;}
 
 a.filebtn { display:block; margin:10px auto; width:80px; height:32px; line-height:32px; background:#238BC8; color:#fff; text-align:center; color:#fff; border-radius:5px;}
 a.filebtn:hover { text-decoration:none; color:#fff;}
+
+/*发题页面样式*/
+.topDiv {
+	height: 150px; 
+	font-size: 45px;
+	width: 100%;
+}
+.topDiv span{
+	line-height: 150px;
+	width: 100%;
+	display: inline-block;
+	text-align: center;
+}
+.bottomDiv{
+	height: 150px; 
+	text-align: center;
+}
+
+.bottomDiv .btn{
+	height: 40px;
+	width: 100px;
+	background-color: #00b198;
+	text-align: center;
+	line-height: 40px;
+	font-size: 18px;
+	color: #fff;
+	padding: 0px;
+	margin: 0px;
+}
+.bottomDiv .hint{
+	margin-top: 10px;
+	display: block;
+}
+
+/*答题结果页*/
+
+.qtitle {
+    width: auto;
+    margin-top: 20px;
+}
+.quest {
+    font-size: 16px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+.quest .file {
+    width: 100%;
+    margin-top: 10px;
+}
+.file img {
+    width: 100%;
+    height: auto;
+    margin-top:10px;
+    border-radius: 5px;
+}
+.result {
+    margin-top: 10px;
+    margin-left: 40px;
+    font-size: 16px;
+}
+.qlogo {
+	display: inline-block;
+    margin-top: 20px;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    margin-right: 10px;
+    background: #0894EC;
+    border-radius: 30px;
+    line-height: 30px;
+    color: #FFFFFF;
+}

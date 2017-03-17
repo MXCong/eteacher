@@ -1,33 +1,17 @@
 package com.turing.eteacher.service.impl;
 
-import java.text.NumberFormat;
-
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.druid.support.json.JSONUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonArrayFormatVisitor;
-import com.google.gson.JsonArray;
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
-import com.turing.eteacher.model.Course;
-
-import com.turing.eteacher.model.KnowledgePoint;
-import com.turing.eteacher.model.Options;
-import com.turing.eteacher.model.Question;
-import com.turing.eteacher.service.IQuestionService;
-import com.turing.eteacher.util.CustomIdGenerator;
-import com.turing.eteacher.util.JsonUtil;
-import com.turing.eteacher.util.StringUtil;
 import com.turing.eteacher.dao.CourseDAO;
 import com.turing.eteacher.dao.FileDAO;
 import com.turing.eteacher.dao.KnowledgePointDAO;
@@ -35,10 +19,16 @@ import com.turing.eteacher.dao.OptionsDAO;
 import com.turing.eteacher.dao.QuestionDAO;
 import com.turing.eteacher.dao.QuestionRecordDAO;
 import com.turing.eteacher.dao.QuestionTypeDAO;
+import com.turing.eteacher.model.Course;
+import com.turing.eteacher.model.KnowledgePoint;
+import com.turing.eteacher.model.Options;
+import com.turing.eteacher.model.Question;
+import com.turing.eteacher.service.IQuestionService;
+import com.turing.eteacher.util.CustomIdGenerator;
+import com.turing.eteacher.util.StringUtil;
 
 @Service
-public class QuestionServiceImpl extends BaseService<Question> implements
-		IQuestionService {
+public class QuestionServiceImpl extends BaseService<Question> implements IQuestionService {
 
 	@Autowired
 	private QuestionDAO questionDAO;
@@ -77,7 +67,7 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 		if (StringUtil.isNotEmpty(knowledgeId)) {
 			if (knowledgeId.equals("all")) {
 				sql = "SELECT DISTINCT tq.`CONTENT` AS content,"
-						+ "CONCAT (toption.`OPTION_TYPE`,"
+						+ "CONCAT (toption.`OPTION_TYPE`,':', "
 						+ "toption.`OPTION_VALUE`) AS answer ,"
 						+ "tq.`QUESTION_ID` AS questionId "
 						+ "FROM t_question tq LEFT JOIN t_options toption "
@@ -88,7 +78,7 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 				return questionDAO.findBySqlAndPage(sql, page * 20, 20, typeId);
 			}else if (knowledgeId.equals("other")) {
 				sql = "SELECT DISTINCT tq.`CONTENT` AS content,"
-						+ "CONCAT (toption.`OPTION_TYPE`,"
+						+ "CONCAT (toption.`OPTION_TYPE`,':', "
 						+ "toption.`OPTION_VALUE`) AS answer ,"
 						+ "tq.`QUESTION_ID` AS questionId "
 						+ "FROM t_question tq LEFT JOIN t_options toption "
@@ -100,7 +90,7 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 				return questionDAO.findBySqlAndPage(sql, page * 20, 20, typeId);
 			}else{
 				sql = "SELECT DISTINCT tq.`CONTENT` AS content,"
-						+ "CONCAT (toption.`OPTION_TYPE`,"
+						+ "CONCAT (toption.`OPTION_TYPE`,':', "
 						+ "toption.`OPTION_VALUE`) AS answer ,"
 						+ "tq.`QUESTION_ID` AS questionId "
 						+ "FROM t_question tq LEFT JOIN t_options toption "
@@ -113,7 +103,7 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 			Course course = courseDAO.get(courseId);
 			if (null != course) {
 				sql = "select DISTINCT tq.`CONTENT` as content, "
-						+ "concat (toption.`OPTION_TYPE`, "
+						+ "concat (toption.`OPTION_TYPE`,':', "
 						+ "toption.`OPTION_VALUE`) as answer , "
 						+ "tq.`QUESTION_ID` as questionId "
 						+ "from t_question tq left join t_options toption "
@@ -129,8 +119,8 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 		}
 		if (null == result || result.size() == 0) {
 			sql = "select DISTINCT tq.`CONTENT` as content, "
-					+ "concat (toption.`OPTION_TYPE`, "
-					+ "toption.`OPTION_VALUE`) as answer , "
+					+ "concat (toption.`OPTION_TYPE`,':', "
+					+ "toption.`OPTION_VALUE`) as answer, "
 					+ "tq.`QUESTION_ID` as questionId "
 					+ "from t_question tq left join t_options toption "
 					+ "on tq.`QUESTION_ID` = toption.`QUESTION_ID` "
@@ -154,7 +144,6 @@ public class QuestionServiceImpl extends BaseService<Question> implements
 						+ "from KnowledgePoint tk where tk.typeId = ?";
 				List list = knowledgePointDAO.findMap(hql2, (String) result
 						.get(i).get("typeId"));
-				System.out.println("list:" + list.toString());
 				if (null != list) {
 					result.get(i).put("knowledges", list);
 				}
