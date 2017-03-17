@@ -14,14 +14,47 @@
 <script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
 <script type="text/javascript" src="../../js/utils/ajax.js"></script>
 <script type="text/javascript" src="../../js/ajaxfileupload.js"></script>
+<style type="text/css">  
 
+    li{
+	  transition: 1s;
+	}
+
+	a:link {
+	color: #0099FF;
+	text-decoration:none;
+   
+	}
+
+	a:visited {
+    color: #FF0000;
+   	text-decoration:none;
+	}
+    
+	li:hover {
+    color: #999999;
+    text-decoration:none;
+	transform:scale(2, 2); 
+	-moz-transform:scale(2,2); 
+	-webkit-transform:scale(2,2); 
+	-o-transform:scale(2,2); 
+	z-index: 3;
+ 	   }
+	   
+    li{
+	   float: left; position: relative; list-style-type:none;
+	   margin:0px 5px 3px 5px; line-height:20px; 
+	   background: url(贝贝截图2017317134916.png)
+	}
+		
+</style> 
 </head>
 <body>
 	<div class="maincont">
         <div class="title"><span>通知信息</span></div>
         <div class="enter-message">
             <form id="noticeForm" method="post" action="saveNotice">
-            	<input type="button" onclick="addfile()" value="添加文件"/>
+<!--             	<input type="button" onclick="addfile()" value="添加文件"/> -->
             	<div class="message-group" id="fileDiv">  
                 </div>
             	<input type="hidden" id="isDraft" name="isDraft" value="" />
@@ -34,8 +67,19 @@
                 </div>
                 <div class="message-group">
                     <div class="message-left">通知内容：</div>
-                    <div class="message-right">
+                    <div class="message-right" id="filesDiv">
                     	<textarea id="content" name="content" placeholder="通知内容" style="margin-bottom:10px;"></textarea>
+                    	<div class="message-wrap fileDiv" id="fileList">
+	                        <input name="file" type="file" class="mess-control" style="width:65%;float:left;" id="fileName"/>
+	                        <div id="toolbar" class="btn-group" style="float:left;margin-left:5px">
+							    <button type="button" class="btn btn-default" style="height:34px;" title="新增" onclick="addFile(this);">
+							        <i class="glyphicon glyphicon-plus"></i>
+							    </button>
+							    <button type="button" class="btn btn-default" style="height:34px;" title="删除" onclick="delFile(this);">
+							        <i class="glyphicon glyphicon-remove"></i>
+							    </button>
+							</div>
+						</div>
                     </div>                   	
                 </div>
                 <div class="message-group">
@@ -58,7 +102,12 @@
 						</div>
                     </div>                   	
                 </div> 
-                <div class="btnsub" id="bus">
+                <div class="message-group" >
+                <div class="message-left">发布时间：</div>
+                	<div class="radio">
+                    <ul id="bus" style="width:600px; height:auto;  overflow:hidden";>
+					</ul> 
+					</div>
                 </div>
                 <div class="btnsub">
                     <button type="button" class="btn-submit" style="float:left;" onclick="save()">发布</button>
@@ -75,11 +124,11 @@
 		getDate();
 	});
 	//生成input框
-	 var f=0;
-	 function addfile(){
-		$("#fileDiv").append('<input type="file" name="file" id="fileName'+f+'"/>');	
-		f++;
-	}
+// 	 var f=0;
+// 	 function addfile(){
+// 		$("#fileDiv").append('<input type="file" name="file" id="fileName'+f+'"/>');	
+// 		f++;
+// 	}
 	//加载页面数据
 	function init(){
 		var params={};
@@ -120,17 +169,32 @@
 		        	filePath=filePath.replace(' ','');
 // 		         var zzz=$('<a href="'+filePath+'">'+files[i].fileName+'</a>');
                       
-		         var zzz=$('<a href="http://localhost:8080/eteacher/remote/teacher/notice/dwloade?filePath='+filePath+'&filename='+files[i].fileName+'">'+files[i].fileName+'</a>');
+		         var zzz=$('<li> <a href="http://localhost:8080/eteacher/remote/teacher/notice/dwloade?filePath='+filePath+'&filename='+files[i].fileName+'">'+files[i].fileName+'</a> </li>');
 // 		         window.location.href = 'http://localhost:8080/eteacher/remote/teacher/notice/dwloade';
 // 		       		  zzz.text(files[i].fileName);
 		       		  zzz.appendTo($("#bus"));
 		         } 
 	         }	
-		       	     
-		         
-			
 		})
     }
+	 
+    var f=0;
+    function addFile(btn){
+    	alert(1);
+   	 f++;
+   	var zz= $(btn).parent().parent().clone();                 
+   	 zz.find("input[type='file']").attr("id","fileName"+f); 
+   	 zz.appendTo('#filesDiv');
+   	}
+   function delFile(btn){
+   	if($('#filesDiv').children('.fileDiv').length > 1){
+   		$(btn).parent().parent().remove();
+   	}
+   	else{
+   		$(btn).parent().prev().val('');
+   	}
+   } 
+	 
 	//保存
 	function save(){
 		var title=	    $("#title").val();
@@ -142,7 +206,7 @@
         	 var ce={};
         	 ce.id=$(this).val();
         	 course.push(ce);
-         })
+         })	
 		var publishTime=$("#publishTime").val();
         var date = new Date(publishTime.replace(/-/,"/")).getTime()/1000;
 		var params={};
