@@ -22,7 +22,7 @@
 	 	params.timeStamp = myDate.getTime();
 	 	params.signature = hex_md5(token + params.timeStamp);
 	 	$.ajax({
-	 		url : 'http://localhost:8080/eteacher/remote/' + url,
+	 		url : 'http://60.205.153.22:8080/eteacher/remote/' + url,
 	 		type : 'POST',
 	 		dataType : 'json',
 	 		data : params,
@@ -59,7 +59,6 @@
 					}
 					break;
 					case '400':
-					alert("aaaa");
 					alert(data.msg);
 					// 请求失败
 					if (fnErr) {
@@ -91,7 +90,7 @@
 	 */
 	 h.postNormal = function(url, params, fnSuc) {
 	 	$.ajax({
-	 		url : 'http://localhost:8080/eteacher/remote/' + url,
+	 		url : 'http://60.205.153.22:8080/eteacher/remote/' + url,
 	 		type : 'POST',
 	 		dataType : 'json',
 	 		data : params,
