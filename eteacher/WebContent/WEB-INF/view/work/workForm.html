@@ -32,14 +32,17 @@
 	$(function(){
 		getCouseList();//获取课程列表
 	});
-	function addFile(btn){
-		$(btn).parent().parent().clone().appendTo('#filesDiv');
+	var f = 0;
+	function addFile(btn) {
+		f++;
+		var zz = $(btn).parent().parent().clone();
+		zz.find("input[type='file']").attr("id", "fileName" + f);
+		zz.appendTo('#filesDiv');
 	}
-	function delFile(btn){
-		if($('#filesDiv').children('.fileDiv').length > 1){
+	function delFile(btn) {
+		if ($('#filesDiv').children('.fileDiv').length > 1) {
 			$(btn).parent().parent().remove();
-		}
-		else{
+		} else {
 			$(btn).parent().prev().val('');
 		}
 	}
@@ -87,6 +90,7 @@
 		params.fileIds=fileIds;
 		
         params.status = 1;
+        alert(JSON.stringify(params));
         $httpUtils.postUp('teacher/work/addWork',params,function(date){
             //alert("作业创建成功");
             history.back();

@@ -81,27 +81,27 @@
 			 fileIds.push(id);
 		})
 		params.fileIds=fileIds;
+		alert(JSON.stringify(params));
 		$httpUtils.postUp('teacher/notice/addNotice', params, function(data) {
 			history.back();
 		});
-		
 	}
 	
- var f=0;
- function addFile(btn){
-	 f++;
-	var zz= $(btn).parent().parent().clone();                 
-	 zz.find("input[type='file']").attr("id","fileName"+f); 
-	 zz.appendTo('#filesDiv');
+
+	var f = 0;
+	function addFile(btn) {
+		f++;
+		var zz = $(btn).parent().parent().clone();
+		zz.find("input[type='file']").attr("id", "fileName" + f);
+		zz.appendTo('#filesDiv');
 	}
-function delFile(btn){
-	if($('#filesDiv').children('.fileDiv').length > 1){
-		$(btn).parent().parent().remove();
+	function delFile(btn) {
+		if ($('#filesDiv').children('.fileDiv').length > 1) {
+			$(btn).parent().parent().remove();
+		} else {
+			$(btn).parent().prev().val('');
+		}
 	}
-	else{
-		$(btn).parent().prev().val('');
-	}
-} 
 </script>
 </head>
 <body>
