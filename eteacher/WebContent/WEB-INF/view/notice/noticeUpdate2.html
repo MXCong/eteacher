@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>教学系统教师pc端</title>
+<link href="../../css/base.css" rel="stylesheet" type="text/css">
+<link href="../../js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/turingLib/validator.js"></script>
+<script type="text/javascript" src="../../js/json2form.js"></script>
+<script type="text/javascript" src="../../js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="../../js/utils/md5.js"></script>
+<script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
+<script type="text/javascript" src="../../js/utils/ajax.js"></script>
+<script type="text/javascript" src="../../js/ajaxfileupload.js"></script>
+<style type="text/css">  
+
+    li{
+	  transition: 1s;
+	}
+
+	a:link {
+	color: #0099FF;
+	text-decoration:none;
+   
+	}
+
+	a:visited {
+    color: #FF0000;
+   	text-decoration:none;
+	}
+    
+	li:hover {
+	position:absolute;
+    color: #999999;
+    text-decoration:none;
+    transform-origin:right top;
+	transform:scale(2, 2); 
+	-moz-transform:scale(2,2); 
+	-webkit-transform:scale(2,2); 
+	-o-transform:scale(2,2); 
+	z-index: 3;
+ 	   }
+	   
+    li{
+	   float: left; position: relative; list-style-type:none;
+	   margin:0px 5px 3px 5px; line-height:20px; 
+	   background: url(贝贝截图2017317134916.png)
+	}
+		
+</style> 
+</head>
+<body>
+	<div class="maincont">
+        <div class="title"><span>通知信息</span></div>
+        <div class="enter-message">
+            <form id="noticeForm" method="post" action="saveNotice">
+<!--             	<input type="button" onclick="addfile()" value="添加文件"/> -->
+            	<div class="message-group" id="fileDiv">  
+                </div>
+            	<input type="hidden" id="isDraft" name="isDraft" value="" />
+            	<input type="hidden" name="noticeId" value="${noticeId?default("")}" />
+            	<div class="message-group">
+                    <div class="message-left">通知标题：</div>
+                    <div class="message-right">
+                        <input id="title" name="title" maxlength="40" type="text" class="mess-control" />
+                    </div>                   	
+                </div>
+                <div class="message-group">
+                    <div class="message-left">通知内容：</div>
+                    <div class="message-right" id="filesDiv">
+                    	<textarea id="content" name="content" placeholder="通知内容" style="margin-bottom:10px;"></textarea>
+                    	<div class="message-wrap fileDiv" id="fileList">
+	                        <input name="file" type="file" class="mess-control" style="width:65%;float:left;" id="fileName"/>
+	                        <div id="toolbar" class="btn-group" style="float:left;margin-left:5px">
+							    <button type="button" class="btn btn-default" style="height:34px;" title="新增" onclick="addFile(this);">
+							        <i class="glyphicon glyphicon-plus"></i>
+							    </button>
+							    <button type="button" class="btn btn-default" style="height:34px;" title="删除" onclick="delFile(this);">
+							        <i class="glyphicon glyphicon-remove"></i>
+							    </button>
+							</div>
+						</div>
+                    </div>                   	
+                </div>
+                <div class="message-group">
+                    <div class="message-left">选择课程：</div>
+                    <div class="message-right" id="courseId">           
+                          
+<!--                         <select id="courseId" name="courseId"> -->
+<!--                             <option value="">--请选择课程--</option> -->
+                            <!-- <#list courseList as course> 
+								<option value="${course.courseId}" <#if course.courseId == courseId?default("")>selected="selected"</#if>>${course.courseName}</option>
+							</#list> -->
+<!--                         </select> -->
+                    </div>                   	
+                </div>
+                <div class="message-group">
+                    <div class="message-left">发布时间：</div>
+                    <div class="message-right">
+                    	<div class="radio">
+						  <input id="publishTime" name="publishTime" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" type="text" class="mess-control" placeholder="请选择发布时间" style="width:37%;"/>         
+						</div>
+                    </div>                   	
+                </div> 
+                <div class="message-group" >
+                <div class="message-left">附件下载：</div>
+                	<div class="radio">
+                    <ul id="bus" style="width:600px; height:auto;  overflow:hidden";>
+					</ul> 
+					</div>
+                </div>
+                <div class="btnsub">
+                    <button type="button" class="btn-submit" style="float:right;" onclick="history.back();">返回</button>
+                </div>
+            </form> 
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+	
+	$(function(){
+		init();
+		getDate();
+		$('input,select,textarea').attr('readonly',true);
+	});
+	//生成input框
+// 	 var f=0;
+// 	 function addfile(){
+// 		$("#fileDiv").append('<input type="file" name="file" id="fileName'+f+'"/>');	
+// 		f++;
+// 	}
+	//加载页面数据
+	function init(){
+		var params={};
+		params.page=0;
+		$httpUtils.post('teacher/getCourseList', params, function(data) {
+			addOption(data);
+		})
+	}
+	//下拉列表添加课程
+	function addOption(ret){
+     for(var i=0;i<ret.length;i++){
+     	var zz=	$('<input type="checkbox" value="'+ret[i].courseId+'"/>'+'<span>'+ret[i].courseName+'</span>');
+     	zz.appendTo("#courseId");
+     }
+	}
+	 //加载通知数据
+    function getDate(){
+   	 var noticeId=$httpUtils.getUrlParam("noticeId");
+   	 var params={};
+   	  params.noticeId=noticeId;
+		$httpUtils.post('teacher/notice/getDetail', params, function(data) {
+				$("#title").val(data.title);
+				$("#content").val(data.content);
+				$("#publishTime").val(data.publishTime);
+			 $("input[type='checkbox']").each(function(i){
+				var _this=$(this);
+				var couser=data.courses;
+	        	for(var k=0;k<couser.length;k++){
+    		        	if(	_this.val()==couser[k].courseId){
+    		        		_this.attr("checked",true);
+    		        	}
+	        	}
+	         })
+	         if(data.files!=null){
+	        	 var files= data.files;
+		         for(var i=0;i<files.length;i++){
+		        	var filePath= files[i].filePath;
+		        	filePath=filePath.replace(' ','');
+// 		         var zzz=$('<a href="'+filePath+'">'+files[i].fileName+'</a>');
+                      
+		         var zzz=$('<li> <a href="http://localhost:8080/eteacher/remote/teacher/deleteFile?filePath='+filePath+'&fileId='+files[i].fileId+'"><img  src="../../images/delet1.png" width="5px" height="5px" style="float:right; z-index:6";  /></a><a href="http://localhost:8080/eteacher/remote/teacher/notice/dwloade?filePath='+filePath+'&filename='+files[i].fileName+'">'+files[i].fileName+'</a> </li>');
+// 		         window.location.href = 'http://localhost:8080/eteacher/remote/teacher/notice/dwloade';
+// 		       		  zzz.text(files[i].fileName);
+		       		  zzz.appendTo($("#bus"));
+		         } 
+	         }	
+		})
+    }
+	 
+    var f=0;
+    function addFile(btn){
+   	 f++;
+   	var zz= $(btn).parent().parent().clone();                 
+   	 zz.find("input[type='file']").attr("id","fileName"+f); 
+   	 zz.appendTo('#filesDiv');
+   	}
+   function delFile(btn){
+   	if($('#filesDiv').children('.fileDiv').length > 1){
+   		$(btn).parent().parent().remove();
+   	}
+   	else{
+   		$(btn).parent().prev().val('');
+   	}
+   } 
+	 
+	//保存
+	function save(){
+		var title=	    $("#title").val();
+		var content=	$("#content").val();
+		var course=[];
+		 var noticeId=$httpUtils.getUrlParam("noticeId");
+         $("input[type='checkbox']:checked").each(function(i){
+        	 var v=$(this).val();
+        	 var ce={};
+        	 ce.id=$(this).val();
+        	 course.push(ce);
+         })	
+		var publishTime=$("#publishTime").val();
+        var date = new Date(publishTime.replace(/-/,"/")).getTime()/1000;
+		var params={};
+		params.title=title;
+		params.noticeId=noticeId;
+		params.content=content;
+		params.course=JSON.stringify(course);
+		params.publishTime=date;
+		var fileIds=[];
+		$("input[type='file']").each(function(i){
+			 var id=$(this).attr("id");
+			 fileIds.push(id);
+		})
+		params.fileIds=fileIds;
+		$httpUtils.postUp('teacher/notice/addNotice', params, function(data) {
+			history.back();
+		});
+	}
+</script>
+</html>
