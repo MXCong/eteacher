@@ -20,13 +20,9 @@
 	var courseID = null;
 	var workId = null;
 	var flag = 0;
+	var filePath = null;
 	$(function(){
 		workId = $PrefsUtils.receive('workId');
-		flag = $PrefsUtils.receive('flag');
-		if(flag == 1){
-			//查看作业详情
-			changeStyle();
-		}
 		getDetail(workId);
 	});
 	
@@ -41,13 +37,7 @@
 			$(btn).parent().prev().val('');
 		}
 	}
-	function removeFile(btn,fileId){
-		if(confirm("确定删除")){
-			$.post('${context}/file/deleteFile',{fileId:fileId},function(data){
-				$(btn).parent().remove();
-			});
-		}
-	}
+	
 	//获取课程列表
     function getCouseList() {
 		var currentTerm = JSON.parse($PrefsUtils.getPref('currentTerm'));
@@ -110,17 +100,28 @@
                 courseID = workInfo.courseId;
                 getCouseList();//获取课程的下拉列表项
                 if (workInfo.files) {
-                	var n = workInfo.files;
-                	alert(JSON.stringify(n));
-                	for ( var i in n) {
-                		var html = '<div>' + n[i].fileName + '&nbsp;&nbsp;<i style="cursor: pointer;" title="删除" class="glyphicon glyphicon-trash" onclick="removeFile(this,\''+n[i].fileId+'\');"></i></div>';
+                	var files = workInfo.files;
+                	for ( var i in files) {
+                		filePath = files[i].filePath;
+		        		filePath=filePath.replace(' ','');
+		        		var fileId = files[i].fileId;
+        				var html = $('<li> <a href="http://localhost:8080/eteacher/remote/teacher/notice/dwloade?filePath='+filePath+'&filename='+files[i].fileName+'">'+files[i].fileName+'</a>'
+        				+'<i onclick="removeFile(\''+fileId+'\')" style="cursor: pointer;" title="删除" class="glyphicon glyphicon-trash"></i></a></li>');
         				$('#content').after(html);
-        				//<a href="http://localhost:8080/eteacher/remote/teacher/notice/dwloade?filePath='+filePath+'&filename='+n[i].fileName+'">'+n[i].fileName+'</a>
 					}
                 }
             }
         });
     }
+    function removeFile(fileId){
+		if(confirm("确定删除")){
+			var params = {};
+			params.fileId = fileId;
+			$httpUtils.postUp('file/delFile',params,function(date){
+				location.reload(); 
+	        });
+		}
+	}
 	function targetClass(cls){
 		var classes = $("#classList");
 			for ( var c in cls) {
@@ -181,16 +182,6 @@
             alert("作业修改成功");
         });
 	}
-  	//查看作业详情，禁止编辑
-  	function changeStyle(){
-  		$('input,textarea,select').attr('readonly',true);
-  		$('#courseId').attr('readonly',true);
-  		//$('#publishTime').attr('readonly',true);
-  		//$('#endTime').attr('readonly',true);
-  		$('#publishTime').unbind("click","WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'}");
-  		$('#saveBtn').hide();
-  		$('#fileList').hide();
-  	}
 </script>
 </head>
 <body>
@@ -208,7 +199,7 @@
                     <div class="message-left">作业内容：</div>
                     <div class="message-right"  id="filesDiv">
                     	<textarea id="content" name="content" placeholder="通知内容" style="margin-bottom:10px;"></textarea>
-                    	<div class="message-wrap fileDiv" id="fileList" style="display:none">
+                    	<div class="message-wrap fileDiv" id="fileList">
 	                        <input name="file" type="file" class="mess-control" style="width:65%;float:left;" id="fileName"/>
 	                        <div id="toolbar" class="btn-group" style="float:left;margin-left:5px">
 							    <button type="button" class="btn btn-default" style="height:34px;" title="新增" onclick="addFile(this);">

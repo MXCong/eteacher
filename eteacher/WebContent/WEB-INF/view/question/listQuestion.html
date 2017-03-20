@@ -17,13 +17,81 @@
 
 <script type="text/javascript">
     var classTable = null;
+    var typeId = null;
 	$(function(){
 		getDatas();//获取用户创建的问题列表
+		initTypeSelect();//初始化问题分类
+		
+		$('#typeSelect').change(function(){ 
+			if ($(this).children('option:selected').val() == 'all'){
+				$('#knowledgeSelect').html("<option value='all'>全部</option>");
+				$httpUtils.post('question/getQuestionList',null,function(data){
+					$('#classTable').bootstrapTable('load', data);
+				});
+			}else{
+				typeId = $('option:selected').val();
+				if(typeId == "未分类"){
+					getUnTypeList();
+				}else{
+					initKnowledgeSelect(typeId);
+				}
+			}
+		});
 	});
 	//获取用户创建的问题列表
 	function getDatas(){
 		$httpUtils.post('question/getQuestionList',null,function(data){
 			initTale(data);
+		});
+	}
+	/*初始化分类*/
+	function initTypeSelect(){
+		$('#typeSelect').html('');
+		$('#typeSelect').append("<option value='all'>全部</option>");
+		$httpUtils.post('question/getType',null,function(data){
+			for (var i = 0; i < data.length; i++) {
+				var opt = "<option value="+data[i].typeId+">"+data[i].typeName+"</option>";	
+				$('#typeSelect').append(opt);
+			}
+		});
+		$('#knowledgeSelect').html("<option value='all'>全部</option>");
+	}
+	/*初始化知识点*/
+	function initKnowledgeSelect(typeId){
+		var params = {};
+		params.typeId = typeId;
+		$httpUtils.post('question/knowledgePoint',params,function(data){
+			for (var i = 0; i < data.length; i++) {
+				$('#knowledgeSelect').html('');
+				$('#knowledgeSelect').append("<option value='all'>——</option>");
+				for (var j = 0; j < data.length; j++) {
+					var opt = "<option value="+data[j].pointId+">"+data[j].pointName+"</option>";
+					$('#knowledgeSelect').append(opt);	
+				}
+			}
+		});
+	}
+	//根据知识点ID获取问题列表
+	function getQuestionList(pointId){
+		var pointList = [];
+		pointList.push(pointId);
+		var params = {};
+		params.pointList = JSON.stringify(pointList);
+		params.typeId = typeId;
+		$httpUtils.post('question/getListByPointId',params,function(ret){
+			if(ret){
+				$('#classTable').bootstrapTable('load', ret);
+			}else{
+				var data = new Array();
+				$('#classTable').bootstrapTable('load', data);
+			}
+		});
+	}
+	//获取类别为“未分类”的问题列表
+	function getUnTypeList(){
+		var params = {};
+		$httpUtils.post('question/getUnTypeList',params,function(ret){
+			$('#classTable').bootstrapTable('load', ret);
 		});
 	}
 	function initTale(datas){
@@ -125,6 +193,22 @@
 	<div class="maincont">
 		<div class="title"><span>问题列表</span></div>
 		<div class="enter-message">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td width="8%" align="left" valign="middle"><label style="line-height:36px; margin-bottom:0;">分类</label></td>
+						<td>
+							<select id="typeSelect" class="select-control" style="width:30%" >   
+							</select>                                
+						</td>  
+						<td width="8%" align="left" valign="middle"><label style="line-height:36px; margin-bottom:0;">知识点</label></td>
+						<td>
+							<select id="knowledgeSelect" class="select-control" style="width:30%" onchange="getQuestionList(this.value)">   
+							</select>                                
+						</td>
+					</tr>                    
+				</tbody>
+			</table>
 			<div id="toolbar" class="btn-group">
 			    <button type="button" class="btn btn-default  btn-sm" title="新增" onclick="window.location.href='questionForm.html'">
 			        <i class="glyphicon glyphicon-plus"></i> 新增
