@@ -183,8 +183,13 @@
 	}
   	//查看作业详情，禁止编辑
   	function changeStyle(){
-  		$('input,select,textarea').attr('readonly',true);
+  		$('input,textarea,select').attr('readonly',true);
+  		$('#courseId').attr('readonly',true);
+  		//$('#publishTime').attr('readonly',true);
+  		//$('#endTime').attr('readonly',true);
+  		$('#publishTime').unbind("click","WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'}");
   		$('#saveBtn').hide();
+  		$('#fileList').hide();
   	}
 </script>
 </head>
@@ -203,7 +208,7 @@
                     <div class="message-left">作业内容：</div>
                     <div class="message-right"  id="filesDiv">
                     	<textarea id="content" name="content" placeholder="通知内容" style="margin-bottom:10px;"></textarea>
-                    	<div class="message-wrap fileDiv" id="fileList">
+                    	<div class="message-wrap fileDiv" id="fileList" style="display:none">
 	                        <input name="file" type="file" class="mess-control" style="width:65%;float:left;" id="fileName"/>
 	                        <div id="toolbar" class="btn-group" style="float:left;margin-left:5px">
 							    <button type="button" class="btn btn-default" style="height:34px;" title="新增" onclick="addFile(this);">
