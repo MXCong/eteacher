@@ -43,20 +43,14 @@
 			$(btn).parent().prev().val('');
 		}
 	}
-	function removeFile(btn,fileId){
-		if(confirm("确定删除")){
-			$.post('${context}/file/deleteFile',{fileId:fileId},function(data){
-				$(btn).parent().remove();
-			});
-		}
-	}
+	
 	//创建作业点击时间
 	function createWork(){
 		var cls = new Array();
 		var title = $('#workTitle').val();
         var publishTime = $('#publishTime').val();
         var endTime = $('#endTime').val();
-        var content = $('#workContent').val();
+        var content = $('#content').val();
         var targetClass = document.getElementsByClassName('targetClass');
         
         for (var i = 0; i < targetClass.length; i++) {
@@ -154,10 +148,10 @@
                 </div> 
                 <div class="message-group">
                     <div class="message-left">作业内容：</div>
-                    <div class="message-right" id="filesDiv">
-                    	<textarea id="workContent" name="content" maxlength="200" placeholder="作业内容（不超过200字）" style="margin-bottom:10px;"></textarea>
+                    <div class="message-right"  id="filesDiv">
+                    	<textarea id="content" name="content" placeholder="通知内容" style="margin-bottom:10px;"></textarea>
                     	<div class="message-wrap fileDiv" id="fileList">
-	                        <input name="file" type="file" class="mess-control" style="width:65%;float:left;" />
+	                        <input name="file" type="file" class="mess-control" style="width:65%;float:left;" id="fileName"/>
 	                        <div id="toolbar" class="btn-group" style="float:left;margin-left:5px">
 							    <button type="button" class="btn btn-default" style="height:34px;" title="新增" onclick="addFile(this);">
 							        <i class="glyphicon glyphicon-plus"></i>
@@ -167,7 +161,7 @@
 							    </button>
 							</div>
 						</div>
-                    </div>                   	
+                    </div>    
                 </div>
                 <div class="message-group">
                     <div class="message-left">选择课程：</div>
