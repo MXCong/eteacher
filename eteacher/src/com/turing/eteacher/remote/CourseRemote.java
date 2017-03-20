@@ -304,6 +304,7 @@ public class CourseRemote extends BaseRemote {
 	@RequestMapping(value = "teacher/Course/getWorkday", method = RequestMethod.POST)
 	public ReturnBody getWorkday(HttpServletRequest request) {
 		String ym = request.getParameter("month");
+		System.out.println(ym);
 		if (StringUtil.checkParams(ym)) {
 			//最后的结果
 			List<Map> result = new ArrayList<>(); 

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>教学系统教师pc端</title>
+<link href="../../css/base.css" rel="stylesheet" type="text/css">
+<link href="../../js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+<link href="../../js/bootstrap-table/bootstrap-table.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/turingLib/alert.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+
+<script type="text/javascript" src="../../js/utils/md5.js"></script>
+<script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
+<script type="text/javascript" src="../../js/utils/ajax.js"></script>
+<script type="text/javascript">
+	var data = new Array();
+	$(function(){
+		intiTable(data);
+	});
+	
+	//table初始化
+	function intiTable(data){
+		if(null == data){
+			data = {};	
+  		}
+		var termTable = $('#termTable').bootstrapTable({
+		    data : data,
+		    striped : true,
+		    toolbar : '#toolbar',
+		    idField : 'tpId',
+		    columns: [{
+		    	field: 'Mon',
+		        title: '周一',
+		        align: 'center',
+		    },{
+		        field: 'Tue',
+		        align: 'center',
+		        title: '周二',
+		    }, {
+		        field: 'Wed',
+		        align: 'center',
+		        title: '周三'
+		    }, {
+		        field: 'Thu',
+		        align: 'center',
+		        title: '周四'
+		    }, {
+		        field: 'Fir',
+		        align: 'center',
+		        title: '周五'
+		    }, {
+		        field: 'Sat',
+		        align: 'center',
+		        title: '周六'
+		    }, {
+		        field: 'Sun',
+		        align: 'center',
+		        title: '周日'
+		    }]
+		});
+	}
+</script>
+</head>
+<body>
+	<div class="maincont">
+		<div class="title"><span>我的课表</span></div>
+		<div class="enter-message">
+			<div id="toolbar" class="btn-group">
+			    <button type="button" class="btn btn-default  btn-sm" title="新增" onclick="window.location.href='addTerm.html'">
+			        <i class="glyphicon glyphicon-plus"></i> 新增
+			    </button>
+			</div>
+			<table id="termTable"></table>
+        </div>
+	</div>
+	<div class="footer">
+    <div class="container">
+       <p>版权所有：河北图灵</p>
+    </div>
+</div>
+</body>
+</html>
