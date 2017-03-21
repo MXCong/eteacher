@@ -1,85 +1,440 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>教学系统教师pc端</title>
-<link href="../../css/base.css" rel="stylesheet" type="text/css">
-<link href="../../js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
-<link href="../../js/bootstrap-table/bootstrap-table.css" rel="stylesheet" type="text/css">
-<script type="text/javascript" src="../../js/jquery.min.js"></script>
-<script type="text/javascript" src="../../js/turingLib/alert.js"></script>
-<script type="text/javascript" src="../../js/bootstrap/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table.min.js"></script>
-<script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>教学系统教师pc端</title>
+	<link href="../../css/base.css" rel="stylesheet" type="text/css">
+	<link href="../../js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+	<link href="../../js/bootstrap-table/bootstrap-table.css" rel="stylesheet" type="text/css">
+	<script type="text/javascript" src="../../js/jquery.min.js"></script>
+	<script type="text/javascript" src="../../js/turingLib/alert.js"></script>
+	<script type="text/javascript" src="../../js/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table.min.js"></script>
+	<script type="text/javascript" src="../../js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
 
-<script type="text/javascript" src="../../js/utils/md5.js"></script>
-<script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
-<script type="text/javascript" src="../../js/utils/ajax.js"></script>
-<script type="text/javascript">
-	var data = new Array();
-	$(function(){
-		intiTable(data);
-	});
-	
-	//table初始化
-	function intiTable(data){
-		if(null == data){
-			data = {};	
-  		}
-		var termTable = $('#termTable').bootstrapTable({
-		    data : data,
-		    striped : true,
-		    toolbar : '#toolbar',
-		    idField : 'tpId',
-		    columns: [{
-		    	field: 'Mon',
-		        title: '周一',
-		        align: 'center',
-		    },{
-		        field: 'Tue',
-		        align: 'center',
-		        title: '周二',
-		    }, {
-		        field: 'Wed',
-		        align: 'center',
-		        title: '周三'
-		    }, {
-		        field: 'Thu',
-		        align: 'center',
-		        title: '周四'
-		    }, {
-		        field: 'Fir',
-		        align: 'center',
-		        title: '周五'
-		    }, {
-		        field: 'Sat',
-		        align: 'center',
-		        title: '周六'
-		    }, {
-		        field: 'Sun',
-		        align: 'center',
-		        title: '周日'
-		    }]
-		});
-	}
-</script>
+	<script type="text/javascript" src="../../js/utils/md5.js"></script>
+	<script type="text/javascript" src="../../js/utils/PrefsUtils.js"></script>
+	<script type="text/javascript" src="../../js/utils/ajax.js"></script>
+	<script type='text/javascript' src='../../js/utils/doT.min.js' charset='utf-8'></script>
 </head>
 <body>
 	<div class="maincont">
-		<div class="title"><span>我的课表</span></div>
+		<div class="title"><span>周课表</span></div>
+
 		<div class="enter-message">
-			<div id="toolbar" class="btn-group">
-			    <button type="button" class="btn btn-default  btn-sm" title="新增" onclick="window.location.href='addTerm.html'">
-			        <i class="glyphicon glyphicon-plus"></i> 新增
-			    </button>
-			</div>
-			<table id="termTable"></table>
-        </div>
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td width="8%" align="left" valign="middle"><label style="line-height:36px; margin-bottom:0;">学期：</label></td>
+						<td>
+							<select id="termSelect" class="select-control" style="width:30%" >   
+							</select>                                
+						</td>
+						<td>
+							<button type="button" class="btn btn-default btn-sm" title="上一周" onclick="fnPrevWeek()">
+								上一周
+							</button>                             
+						</td>   
+						<td>
+							周数：
+							<select id="nowDays" class="select-control" style="width:30%" >   
+							</select>                                
+						</td>
+						<td>
+							<button type="button" class="btn btn-default btn-sm" title="下一周" onclick="fnNextWeek()">
+								下一周
+							</button>                              
+						</td>
+					</tr>                    
+				</tbody>
+			</table>
+			<table width="100%" >
+				<tr>
+					<td align="center">
+						<div class="date-show">
+							<span class="day-show">星期一</span>
+						</div>
+					</td>
+					<td align="center">
+						<div class="date-show">
+							<span class="day-show">星期二</span>
+						</div>
+					</td>
+					<td align="center">
+						<div class="date-show">
+							<span class="day-show">星期三</span>
+						</div>
+					</td>
+					<td align="center">
+						<div class="date-show">
+							<span class="day-show">星期四</span>
+						</div>
+					</td>
+					<td align="center">
+						<div class="date-show">
+							<span class="day-show">星期五</span>
+						</div>
+					</td>
+					<td align="center">
+						<div class="date-show">
+							<span class="day-show">星期六</span>
+						</div>
+					</td>
+					<td align="center">
+						<div class="date-show">
+							<span class="day-show">星期日</span>
+						</div>
+					</td>
+				</tr>
+				<tr id="calender" >
+
+				</tr>
+			</table>
+			<div id="courseList" style="margin-top:10px;"></div>
+		</div>
 	</div>
-	<div class="footer">
-    <div class="container">
-       <p>版权所有：河北图灵</p>
-    </div>
-</div>
 </body>
-</html>
+<script id="courseTemplate" type="text/template">
+	{{~ it:data }}
+	<div class="course-item">
+		<div class="course-bar">
+			<div class="course-info">
+				<div class="course-name">{{=data.courseName}}</div>
+				<div id={{=data.courseId}} class="course-classes">
+					{{ for(var prop in data.classes) { }}
+					<span>{{=data.classes[prop].className}}</span>
+					{{ } }}
+				</div>
+			</div>
+		</div>
+	</div>
+	{{~}}
+</script>
+
+<script type="text/javascript">
+	var courseTemp = doT.template($('#courseTemplate').html());
+	var monday = null;
+	var termIds = new Array();
+	var termNames = new Array();
+	var terms = new Array();
+	var termId = null;
+	var cTerm = null;
+        //显示日历的第一天
+        var cFirstDay = null;
+        //显示日历的最后一天
+        var cLastDay = null;
+        //当前学期第一天的周一
+        var cTermStart = null;
+        //当前学期最后一天的周日
+        var cTermEnd = null;
+
+        var dateArr = new Array();
+        $(function(){
+        	var Today = new Date();
+        	monday = getWeekFirstDay(Today);
+        	weekCalender();
+        	getTermList();
+        });
+
+        $('#termSelect').change(function(){ 
+		  termId = $(this).children('option:selected').val();//这就是selected的值 
+		  for (var i = 0;i< terms.length;i++) {
+		  	var temp = terms[i];
+		  	if (temp.tpId == termId) {
+		  		cTerm = temp;
+		  	}
+		  }
+		  monday = getWeekFirstDay(new Date(cTerm.startDate));
+		  initTerm();
+		});
+
+        $('#nowDays').change(function(){ 
+		  	var temp = $(this).children('option:selected').val();//这就是selected的值 
+		  	monday = new Date(monday.setTime(cTermStart.getTime() + 24 * 60 * 60 * 1000 * 7*(temp -1)));
+		  	weekCalender();
+		  });
+        
+        /**
+         *为日历设置标签 
+         */
+         function setSign(dates){
+         	$('.date-sign').remove();
+         	if(dates && dates.length > 0){
+         		for(var i = 0;i < dates.length;i++){
+         			$(".date").each(function(){
+         				if(dates[i] == $(this).attr('date')){
+         					if($(this).parent().find('.date-sign').length == 0){
+         						$(this).after('<div class="date-sign"></div>');
+         					}
+         					return;
+         				}
+         			});
+         		}
+         	}
+         };
+
+        /**
+         *获取学期列表
+         */
+         function getTermList() {
+         	termNames.splice(0, termNames.length);
+         	termIds.splice(0, termIds.length);
+         	$httpUtils.post('teacher/term/getTermList',null,function(ret){
+         		terms = ret;
+         		if(terms && terms.length > 0){
+         			termId = terms[0].tpId;
+         			cTerm = getCurrentTerm();
+         			if (!cTerm) {
+         				cTerm = terms[0];
+         				termId = cTerm.tpId;
+         			}
+
+         			var option = $("#termSelect");
+         			var o = null;
+         			for ( var i in terms) {
+         				if(terms[i].tpId == termId){
+         					o = "<option value="+terms[i].tpId+" selected='selected'>"+terms[i].termName+"</option>";
+         					cTerm = terms[i];
+         				}else{
+         					o = "<option value="+terms[i].tpId+">"+terms[i].termName+"</option>";	
+         				}
+         				option.append(o);
+         			}
+
+         			//$('#termName').val(cTerm.termName);
+         			monday = getWeekFirstDay(new Date(cTerm.startDate));
+         			initTerm();
+         		}	
+         	});
+         };
+        /**
+         *学期切换后，初始化与学期有关的数据
+         */
+         function initTerm() {
+         	termId = cTerm.tpId;
+         	var option = $("#nowDays");
+         	option.html('');
+         	for (var i = 1; i <= cTerm.weekCount; i++) {
+         		var o = null;
+         		if (i == 1) {
+         			o = "<option value="+i+" selected='selected'>"+i+"</option>";
+         		}else{
+         			o = "<option value="+i+">"+i+"</option>";
+         		}
+         		option.append(o);
+         	}
+
+         	cTermStart = getWeekFirstDay(new Date(cTerm.startDate));
+            //学期最后一天所在星期的星期一
+            cTermEnd = getSunday(new Date(cTerm.endDate));
+            weekCalender();
+        }
+
+        /**
+         *判断tNow 是否在某个时间段内
+         */
+         function isInRange(tBegin, tEnd, tNow) {
+         	var dBegin = new Date(tBegin);
+         	var dEnd = new Date(tEnd);
+         	var dNow = new Date(tNow);
+
+         	if (dEnd.getTime() - dNow.getTime() >= 0 && dBegin.getTime() - dNow.getTime() <= 0) {
+         		return true;
+         	} else {
+         		return false;
+         	}
+         }
+
+        /**
+         *获取当前学期
+         */
+         function getCurrentTerm() {
+         	for (var i = 0; i < terms.length; i++) {
+         		var temp = terms[i];
+         		var today = new Date();
+         		var todayStr = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+         		if (isInRange(temp.startDate, temp.endDate, todayStr)) {
+         			return temp;
+         		}
+         	}
+         }
+
+        /**
+         *获取课程列表
+         */
+         function getWeekCouseList(isWeek,cf,cl) {
+         	var params = {};
+         	params.startDate = cf;
+         	params.endDate = cl;
+         	params.termId = termId;
+         	$httpUtils.post('teacher/Course/getlistByDate', params, function(ret) {
+         		if (ret) {
+         			$('#courseList').html(courseTemp(ret.courseList));
+         			if(isWeek){
+         				setSign(ret.dateList);
+         			}
+         		}
+         	});
+         }
+
+        /**
+         *前一周
+         */
+         function fnPrevWeek() {
+         	monday = monday.setTime(monday.getTime() - 24 * 60 * 60 * 1000 * 7);
+         	monday = new Date(monday);
+         	weekCalender();
+         };
+        /**
+         *下一周
+         */
+         function fnNextWeek() {
+         	monday = monday.setTime(monday.getTime() + 24 * 60 * 60 * 1000 * 7);
+         	monday = new Date(monday);
+         	weekCalender();
+         };
+        /**
+         *修改日历
+         */
+         function weekCalender() {
+         	dateArr.splice(0 , dateArr.length);
+         	for (var i = 0; i < 7; i++) {
+         		var temp = dateSubmit(monday, i);
+         		dateArr.push(temp)
+         	};
+         	var calender_html = '';
+         	dateArr.forEach(function(item, i) {
+         		calender_html += '<td align="center" onclick="dayClick(\'' + item.fullDay + '\')" >' + '<div class="date-show">' + '<span class="date" date="'+item.fullDay+'">' + item.day + '</span>' + '</div></td>';
+         	});
+         	$('#calender').html(calender_html);
+         	weekCalenderChanged(dateArr[0].calculateDay, dateArr[6].calculateDay);
+         }
+
+        /**
+         *日历列表时间监听器
+         */
+         function weekCalenderChanged(firstDay, endDay) {
+         	cFirstDay = firstDay;
+         	cLastDay = endDay;
+         	if (cTerm) {
+         		if (cTermStart && isInRange(cTermStart.getFullYear() + "-" + (cTermStart.getMonth() + 1) + "-" + cTermStart.getDate(), cTermEnd.getFullYear() + "-" + (cTermEnd.getMonth() + 1) + "-" + cTermEnd.getDate(), cLastDay)) {
+         			$('#nowDays').val(getWeekNum(cTermStart, new Date(cLastDay)));
+         		} else {
+         			$("#nowDays").val("");
+         			var temp = getTermByWeek(cFirstDay, cLastDay);
+         			if (temp) {
+         				cTerm = temp;
+         				$('#termName').val(cTerm.termName);
+         				initTerm();
+         			}
+         		}
+         		getWeekCouseList(true,cFirstDay,cLastDay);
+         	}
+         }
+
+        /**
+         *查找星期的开始结束时间得到所属学期
+         */
+         function getTermByWeek(wStart, wEnd) {
+         	try {
+         		for (var i = 0; i < terms.length; i++) {
+         			var temp = terms[i];
+         			if (isIntersection(wStart, wEnd, temp.startDate, temp.endDate)) {
+         				throw temp;
+         				return;
+         			}
+         		}
+         	} catch(e) {
+         		return e;
+         	}
+         }
+
+        /**
+         * 判断两个时间阶段是否有交叉
+         */
+         function isIntersection(fStart, fEnd, SStart, SEnd) {
+         	var fSDate = new Date(fStart);
+         	var fEDate = new Date(fEnd);
+         	var sSDate = new Date(SStart);
+         	var sEDate = new Date(SEnd);
+         	if ((fSDate.getTime() - sEDate.getTime() >= 0) || (sSDate.getTime() - fEDate.getTime() >= 0)) {
+         		return false;
+         	} else {
+         		return true;
+         	}
+         }
+
+         function getWeekNum(start, end) {
+         	return Math.round((end.getTime() + (24 * 60 * 60 * 1000) - start.getTime()) / (24 * 60 * 60 * 1000 * 7));
+         }
+
+        /**
+         *日期点击事件
+         */
+         function dayClick(day) {
+         	$(".date").each(function(i){
+         		if($(this).attr('date') == day){
+         			$(this).addClass('date-select');
+         		}else{
+         			$(this).removeClass('date-select');
+         		}
+         	});
+         	getWeekCouseList(false,day,day);
+         }
+
+        /**
+         *指定日期加周数
+         * @date 指定日期字符串
+         * @days 天数
+         */
+         function dateSubmit(date, days) {
+         	var objDate2 = new Date();
+         	objDate2.setTime(date.getTime() + 24 * 60 * 60 * 1000 * days);
+         	objDate2 = new Date(objDate2);
+         	if (days == 0) {
+         		$('#nowDays').val(objDate2.getFullYear());
+         	}
+         	var times = {};
+         	var m = objDate2.getMonth() + 1;
+         	if(m < 10){
+         		m = '0' + m;
+         	}
+         	var d = objDate2.getDate();
+         	if(d < 10){
+         		d = '0' + d;
+         	}
+         	times.day = m + "-" + d;
+         	times.calculateDay = objDate2.getFullYear() + "-" + (objDate2.getMonth() + 1) + "-" +objDate2.getDate();
+         	times.fullDay = objDate2.getFullYear() + "-" + m + "-" + d;
+         	return times;
+         }
+
+        /**
+         *返回Nowdate所在周的第一天
+         */
+         function getWeekFirstDay(nowDate) {
+         	var day = 0;
+         	if (nowDate.getDay() == 0) {
+         		day = 6;
+         	} else {
+         		day = nowDate.getDay() - 1;
+         	}
+         	var temp = new Date(nowDate.getFullYear() + "-" + (nowDate.getMonth() + 1) + "-" + nowDate.getDate());
+         	return new Date(temp.getTime() - day * 24 * 60 * 60 * 1000);
+         }
+
+        /**
+         *返回Nowdate所在周的周日
+         */
+         function getSunday(nowDate) {
+         	var day = 0;
+         	if (nowDate.getDay() == 0) {
+         		day = 1;
+         	} else {
+         		day = 8 - nowDate.getDay();
+         	}
+         	var temp = new Date(nowDate.getFullYear() + "-" + (nowDate.getMonth() + 1) + "-" + nowDate.getDate());
+         	return new Date(temp.getTime() + day * 24 * 60 * 60 * 1000 - 1);
+         }
+     </script>
+     </html>
