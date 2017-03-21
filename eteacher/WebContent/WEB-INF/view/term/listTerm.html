@@ -36,13 +36,24 @@
 			var terms = new Array();
             if (ret.current && ret.current.length > 0) {
                 terms = terms.concat(ret.current);
+                //存储当前学期到
+                if(terms[0]){
+	                $PrefsUtils.savePref("currentTerm" , terms[0]);
+                }
             }
             if (ret.future && ret.future.length > 0) {
                 terms = terms.concat(ret.future);
+                if(!$PrefsUtils.getPref("currentTerm")){
+                	$PrefsUtils.savePref("currentTerm" , terms[0]);
+                }
             }
             if (ret.before && ret.before.length > 0) {
                 terms = terms.concat(ret.before);
+                if(!$PrefsUtils.getPref("currentTerm")){
+                	$PrefsUtils.savePref("currentTerm" , terms[0]);
+                }
             }
+            $PrefsUtils.savePref("termList" , terms);
 			intiTable(terms);
 		});
 	}

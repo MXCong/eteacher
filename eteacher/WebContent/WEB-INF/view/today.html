@@ -49,7 +49,7 @@
 		var params = {};
 		params.month = getYearMonth();
 		$httpUtils.post('teacher/Course/getWorkday', params, function(ret) {
-			alert(JSON.stringify(ret));
+			//alert(JSON.stringify(ret));
 			getCoursrByDate(ret);
 		});
 	}
