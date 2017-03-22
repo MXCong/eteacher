@@ -92,7 +92,6 @@
 		        	}else{
 		        		return '<span class="label label-danger">已到期</span>';
 		        	}
-		        	//return '<span class="label label-danger">过期</span>';
 		        }
 		    }, {
 		        title: '操作',
@@ -151,7 +150,6 @@
 	}
     //获取课程列表
     function getCouseList(termId) {
-    	$("#courseSelect").empty();
         var params = {};
         if(null == termId ){
         	params.termId = currentTermId;	
@@ -159,10 +157,11 @@
         	params.termId = termId;
         }
         $httpUtils.post('teacher/course/getCourseByTerm', params, function(ret) {
+    		$("#courseSelect").empty();
+        	var option = $("#courseSelect");
+        	var o2 = "<option value=''>全部</option>";
+        	option.append(o2);
             if (ret && ret.length > 0) {
-            	var option = $("#courseSelect");
-            	var o2 = "<option value=''>全部</option>";
-            	option.append(o2);
             	for ( var i in ret) {
                 	var o = "<option value="+ret[i].courseId+">"+ret[i].courseName+"</option>";
                 	option.append(o);
@@ -187,24 +186,13 @@
                     	<td width="12%" align="left" valign="middle"><label for="xueqi" style="line-height:36px; margin-bottom:0;">学期名称：</label></td>
                         <td width="30%">
                         	<select id="termSelect" class="select-control" onchange="updateCourseSelect(this.value)">                            
-                                <!-- <#list termList as term> 
-									<option value="${term.termId}" <#if term.termId == termId?default("")>selected="selected"</#if>>${term.termName}</option>
-								</#list> -->   
                             </select>                                
                         </td>
                         <td width="12%" align="left" valign="middle"><label for="kecheng" style="line-height:36px; margin-bottom:0;">课程名称：</label></td>
                         <td width="36%">
                         	<select id="courseSelect" class="select-control" onchange="getWorkList(this.value)">
-                        		<!-- <#list courseList as course> 
-									<option value="${course.courseId}" <#if course.courseId == courseId?default("")>selected="selected"</#if>>${course.courseName}</option>
-								</#list> -->
                         	</select>                                
                         </td>
-                        <!-- <td width="10%">
-                        	<button type="button" class="btn btn-default btn-sm" onclick="workTable.bootstrapTable('refresh');">
-								<span class="glyphicon glyphicon-search" aria-hidden="true"></span> 搜索
-							</button>
-						</td> -->
                     </tr>                        
                 </tbody>
             </table>
