@@ -14,6 +14,9 @@
 
 <script type="text/javascript">
 	var termId = null;
+	var TstartDate = null;
+	var TendDate = null;
+	var TweekCount = null;
 	//查看学期详情
 	$(function(){
 		termId = $PrefsUtils.receive("termId");
@@ -35,6 +38,9 @@
         		$('#startDate').val(ret.startDate);
         		$('#endDate').val(ret.endDate);
         		$('#weekCount').val(ret.weekCount);
+        		TstartDate = ret.startDate;
+        		TendDate = ret.endDate;
+        		TweekCount = ret.weekCount;
             }
         });
 	}
@@ -103,6 +109,10 @@
 			alert("开始学年必须小于或等于结束学年！");
 			return;
 		}
+		if (TweekCount > weekCount) {
+			alert("学期周数不能小于"+TweekCount+"周");
+			return;
+		}
 		var params = {};
 		params.tpId = termId;
 		params.termName = $('#yearBegin').val() + "-" + $('#yearEnd').val()
@@ -114,7 +124,10 @@
 			alert("学期修改成功");
 		});
 	};
-	
+
+	function termStartClick(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:TstartDate});
+	}
 </script>
 </head>
 <body>
@@ -157,7 +170,7 @@
 					<div class="message-right">
 						<input id="startDate" name="startDate" readonly type="text"
 							class="mess-control"
-							onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})"
+							onClick="termStartClick()"
 							placeholder="请选择起始时间" onblur="dateSubmit();"/>
 					</div>
 				</div>

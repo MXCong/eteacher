@@ -386,3 +386,5 @@ a.filebtn:hover { text-decoration:none; color:#fff;}
 .course-name { width:93%; height:40px; line-height:50px; font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 .course-classes { width:95%; height:32px; overflow:hidden;}
 .course-classes span { display:inline-block; float:left; margin:3px 5px 0 0; padding:2px 6px; line-height:20px; border:1px solid #dcdcdc;color: #999; font-size:12px;}
+.selectcontrol { width: 30%; padding: 3px 1px; font-size: 13px; line-height:20px; color: #555555; background: #fff ;border: 1px solid #e3e6f3; border-radius: 3px; box-shadow:none; 
+transition: border .25s linear,color .25s linear,background-color .25s linear;-webkit-font-smoothing: antialiased;}

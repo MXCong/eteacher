@@ -25,74 +25,70 @@
 			<table width="100%" border="0" cellpadding="0" cellspacing="0">
 				<tbody>
 					<tr>
-						<td width="8%" align="left" valign="middle"><label style="line-height:36px; margin-bottom:0;">学期：</label></td>
-						<td>
-							<select id="termSelect" class="select-control" style="width:30%" >   
-							</select>                                
-						</td>
-						<td>
-							<button type="button" class="btn btn-default btn-sm" title="上一周" onclick="fnPrevWeek()">
-								上一周
-							</button>                             
-						</td>   
-						<td>
-							周数：
-							<select id="nowDays" class="select-control" style="width:30%" >   
-							</select>                                
-						</td>
-						<td>
-							<button type="button" class="btn btn-default btn-sm" title="下一周" onclick="fnNextWeek()">
-								下一周
-							</button>                              
-						</td>
-					</tr>                    
-				</tbody>
-			</table>
-			<table width="100%" >
-				<tr>
-					<td align="center">
-						<div class="date-show">
-							<span class="day-show">星期一</span>
-						</div>
+						<td>学期：<select id="termSelect" class="selectcontrol" style="width:30%" >
+						</select>                                
 					</td>
-					<td align="center">
-						<div class="date-show">
-							<span class="day-show">星期二</span>
-						</div>
-					</td>
-					<td align="center">
-						<div class="date-show">
-							<span class="day-show">星期三</span>
-						</div>
-					</td>
-					<td align="center">
-						<div class="date-show">
-							<span class="day-show">星期四</span>
-						</div>
-					</td>
-					<td align="center">
-						<div class="date-show">
-							<span class="day-show">星期五</span>
-						</div>
-					</td>
-					<td align="center">
-						<div class="date-show">
-							<span class="day-show">星期六</span>
-						</div>
-					</td>
-					<td align="center">
-						<div class="date-show">
-							<span class="day-show">星期日</span>
-						</div>
-					</td>
-				</tr>
-				<tr id="calender" >
+					<td>周数：<select id="nowDays" class="selectcontrol" style="width:30%" >   
+					</select>                                
+				</td>
+				<td>
+					<button type="button" class="btn btn-default btn-sm" title="上一周" onclick="fnPrevWeek()">
+						上一周
+					</button>                             
+				</td>   
+				<td>
+					<button type="button" class="btn btn-default btn-sm" title="下一周" onclick="fnNextWeek()">
+						下一周
+					</button>                              
+				</td>
+			</tr>                    
+		</tbody>
+	</table>
+	<table width="100%" >
+		<tr>
+			<td align="center">
+				<div class="date-show">
+					<span class="day-show">星期一</span>
+				</div>
+			</td>
+			<td align="center">
+				<div class="date-show">
+					<span class="day-show">星期二</span>
+				</div>
+			</td>
+			<td align="center">
+				<div class="date-show">
+					<span class="day-show">星期三</span>
+				</div>
+			</td>
+			<td align="center">
+				<div class="date-show">
+					<span class="day-show">星期四</span>
+				</div>
+			</td>
+			<td align="center">
+				<div class="date-show">
+					<span class="day-show">星期五</span>
+				</div>
+			</td>
+			<td align="center">
+				<div class="date-show">
+					<span class="day-show">星期六</span>
+				</div>
+			</td>
+			<td align="center">
+				<div class="date-show">
+					<span class="day-show">星期日</span>
+				</div>
+			</td>
+		</tr>
+		<tr id="calender" >
 
-				</tr>
-			</table>
-			<div id="courseList" style="margin-top:10px;"></div>
-		</div>
-	</div>
+		</tr>
+	</table>
+	<div id="courseList" style="margin-top:10px;"></div>
+</div>
+</div>
 </body>
 <script id="courseTemplate" type="text/template">
 	{{~ it:data }}
