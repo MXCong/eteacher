@@ -707,23 +707,24 @@ public class CourseServiceImpl extends BaseService<Course> implements
 								tcclist.add(cclist.get(k));
 							}
 						}
-						System.out.println("正确的数据："+tcclist.toString());
-						if(null != tcclist && tcclist.size() > 0){
-							String cid = (String) tcclist.get(0).get("courseId");
-							List<Map> classLists = courseDAO.findMap(hq, cid);
-							String cls = "";
-							for (int a = 0; a < classLists.size(); a++) {
-								cls += classLists.get(a).get("className") + ",";
-							}
-							for (int k = 0; k < tcclist.size(); k++) {
-								tcclist.get(k).put("classes",cls.substring(0 , cls.length() - 1));
-							}
-							rlist.addAll(tcclist);
-						}
 					}
 				}
 			}
-			
+			System.out.println("正确的数据："+tcclist.toString());
+			if(null != tcclist && tcclist.size() > 0){
+				for (int j = 0; j < tcclist.size(); j++) {
+					String cid = (String) tcclist.get(j).get("courseId");
+					List<Map> classLists = courseDAO.findMap(hq, cid);
+					String cls = "";
+					for (int a = 0; a < classLists.size(); a++) {
+						cls += classLists.get(a).get("className") + ",";
+					}
+					for (int k = 0; k < tcclist.size(); k++) {
+						tcclist.get(k).put("classes",cls.substring(0 , cls.length() - 1));
+					}
+					rlist.add(tcclist.get(j));
+				}
+			}
 			if(null != rlist && rlist.size() > 0){
 				return rlist;
 			}

@@ -446,7 +446,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	 */
 	@Override
 	public void changeStatus(String stuId, String workId, String status) {
-		if(status.equals("true")){//未完成作业-->已完成作业
+		if(status.equals("1")){//未完成作业-->已完成作业
 			WorkStatus record = new WorkStatus();
 			record.setStuId(stuId);
 			record.setWorkId(workId);

@@ -189,7 +189,7 @@ public class SignCodeRemote extends BaseRemote {
 						si.setStatus(1);                          
 						si.setSignId(CustomIdGenerator.generateShortUuid());
 						SignCodeServiceImpl.save(si);                  
-						return new ReturnBody("结束签到"); 
+						return new ReturnBody("签到成功！"); 
 					}else{
 						return new ReturnBody("输入验证码有误"); 
 					}

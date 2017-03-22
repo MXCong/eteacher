@@ -142,7 +142,7 @@ public class SignInRemote extends BaseRemote {
 	 * 
 	 * @author macong 时间：2016年12月9日10:48:36
 	 */
-	@RequestMapping(value = "signIn/getDefaultSignSetting", method = RequestMethod.POST)
+	/*@RequestMapping(value = "signIn/getDefaultSignSetting", method = RequestMethod.POST)
 	public ReturnBody getDefaultSignSetting(HttpServletRequest request) {
 		try {
 			String userId = getCurrentUserId(request);
@@ -155,7 +155,7 @@ public class SignInRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);
 		}
 		return null;
-	}
+	}*/
 
 	/**
 	 * 获取特定课程的学生出勤情况

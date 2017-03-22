@@ -278,13 +278,13 @@ public class SignInServiceImpl extends BaseService<SignIn> implements ISignInSer
 			Map r3 = signInDAO.findMap(hql3, courseId).get(0);
 			float result = 0;
 			if(r2.get("courseNum").toString().equals("0")){
-				result =  1;
+				result =  0;
 			}else{
 				result = Float.parseFloat(r.get("totalSignIn").toString()) / (Integer.parseInt(r2.get("courseNum").toString())*Integer.parseInt(r3.get("studentNum").toString()));			
 			}
 			return result;
 		} catch (Exception e) {
-			return 1;
+			return 0;
 		}
 	}
 	//获取正在进行的课程的出勤率
