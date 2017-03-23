@@ -392,4 +392,18 @@ public class UserRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE,ReturnBody.ERROR_MSG);
 		}
 	}
+	@RequestMapping(value = "report", method = RequestMethod.POST)
+	public ReturnBody report(HttpServletRequest request) {
+		String jpushId = request.getParameter("jpushId");
+		if (StringUtil.checkParams(jpushId)) {
+			User user = getCurrentUser(request);
+			if(null != user){
+				user.setJpushId(jpushId);
+				userServiceImpl.update(user);
+			}
+			return new ReturnBody("保存成功！");
+		}else{
+			return ReturnBody.getParamError();
+		}
+	}
 }
