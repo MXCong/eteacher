@@ -1542,7 +1542,8 @@ public class CourseServiceImpl extends BaseService<Course> implements
 				"tci.CI_ID AS ciId, "+
 				"tci.START_DAY AS startDay, "+
 				"tci.END_DAY AS endDay, "+
-				"tci.REPEAT_TYPE AS repeatType "+
+				"tci.REPEAT_TYPE AS repeatType, "+
+				"tci.REPEAT_NUMBER AS repeatNumber "+
 				"FROM t_course tc, t_course_item tci, t_term_private ttp "+
 				"WHERE tc.`COURSE_ID` IN ("+
 				"SELECT tcc.`COURSE_ID` "+
