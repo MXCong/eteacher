@@ -21,6 +21,7 @@ import com.turing.eteacher.model.CourseCell;
 import com.turing.eteacher.model.CourseItem;
 import com.turing.eteacher.model.Notice;
 import com.turing.eteacher.model.TaskModel;
+import com.turing.eteacher.model.User;
 import com.turing.eteacher.model.Work;
 import com.turing.eteacher.service.ICourseCellService;
 import com.turing.eteacher.service.ICourseClassService;
@@ -30,6 +31,7 @@ import com.turing.eteacher.service.INoticeService;
 import com.turing.eteacher.service.IRegistConfigService;
 import com.turing.eteacher.service.ISignInService;
 import com.turing.eteacher.service.ITimeTableService;
+import com.turing.eteacher.service.IUserService;
 import com.turing.eteacher.service.IWorkService;
 import com.turing.eteacher.util.PushBody.Platform;
 import com.turing.eteacher.util.PushBody.Role;
@@ -69,6 +71,9 @@ public class SpringTimerTest {
 	
 	@Autowired
 	private ICourseClassService courseClassServiceImpl;
+	
+	@Autowired
+	private IUserService userServiceImpl;
 	
 	private static List<TaskModel> allList = new ArrayList<>();
 	
@@ -491,7 +496,7 @@ public class SpringTimerTest {
 			pushBody = getHomeWorkBody(model.getId());
 			break;
 		case TaskModel.TYPE_SIGN_IN:
-			pushSignIn(model);
+			pushBody = pushSignIn(model.getId());
 			break;
 		default:
 			break;
@@ -514,7 +519,7 @@ public class SpringTimerTest {
 				}
 				PushBody pBody = new PushBody();
 				pBody.setPlatform(Platform.all);
-				pBody.setRole(Role.student);
+				pBody.setRole(Role.all);
 				pBody.setSortFlag(classIds);
 				pBody.setSortType(SortType.tag);
 				pBody.setSortComb(SortComb.or);
@@ -597,28 +602,25 @@ public class SpringTimerTest {
 	 * 发送课程上课提醒推送（教师端）
 	 * @param model
 	 */
-	private void pushSignIn(TaskModel model){
-		/**Course course = courseServiceImpl.get(model.getId());
+	private PushBody pushSignIn(String courseId){
+		Course course = courseServiceImpl.get(courseId);
 		if (null != course) {
-			List<Map> list = noticeServiceImpl.getClassIdByNoticeId(model.getId());
-			String classIds = ""; 
-			if (null != list && list.size() > 0) {
-				for (int i = 0; i < list.size(); i++) {
-					classIds += list.get(i).get("classId")+",";
-				}
-				classIds = classIds.substring(0, classIds.length()-1);
-			}
-			PushMessage message = new PushMessage();
-			message.setAction(JPushUtil.ACTION_ALERT);
-			message.setUserType(PushMessage.UTYPE_STUDENT);
-			message.setTitle(course.getCourseName()+" 快要上课啦！");
-			message.setContent("提前"+course.getCourseId()+"进行课程提醒！");
-			message.setShow(JPushUtil.SHOW_ON);
-			message.setClassId(classIds);
-			JPushUtil.pushMessage(message);
-			System.out.println("message:"+message.toString());
-			System.out.println("执行上课签到推送啦");
-		}**/
+			User user = userServiceImpl.get(course.getUserId()); 
+			List<String> jPushIds = new ArrayList<>();
+			jPushIds.add(user.getJpushId());
+			PushBody pBody = new PushBody();
+			pBody.setPlatform(Platform.all);
+			pBody.setRole(Role.teacher);
+			pBody.setSortFlag(jPushIds);
+			pBody.setSortType(SortType.id);
+			pBody.setSortComb(SortComb.or);
+			NotifyBody nBody = NotifyBody.getNotifyBody("上课啦！",
+					course.getCourseName()+"已经上课了,！",
+					2, null);
+			pBody.setNotifyBody(nBody);
+			return pBody;
+		}
+		return null;
 	}
 
 }

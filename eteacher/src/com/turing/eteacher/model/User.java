@@ -22,6 +22,7 @@ public class User {
 	private String token;
 	private String lastAccessTime;
 	private String imei;
+	private String jpushId;
 
 	@Id
 	@GeneratedValue(generator = "customId")
@@ -105,6 +106,14 @@ public class User {
 
 	public void setImei(String imei) {
 		this.imei = imei;
+	}
+	@Column(name = "JPUSH_ID")
+	public String getJpushId() {
+		return jpushId;
+	}
+		
+	public void setJpushId(String jpushId) {
+		this.jpushId = jpushId;
 	}
 
 	@Override
