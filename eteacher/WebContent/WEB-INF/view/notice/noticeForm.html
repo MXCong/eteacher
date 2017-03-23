@@ -81,7 +81,6 @@
 			 fileIds.push(id);
 		})
 		params.fileIds=fileIds;
-		alert(JSON.stringify(params));
 		$httpUtils.postUp('teacher/notice/addNotice', params, function(data) {
 			history.back();
 		});

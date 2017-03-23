@@ -16,39 +16,40 @@
 	<script type="text/javascript" src="../../js/ajaxfileupload.js"></script>
 	<style type="text/css">  
 
-		li{
-			transition: 1s;
-		}
+	a{
+	text-decoration:none;
+	font-size:16px;
+	float:left; 
+	}
+   
+	a:link {
+	color: #000000;
+	text-decoration:none;
+	}
 
-		a:link {
-			color: #0099FF;
-			text-decoration:none;
-
-		}
-
-		a:visited {
-			color: #FF0000;
-			text-decoration:none;
-		}
-
-		li:hover {
-			position:absolute;
-			color: #999999;
-			text-decoration:none;
-			transform-origin:right top;
-			transform:scale(2, 2); 
-			-moz-transform:scale(2,2); 
-			-webkit-transform:scale(2,2); 
-			-o-transform:scale(2,2); 
-			z-index: 3;
-		}
-
-		li{
-			float: left; position: relative; list-style-type:none;
-			margin:0px 5px 3px 5px; line-height:20px; 
-			background: url(贝贝截图2017317134916.png)
-		}
-		#courseId > span { display:inline-block; float:left; margin:3px 5px 0 0; padding:2px 6px; line-height:20px; border:1px solid #dcdcdc;color: #999; font-size:12px;}
+	a:visited {
+    color: #FF0000;
+    text-decoration:none;
+	}
+	   
+    li{ 
+	   list-style-type:none; 
+	   display:inline-block;
+	   margin-left:10px;
+	   
+	}
+	ul{ width:640px;
+   		padding-top:7px;
+		padding-right:8px;
+	   
+	}
+	ul img{ 
+		float:left; 
+	    width:10px;
+		cursor:pointer;
+	  
+	}
+	#courseId > span { display:inline-block; float:left; margin:3px 5px 0 0; padding:2px 6px; line-height:20px; border:1px solid #dcdcdc;color: #999; font-size:12px;}
 
 	</style> 
 </head>
@@ -70,7 +71,7 @@
 				<div class="message-group">
 					<div class="message-left">通知内容：</div>
 					<div class="message-right" id="filesDiv">
-						<textarea id="content" name="content" placeholder="通知内容" style="margin-bottom:10px;"></textarea>
+						<textarea readonly id="content" name="content" placeholder="通知内容" style="margin-bottom:10px;"></textarea>
 					</div>                   	
 				</div>
 				<div class="message-group">
@@ -82,19 +83,16 @@
 					<div class="message-left">发布时间：</div>
 					<div class="message-right">
 						<div class="radio">
-							<input id="publishTime" name="publishTime" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" type="text" class="mess-control" placeholder="请选择发布时间" style="width:37%;"/>         
+							<input  readonly id="publishTime" name="publishTime" type="text" class="mess-control" placeholder="请选择发布时间" style="width:37%;"/>         
 						</div>
 					</div>                   	
 				</div> 
 				<div class="message-group" >
 					<div class="message-left">附件下载：</div>
-					<div class="radio">
-						<ul id="bus" style="width:600px; height:auto;  overflow:hidden";>
-						</ul> 
-					</div>
+					<ul id="bus"></ul> 
 				</div>
 				<div class="btnsub">
-					<button type="button" class="btn-submit" style="float:right;" onclick="history.back();">返回</button>
+					<button type="button" class="btn-submit"  onclick="history.back();">返回</button>
 				</div>
 			</form> 
 		</div>
@@ -103,6 +101,7 @@
 <script type="text/javascript">
 	
 	$(function(){
+		
 		init();
 		getDate();
 		$('input,select,textarea').attr('readonly',true);
@@ -145,7 +144,8 @@
 	 			for(var i=0;i<files.length;i++){
 	 				var filePath= files[i].filePath;
 	 				filePath=filePath.replace(' ','');
-	 				var zzz=$('<li> <a href="http://localhost:8080/eteacher/remote/teacher/deleteFile?filePath='+filePath+'&fileId='+files[i].fileId+'"><img  src="../../images/delet1.png" width="5px" height="5px" style="float:right; z-index:6";  /></a><a href="http://localhost:8080/eteacher/remote/teacher/notice/dwloade?filePath='+filePath+'&filename='+files[i].fileName+'">'+files[i].fileName+'</a> </li>');
+	 				var zzz=$('<li> <a href="http://localhost:8080/eteacher/remote/teacher/notice/dwloade?filePath'
+	 						+'='+filePath+'&filename='+files[i].fileName+'">'+files[i].fileName+'</a> </li>');
 	 				zzz.appendTo($("#bus"));
 	 			} 
 	 		}	
@@ -198,5 +198,17 @@
 			history.back();
 		});
 	}
+	function removeFile(fileId,ss){
+		if(confirm("确定删除")){
+			var params = {};
+			params.fileId = fileId;
+			$httpUtils.postUp('file/delFile',params,function(date){
+				var _this=$(ss);
+				_this.parent().remove();
+	        });
+		}
+	}
+	
+	
 </script>
 </html>
