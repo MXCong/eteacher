@@ -392,7 +392,7 @@ transition: border .25s linear,color .25s linear,background-color .25s linear;-w
 
 /*首页今日课程*/
 .index-kc { width:100%;}
-.kc-title { margin:20px auto; width:100%; height:60px; text-align:center; font:normal 32px/32px "Microsoft Yahei", Arial, Helvetica, sans-serif; border-bottom:1px solid #eee;}
+.kc-title { margin:0 auto; width:100%; height:30px; text-align:left; font:normal 16px/30px "Microsoft Yahei", Arial, Helvetica, sans-serif; border-bottom:1px solid #eee;padding-left:56px; background:url(../images/floor_title_2.png) no-repeat; background-size:55px;}
 .class-text { display:block; margin:10px 0 10px 0; padding:15px; width:215px; height:260px; background:#e7e7e7 url(../images/jrkcbg.png) no-repeat  135px 10px; transition: 0.5s; }
 .class-title { transition: 0.5s; margin-bottom:15px; width:100%; height:70px; font:normal 18px/80px "Microsoft Yahei", Arial, Helvetica, sans-serif; border-bottom:1px solid #999999; overflow:hidden; text-overflow: ellipsis; white-space: nowrap;}
 .class-text p { transition: 0.5s; margin:0; width:100%; height:24px; font:normal 14px/24px "Microsoft Yahei", Arial, Helvetica, sans-serif; color:#000; overflow:hidden; text-overflow: ellipsis; white-space: nowrap;}
