@@ -46,6 +46,14 @@ public class SignCodeServiceImpl extends BaseService<SignCode> implements ISignC
 
 
 
+	@Override
+	public void closeSignByCourseId(String courseId) {
+		String sql = "UPDATE t_sign_code tsc SET tsc.`STATE` = 0 WHERE tsc.`COURSE_ID` = ? AND tsc.`STATE` = 1";
+		signCodeDAO.executeBySql(sql, courseId);
+	}
+
+
+
 
 	
 

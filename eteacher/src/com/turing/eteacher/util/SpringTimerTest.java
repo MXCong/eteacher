@@ -28,9 +28,7 @@ import com.turing.eteacher.service.ICourseClassService;
 import com.turing.eteacher.service.ICourseItemService;
 import com.turing.eteacher.service.ICourseService;
 import com.turing.eteacher.service.INoticeService;
-import com.turing.eteacher.service.IRegistConfigService;
-import com.turing.eteacher.service.ISignInService;
-import com.turing.eteacher.service.ITimeTableService;
+import com.turing.eteacher.service.ISignCodeService;
 import com.turing.eteacher.service.IUserService;
 import com.turing.eteacher.service.IWorkService;
 import com.turing.eteacher.util.PushBody.Platform;
@@ -52,19 +50,10 @@ public class SpringTimerTest {
 	private ICourseCellService courseCellServiceImpl;
 	
 	@Autowired
-	private ITimeTableService timeTableServiceImpl;
-	
-	@Autowired
 	private ICourseService courseServiceImpl;
 	
 	@Autowired
 	private IWorkService workServiceImpl;
-	
-	@Autowired
-	private IRegistConfigService registConfigServiceImpl;
-	
-	@Autowired
-	private ISignInService signInServiceImpl;
 	
 	@Autowired
 	private ICourseItemService courseItemServiceImpl;
@@ -74,6 +63,9 @@ public class SpringTimerTest {
 	
 	@Autowired
 	private IUserService userServiceImpl;
+	
+	@Autowired
+	private ISignCodeService signCodeServiceImpl;
 	
 	private static List<TaskModel> allList = new ArrayList<>();
 	
@@ -605,6 +597,7 @@ public class SpringTimerTest {
 	private PushBody pushSignIn(String courseId){
 		Course course = courseServiceImpl.get(courseId);
 		if (null != course) {
+			signCodeServiceImpl.closeSignByCourseId(courseId);
 			User user = userServiceImpl.get(course.getUserId()); 
 			List<String> jPushIds = new ArrayList<>();
 			jPushIds.add(user.getJpushId());
