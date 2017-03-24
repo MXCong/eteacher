@@ -579,9 +579,6 @@ public class CourseRemote extends BaseRemote {
 					ReturnBody.ERROR_MSG);
 		}
 	}
-
-	
-
 	/**
 	 * 获取教材或教辅详情
 	 * 

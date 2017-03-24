@@ -949,6 +949,7 @@ public class CourseServiceImpl extends BaseService<Course> implements
 		String currentDate = DateUtil.getCurrentDateStr("yyyy-MM-dd");
 		String currentTime = DateUtil.getCurrentDateStr("HH:mm");
 		String weekDay = Integer.toString(DateUtil.getWeekNum(currentDate));
+		/*
 		//根据用户的签到设置，获取有效的时间范围
 		String hql1 = "select rf.before as before , rf.after as after "
 				+ "from RegistConfig rf where "
@@ -974,7 +975,26 @@ public class CourseServiceImpl extends BaseService<Course> implements
 				+ "and ci.endDay > ? and cc.startTime < ? and cc.endTime > ? and c.termId = ? "
 				+ "and (cc.weekDay like ? or cc.weekDay = null )";
 		List<Map> course = courseDAO.findMap(hql, userId,currentDate,currentDate,resutlTime,endTime,termId,"%"+weekDay+"%");
+		*/
+		String hql = "select c.courseName as courseName , c.courseId as courseId , "
+				+ "cc.location as location , cc.classRoom as classRoom , "
+				+ "cc.weekDay as weekDay , ci.repeatType as repeatType , "
+				+ "ci.repeatNumber as repeatNumber , "
+				+ "cc.startTime as startTime , cc.endTime as endTime "
+				+ "from Course c , CourseCell cc , CourseItem ci "
+				+ "where c.courseId = ci.courseId and ci.ciId = cc.ciId "
+				+ "and c.userId = ? and ci.startDay < ? and ci.endDay > ? "
+				+ "and cc.startTime < ? and cc.endTime > ? and c.termId = ? "
+				+ "and (cc.weekDay like ? or cc.weekDay = null )";
+		List<Map> course = courseDAO.findMap(hql, userId,currentDate,currentDate,currentTime,currentTime,termId,"%"+weekDay+"%");
 		if(null != course && course.size() > 0){
+			String hql2 = "select sc.code as signInCode from SignCode sc "
+					+ "where sc.courseId = ? and sc.state = 0";
+			List<Map> m = courseDAO.findMap(hql2, course.get(0).get("courseId"));
+			if(null != m && m.size()>0){
+				course.get(0).put("isSignIn", 1);
+				course.get(0).put("signInCode", m.get(0).get("signInCode"));
+			}
 			return course;
 		}
 		return null;
