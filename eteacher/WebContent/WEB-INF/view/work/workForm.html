@@ -115,8 +115,10 @@
     }
 	//选择课程，列出该课程下的授课班级
     function updateCourseSelect(courseId){
+//     	alert(11);
     	courseID = courseId;
-    	var classes = $("#classList");
+    	var classes = $("#classList2");
+    	classes.empty();
 		for ( var i in courseList) {
 			if(courseList[i].courseId == courseId){
 				var cls = courseList[i].classes;
@@ -173,7 +175,7 @@
                         <select id="courseId" name="courseId" onchange="updateCourseSelect(this.value)">
                             <option value="">--请选择课程--</option>
                         </select>
-                        <div id="classList"></div>
+                        <div id="classList2"></div>
                         <!-- <div>
                         	<div class="targetClass onetab" name="classes">
 			            		<span></span>
