@@ -94,65 +94,68 @@
 			$('#classTable').bootstrapTable('load', ret);
 		});
 	}
-	function initTale(datas){
-			classTable = $('#classTable').bootstrapTable({
-			data : datas,
-		    striped : true,
-		    search : true,
-		    showRefresh : true,
-		    toolbar : '#toolbar',
-		    columns: [{
-		        title: '序号',
-		        align: 'center',
-		        formatter : function (value, row, index){
-		        	return index + 1;
-		        }
-		    },{
-		        field: 'content',
-		        halign: 'center',
-		        title: '问题内容'
-		    }, {
-		        field: 'typeName',
-		        halign: 'center',
-		        title: '分类'
-		    }, {
-		        field: 'pointName',
-		        halign: 'center',
-		        title: '知识点'
-		    }, {
-		        field: 'status',
-		        halign: 'center',
-		        title: '是否标记',
-		        formatter : function (value, row, index){
-		        	if(row.status == 0){
-		        		return '<span class="label label-primary">未标记</span>';
-		        	}else if(row.status == 1){
-		        		return '<span class="label label-success">备选题</span>';
-		        	}
-		        }
-		    }, {
-		        title: '操作',
-		        field: 'questionId',
-		        align: 'center',
-		        formatter : function (value, row, index){
-		        	return '<i style="cursor: pointer;" title="标记/取消" class="glyphicon-collapse-up icon-chevron-up"></i> &nbsp;'
-		        		 + '<i style="cursor: pointer;" title="编辑" class="glyphicon glyphicon-edit"></i> &nbsp;'
-		        		 + '<i style="cursor: pointer;" title="删除" class="glyphicon glyphicon-trash"></i>';
+function initTale(datas){
+	if(null == datas){
+		datas = {};
+	}
+		classTable = $('#classTable').bootstrapTable({
+		data : datas,
+	    striped : true,
+	    search : true,
+	    showRefresh : true,
+	    toolbar : '#toolbar',
+	    columns: [{
+	        title: '序号',
+	        align: 'center',
+	        formatter : function (value, row, index){
+	        	return index + 1;
+	        }
+	    },{
+	        field: 'content',
+	        halign: 'center',
+	        title: '问题内容'
+	    }, {
+	        field: 'typeName',
+	        halign: 'center',
+	        title: '分类'
+	    }, {
+	        field: 'pointName',
+	        halign: 'center',
+	        title: '知识点'
+	    }, {
+	        field: 'status',
+	        halign: 'center',
+	        title: '是否标记',
+	        formatter : function (value, row, index){
+	        	if(row.status == 0){
+	        		return '<span class="label label-primary">未标记</span>';
+	        	}else if(row.status == 1){
+	        		return '<span class="label label-success">备选题</span>';
+	        	}
+	        }
+	    }, {
+	        title: '操作',
+	        field: 'questionId',
+	        align: 'center',
+	        formatter : function (value, row, index){
+	        	return '<i style="cursor: pointer;" title="标记/取消" class="glyphicon-collapse-up icon-chevron-up"></i> &nbsp;'
+	        		 + '<i style="cursor: pointer;" title="编辑" class="glyphicon glyphicon-edit"></i> &nbsp;'
+	        		 + '<i style="cursor: pointer;" title="删除" class="glyphicon glyphicon-trash"></i>';
+	        },
+	        events : {
+	        	'click .glyphicon-collapse-up': function (e, value, row, index) {
+		            //alert(e+'--'+value+'---'+row.status+'---'+index);
+	        		updateStatus(value,row.status);//标记问题/取消标记
 		        },
-		        events : {
-		        	'click .glyphicon-collapse-up': function (e, value, row, index) {
-			            //alert(e+'--'+value+'---'+row.status+'---'+index);
-		        		updateStatus(value,row.status);//标记问题/取消标记
-			        },
-		        	'click .glyphicon-edit': function (e, value, row, index) {
-			            window.location.href = 'questionUpdate.html?questionId=' + value;
-			        },
-			        'click .glyphicon-trash': function (e, value, row, index) {
-			        	deleteQuestion(value);
-			        }
+	        	'click .glyphicon-edit': function (e, value, row, index) {
+		            window.location.href = 'questionUpdate.html?questionId=' + value;
+		        },
+		        'click .glyphicon-trash': function (e, value, row, index) {
+		        	deleteQuestion(value);
 		        }
-		    } ]
-		});
+	        }
+	    } ]
+	});
 	}
 	//删除问题
 	function deleteQuestion(value){

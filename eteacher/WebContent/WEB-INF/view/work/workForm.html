@@ -90,7 +90,7 @@
 		params.fileIds=fileIds;
 		
         params.status = 1;
-        alert(JSON.stringify(params));
+        //alert(JSON.stringify(params));
         $httpUtils.postUp('teacher/work/addWork',params,function(date){
             //alert("作业创建成功");
             history.back();
