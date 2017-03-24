@@ -258,18 +258,14 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		 * 
 		 * 修改：拼接作业的授课班级列表
 		 */
-		String hq = "select concat(cls.grade,'级',cls.className) as className , wc.workId " 
+		String hq = "select concat(cls.grade,'级',cls.className) as className " 
 					+ "from Classes cls , WorkClass wc "
 					+ "where cls.classId = wc.classId and wc.workId = ?";
 		for (int a = 0; a < list.size(); a++) {
 			// 1.课程名称与授课班级的拼接--->软件工程（13软工A班）
 			List<Map> cnlist = workDAO.findMap(hq, (String) list.get(a).get("workId"));
 			if (null != cnlist && cnlist.size() > 0) {
-				String classes = "";
-				for (int i = 0; i < cnlist.size(); i++) {
-					classes += cnlist.get(i).get("className") + ",";
-				}
-				list.get(a).put("className", classes.substring(0, classes.length() - 1));
+				list.get(a).put("classes", cnlist);
 			}
 		}
 		if (null != list && list.size() > 0) {

@@ -87,24 +87,26 @@
 
 		</tr>
 	</table>
-	<div id="courseList" style="margin-top:10px;"></div>
+	<div id="courseList" class="row" style="margin-top:10px;">
+    </div>
 </div>
 </div>
 </body>
 <script id="courseTemplate" type="text/template">
 	{{~ it:data }}
-	<div class="course-item">
-		<div class="course-bar">
-			<div class="course-info">
-				<div class="course-name">{{=data.courseName}}</div>
-				<div id={{=data.courseId}} class="course-classes">
-					{{ for(var prop in data.classes) { }}
-					<span>{{=data.classes[prop].className}}</span>
-					{{ } }}
-				</div>
-			</div>
-		</div>
-	</div>
+        <div class="col-md-3">
+            <div class="class-text">
+                <div class="class-title">{{=data.courseName}}</div>
+                <p title="">上课日期：{{=data.date}}</p>
+                <p title="">上课时间：{{=data.startTime}}-{{=data.endTime}}</p>
+                <p title="">上课地点：{{=data.location}}</p>
+                <div class="class-top">
+                    {{ for(var prop in data.classes) { }}
+                    <span>{{=data.classes[prop].className}}</span>
+                    {{ } }}
+                </div>
+            </div>
+        </div>
 	{{~}}
 </script>
 

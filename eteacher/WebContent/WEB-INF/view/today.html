@@ -1,17 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>教学系统教师pc端</title>
-<link href="../css/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-<link href="../css/base.css" rel="stylesheet" type="text/css">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>教学系统教师pc端</title>
+	<link href="../css/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+	<link href="../css/base.css" rel="stylesheet" type="text/css">
 
-<script type="text/javascript" src="../js/jquery.min.js"></script>
-<script type="text/javascript" src="../js/utils/md5.js"></script>
-<script type="text/javascript" src="../js/utils/PrefsUtils.js"></script>
-<script type="text/javascript" src="../js/utils/ajax.js"></script>
-<script type="text/javascript">
-	var currentDate = null;
+	<script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script type="text/javascript" src="../js/utils/md5.js"></script>
+	<script type="text/javascript" src="../js/utils/PrefsUtils.js"></script>
+	<script type="text/javascript" src="../js/utils/ajax.js"></script>
+	<script type='text/javascript' src='../js/utils/doT.min.js' charset='utf-8'></script>
+
+	<script id="courseTemplate" type="text/template">
+		{{~ it:data }}
+			<div class="col-md-3">
+				<div class="class-text">
+					<div class="class-title">{{=data.courseName}}</div>
+					<p title="">上课日期：{{=data.date}}</p>
+					<p title="">上课时间：{{=data.startTime}}-{{=data.endTime}}</p>
+					<p title="">上课地点：{{=data.location}}</p>
+					<div class="class-top">
+						{{ for(var prop in data.classes) { }}
+						<span>{{=data.classes[prop].className}}</span>
+						{{ } }}
+					</div>
+				</div>
+			</div>
+		{{~}}
+	</script>
+	<script id="workTemplate" type="text/template">
+		{{~ it:data }}
+			<div class="col-md-3">
+				<div class="class-text">
+					<div class="class-title">{{=data.title}}</div>
+					<p title="">作用内容：{{=data.content}}</p>
+					<p title="">目标课程：{{=data.courseName}}</p>
+					<div class="class-top">
+						{{ for(var prop in data.classes) { }}
+						<span>{{=data.classes[prop].className}}</span>
+						{{ } }}
+					</div>
+				</div>
+			</div>
+		{{~}}
+	</script>
+	<script type="text/javascript">
+		var courseTemp = doT.template($('#courseTemplate').html());
+		var workTemp = doT.template($('#workTemplate').html());
+		var currentDate = null;
 	//获取今日课程和今日到期作业；
 	$(function(){
 		$httpUtils.checkParams();
@@ -46,51 +83,37 @@
 		return currentdate;
 	}
 	//获取指定月份，上课的日期列表。
-	function getSpecialCourseDates() {
-		var params = {};
-		params.month = getYearMonth();
-		$httpUtils.post('teacher/Course/getWorkday', params, function(ret) {
-			//alert(JSON.stringify(ret));
-			getCoursrByDate(ret);
-		});
-	}
-	//获取指定日期的课程列表
-	function getCoursrByDate(dateLists) {
-		var courseIds = new Array();
-		for (var i = 0; i < dateLists.length; i++) {
-			var d = dateLists[i].date;
-			if (d == currentDate) {
-				courseIds.push(dateLists[i].courseId);
-			}
-		}
-		if (null != courseIds && courseIds.length > 0) {
+	function getSpecialCourseDates(){
+		var date = new Date();
+		dateStr = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
+		var cTerm = $PrefsUtils.getPref("currentTerm");
+		if (cTerm) {
+			var cTermJson =  $.parseJSON(cTerm);
 			var params = {};
-			params.courseIds = JSON.stringify(courseIds);
-			params.targetDate = currentDate;
-			$httpUtils.post('teacher/course/getCourseInfo', params, function(data) {
-				//alert("今日课程："+JSON.stringify(data));
-				$('#courseList').text(JSON.stringify(data));
+			params.startDate = dateStr;
+			params.endDate = dateStr;
+			params.termId = cTermJson.tpId;
+			$httpUtils.post('teacher/Course/getlistByDate', params, function(ret) {
+				if (ret) {
+					$('#courseList').html(courseTemp(ret.courseList));
+				}
 			});
-		} else {
-			//没有课程
-			$('#courseList').text("今天没课，好好放松一下吧！");
 		}
 	}
 	//获取指定日期结束的作业列表
-    function getWorkByDate(){
-       var par = {};
-       par.status = 3;
-       par.date = currentDate;
-      	$httpUtils.post('teacher/work/getWorkList', par, function(ret) {
-      		if(ret){
-      			$('#workList').text(JSON.stringify(ret));
-      		}else{
-      			$('#workList').text("今天没有要处理的作业呦~");
-      		}
+	function getWorkByDate(){
+		var par = {};
+		par.status = 3;
+		par.date = currentDate;
+		$httpUtils.post('teacher/work/getWorkList', par, function(ret) {
+			if(ret){
+				$('#workList').html(workTemp(ret));
+			}else{
+				$('#workList').text("今天没有要处理的作业呦~");
+			}
 		});
-    } 
+	} 
 </script>
-</head>
 <body>
 	<div class="maincont">
 		<div class="title">
@@ -98,85 +121,16 @@
 		</div>
 		<div class="today-case">
 			<div class="index-kc">
-        	<div class="kc-title">今日课程</div>            
-            <div class="row">
-            	<div class="col-md-3">
-                	<div class="class-text">
-                        <div class="class-title" title="毛泽东思想邓小平理论和三个代表重要思想">毛泽东思想邓小平理论和三个代表重要思想</div>
-                        <p title="">上课时间：8:00-12:00</p>
-                        <p title="">上课地点：石家庄学院尚学堂石家庄学院尚学堂</p>
-                        <div class="class-top">
-                        	<span title="2013级软件工级软件工程程1班">2013级软件工级软件工程程1班</span>
-                            <span>2013级软件工程1班</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                	<div class="class-text">
-                        <div class="class-title" title="毛泽东思想邓小平理论和三个代表重要思想">毛泽东思想邓小平理论和三个代表重要思想</div>
-                        <p title="">上课时间：8:00-12:00</p>
-                        <p title="">上课地点：石家庄学院尚学堂石家庄学院尚学堂</p>
-                        <div class="class-top">
-                        	<span title="2013级软件工级软件工程程1班">2013级软件工级软件工程程1班</span>
-                            <span>2013级软件工程1班</span>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>            
-        </div>
-        <div class="index-kc">
-        	<div class="kc-title">到期作业</div>            
-            <div class="row">
-            	<div class="col-md-3">
-                	<div class="class-text dqzy">
-                        <div class="class-title" title="毛邓三的作业标题作业标题">毛邓三的作业标题作业标题</div>
-                        <p title="">作业内容：毛邓三的作业内容毛邓三的作业内容</p>
-                        <p title="">开始时间：8:00-12:00</p>
-                        <p title="">课程名称：石家庄学院尚学堂</p>                        
-                        <div class="class-top">
-                        	<span title="2013级软件工级软件工程程1班">2013级软件工级软件工程程1班</span>
-                            <span>2013级软件工程1班</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                	<div class="class-text dqzy">
-                        <div class="class-title" title="毛邓三的作业标题作业标题">毛邓三的作业标题作业标题</div>
-                        <p title="">作业内容：毛邓三的作业内容毛邓三的作业内容</p>
-                        <p title="">开始时间：8:00-12:00</p>
-                        <p title="">课程名称：石家庄学院尚学堂</p>                        
-                        <div class="class-top">
-                        	<span title="2013级软件工级软件工程程1班">2013级软件工级软件工程程1班</span>
-                            <span>2013级软件工程1班</span>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>            
-        </div>
-			<!-- <div class="icase">
-				<div class="icase-title">
-					<span>1</span>
-				</div>
-				<div class="icase-cont">
-					<h1>今日课程：</h1>
-					<p id="courseList">
-						
-					</p><br>
-				</div>
-				<div class="icase-title">
-					<span>2</span>
-				</div>
-				<div class="icase-cont">
-					<h1>到期作业：</h1>
-					<p id="workList">
-						
-					</p>
-				</div>
-				
-			</div> -->
+				<div class="kc-title">今日课程</div>            
+				<div class="row" id="courseList">               
+				</div>            
+			</div>
+			<div class="index-kc">
+				<div class="kc-title">到期作业</div>            
+				<div class="row" id="workList">
 
+				</div>            
+			</div>
 		</div>
 	</div>
 	<div class="footer">

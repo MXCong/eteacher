@@ -1442,12 +1442,21 @@ public class CourseServiceImpl extends BaseService<Course> implements
 											if (!dateList.contains(date)) {
 												dateList.add(date);
 											}
-											Map<String,Object> courseMap = new HashMap<>();
-											courseMap.put("courseId", (String)map.get("courseId"));
-											courseMap.put("courseName", (String)map.get("courseName"));
-											courseMap.put("classes", courseClassesDAO.getClassesByCourseId((String)map.get("courseId")));
-											if (!courseList.contains(courseMap)) {
-												courseList.add(courseMap);
+											List<CourseCell> cells = courseCellDAO.getCells((String)map.get("ciId"));
+											if (null != cells) {
+												for (int i = 0; i < cells.size(); i++) {
+													Map<String,Object> courseMap = new HashMap<>();
+													courseMap.put("date", date);
+													courseMap.put("startTime", cells.get(i).getStartTime());
+													courseMap.put("endTime", cells.get(i).getEndTime());
+													courseMap.put("location", cells.get(i).getLocation());
+													courseMap.put("courseId", (String)map.get("courseId"));
+													courseMap.put("courseName", (String)map.get("courseName"));
+													courseMap.put("classes", courseClassesDAO.getClassesByCourseId((String)map.get("courseId")));
+													if (!courseList.contains(courseMap)) {
+														courseList.add(courseMap);
+													}
+												}
 											}
 									   }
 									}
@@ -1481,7 +1490,12 @@ public class CourseServiceImpl extends BaseService<Course> implements
 																if (!dateList.contains(dateStr)) {
 																	dateList.add(dateStr);
 																}
+																List<CourseCell> cells = courseCellDAO.getCells((String)map.get("ciId"));
 																Map<String,Object> courseMap = new HashMap<>();
+																courseMap.put("date", dateStr);
+																courseMap.put("location", cell.getLocation());
+																courseMap.put("startTime", cell.getStartTime());
+																courseMap.put("endTime", cell.getEndTime());
 																courseMap.put("courseId", (String)map.get("courseId"));
 																courseMap.put("courseName", (String)map.get("courseName"));
 																courseMap.put("classes", courseClassesDAO.getClassesByCourseId((String)map.get("courseId")));
