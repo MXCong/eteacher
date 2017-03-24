@@ -22,6 +22,8 @@ import com.turing.eteacher.model.SignCode;
 import com.turing.eteacher.model.SignIn;
 import com.turing.eteacher.service.ICourseClassService;
 import com.turing.eteacher.service.ISignCodeService;
+import com.turing.eteacher.service.ISignInService;
+import com.turing.eteacher.service.impl.SignInServiceImpl;
 import com.turing.eteacher.util.CustomIdGenerator;
 import com.turing.eteacher.util.JPushUtils;
 import com.turing.eteacher.util.NotifyBody;
@@ -40,6 +42,9 @@ public class SignCodeRemote extends BaseRemote {
 		private ISignCodeService SignCodeServiceImpl;	
 		@Autowired
 		private ICourseClassService courseClassServiceImpl;
+		@Autowired
+		private ISignInService signInServiceImpl;
+		
 		/**
 		 * 开启签到          
 		 * @param request     
@@ -53,8 +58,7 @@ public class SignCodeRemote extends BaseRemote {
 					Random ra = new Random();
 					int code = ra.nextInt(8999) + 1000;
 					SignCode sc = new SignCode();
-					String iid=CustomIdGenerator.generateShortUuid();
-					final String id=iid;
+					String id=CustomIdGenerator.generateShortUuid();
 					sc.setScId(id);
 					sc.setCode(code);
 					sc.setCourseId(courseId);
@@ -63,21 +67,6 @@ public class SignCodeRemote extends BaseRemote {
 					boolean bn = SignCodeServiceImpl.Add(sc);
 					if (bn = true) {
 						startSign(courseId,id);
-						final Timer timer = new Timer();
-					    timer.schedule(new TimerTask() {
-					      public void run() {
-					    	  System.out.println("---- 开始-----");
-					    	  SignCode sc2=SignCodeServiceImpl.selectOne(id);
-					    	  if(null!=sc2&&sc2.getState()==0){
-					    		  sc2.setEndTime(new Date());
-					    		  sc2.setState(1);
-					    		  SignCodeServiceImpl.update(sc2);
-					    		  System.out.println("---- 结束-----");
-					    		  timer.cancel();
-					    	  }
-					        timer.cancel();
-					      }
-					    }, 10*1000);// 设定指定的时间time,此处为2000毫秒
 					    Map<String,Object> m=new HashMap<String,Object>();
 					    m.put("scId", id);
 					    m.put("code", String.valueOf(code));
@@ -174,27 +163,28 @@ public class SignCodeRemote extends BaseRemote {
 		@RequestMapping(value="student/ClickSign",method=RequestMethod.POST)
 		public ReturnBody ClickSign(HttpServletRequest request){
 			try {
-				String code = request.getParameter("code");           
-				String courseId = request.getParameter("courseId");  
-				String scId = request.getParameter("scId");             
-				String userId = request.getParameter("userId");       
-				if(StringUtil.checkParams(code,courseId)){        
-					SignCode sc = SignCodeServiceImpl.selectOne("scId");
-					if(code.equals(sc.getCode())){                
-					  	SignIn si=new SignIn();                     
+				String code = request.getParameter("code"); 
+				String userId = request.getParameter("userId");
+				Map m=SignCodeServiceImpl.selectSign(code,userId);
+				if(m.get("shu").equals("1")){
+					String 	scId=(String) m.get("scId");
+					String 	courseId=(String) m.get("courseId");
+				 boolean bn=SignCodeServiceImpl.selectOnly(scId,userId);
+				 if(bn==true){
+					 	SignIn si=new SignIn();                     
 					  	si.setCourseId(courseId);                 
 					  	si.setScId(scId);                           
 						si.setCreateTime(new Date());               
 						si.setStudentId(userId);                   
 						si.setStatus(1);                          
 						si.setSignId(CustomIdGenerator.generateShortUuid());
-						SignCodeServiceImpl.save(si);                  
+						signInServiceImpl.save(si);
 						return new ReturnBody("签到成功！"); 
-					}else{
-						return new ReturnBody("输入验证码有误"); 
-					}
-				}else{
-					return new ReturnBody("验证码不能为空或系统异常"); 
+				 }else{
+					 return new ReturnBody("已经签到"); 
+				 }	
+				}else {
+					return new ReturnBody("验证码有误为空或系统异常"); 
 				}
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
