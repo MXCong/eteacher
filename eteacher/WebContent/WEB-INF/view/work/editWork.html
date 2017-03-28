@@ -39,7 +39,7 @@
 	}
 	
 	//获取课程列表
-    function getCouseList() {
+    function getCouseList(couId) {
 		var currentTerm = JSON.parse($PrefsUtils.getPref('currentTerm'));
 		var currentTermId = currentTerm.tpId;
         var params = {};
@@ -49,8 +49,12 @@
             	courseList = ret;
             	var option = $("#courseId");
             	for ( var i in ret) {
-                	var o = "<option value="+ret[i].courseId+">"+ret[i].courseName+"</option>";
+                	var o = $("<option value="+ret[i].courseId+">"+ret[i].courseName+"</option>");
+                	if(couId==ret[i].courseId){
+                		o.attr("selected",true);
+                	}
                 	option.append(o);
+                	
         		} 
             }
         });
@@ -59,7 +63,7 @@
 	//选择课程，列出该课程下的授课班级
     function updateCourseSelect(courseId){
     	courseID = courseId;
-    	var classes = $("#classList");
+    	var classes = $("#classList2");
     	$('#classItem').remove(); //清空班级
 		for ( var i in courseList) {
 			if(courseList[i].courseId == courseId){
@@ -92,13 +96,13 @@
                 $('#endTime').val(workInfo.endTime);
                 $('#content').html(workInfo.content);
                 
-                var o = "<option value="+workInfo.courseId+">"+workInfo.courseName+"</option>";
-                $('#courseId').html(o);
-
+//                 var o = "<option value="+workInfo.courseId+">"+workInfo.courseName+"</option>";
+               // $('#courseId').html(o);
+ 			    getCouseList(workInfo.courseId);//获取课程的下拉列表项
                 targetClass(workInfo.targetClass);//作业的授课班级处理并显示；
                 
                 courseID = workInfo.courseId;
-                getCouseList();//获取课程的下拉列表项
+              
                 if (workInfo.files) {
                 	var files = workInfo.files;
                 	for ( var i in files) {
@@ -216,9 +220,9 @@
                     <div class="message-left">选择课程：</div>
                     <div class="message-right" id="classList">                	
                         <select id="courseId" name="courseId" onchange="updateCourseSelect(this.value)">
-                            <option value="">--请选择课程--</option>
+                            
                         </select>
-                        <div id="classList"></div>
+                        <div id="classList2"></div>
                         <!-- <div>
                         	<div class="targetClass onetab" name="classes">
 			            		<span></span>
