@@ -109,8 +109,13 @@ public class StudentRemote extends BaseRemote {
 	public ReturnBody getStudent(HttpServletRequest request){
 		try {
 			String userId = request.getParameter("userId");
+			System.out.println("userId"+userId);
 			Map student = studentServiceImpl.getUserInfo(userId,FileUtil.getRequestUrl(request));
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, student);
+			if (null != student) {
+				return new ReturnBody(ReturnBody.RESULT_SUCCESS, student);
+			}else{
+				return ReturnBody.getParamError();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE, ReturnBody.ERROR_MSG);

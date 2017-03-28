@@ -237,6 +237,8 @@ public class NoteRemote extends BaseRemote {
 			if (null == note) {
 				return ReturnBody.getParamError();
 			}
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			createTime = simpleDateFormat.format(new Date(Long.parseLong(createTime)*1000));
 			note.setTitle(title);
 			note.setContent(content);
 			note.setCreateTime(createTime);

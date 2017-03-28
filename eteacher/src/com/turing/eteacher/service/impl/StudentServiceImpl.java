@@ -100,9 +100,9 @@ public class StudentServiceImpl extends BaseService<Student> implements
 	 */
 	@Override
 	public Map getUserInfo(String userId, String url) {
-		Map<String, String> map = new HashMap();
 		Student student = studentDAO.get(userId);
 		if (null != student) {
+			Map<String, String> map = new HashMap();
 			map.put("stuName", student.getStuName());
 			map.put("stuNo", student.getStuNo());
 			map.put("sex", student.getSex());
@@ -132,8 +132,12 @@ public class StudentServiceImpl extends BaseService<Student> implements
 					map.put("schoolName", school.getValue());
 				}
 			}
+			System.out.println("非空");
+			return map;
+		}else{
+			System.out.println("空");
+			return null;
 		}
-		return map;
 	}
 
 	@Override
