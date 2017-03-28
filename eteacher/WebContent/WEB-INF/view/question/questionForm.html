@@ -96,8 +96,17 @@
 	//获取用户的问题分类列表
 	function initQuestionType(){
 		$httpUtils.post('question/getType',null,function(ret){
-			if(ret){
+			if(ret!=""){
 				$("#examMethodList").html(questionTypeDot(ret));
+			}else{
+				if(confirm("您还没有创建问题分类，是否使用课程名称作为分类？")){
+					$httpUtils.post('question/defaultQuestionType',null,function(ret){
+						alert("导入成功");
+						if(ret!=""){
+							$("#examMethodList").html(questionTypeDot(ret));
+						}
+					});
+				}
 			}
 		});
 	}

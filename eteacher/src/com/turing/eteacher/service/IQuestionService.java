@@ -147,4 +147,10 @@ public interface IQuestionService extends IService<Question> {
 	 * @param optionId
 	 */
 	public void deleteOption(String optionId);
+	/**
+	 * 将用户本学期的课程名称作为问题分类
+	 * @param userId
+	 * @return
+	 */
+	public List<Map> defaultQuestionType(String userId,String termId);
 }

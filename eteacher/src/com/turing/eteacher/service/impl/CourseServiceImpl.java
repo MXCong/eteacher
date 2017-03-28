@@ -106,17 +106,10 @@ public class CourseServiceImpl extends BaseService<Course> implements
 	@Autowired
 	private WorkCourseDAO workCourseDAO;
 	
-	@Autowired
-	private StudentDAO studentDAO;
-	
 	@Override
 	public BaseDAO<Course> getDAO() {
 		return courseDAO;
 	}
-	
-	@Autowired
-	private ISignInService signInServiceImpl;
-	
 
 	// 获取学期下的课程数据，判断该学期下是否含有课程数据
 	@Override

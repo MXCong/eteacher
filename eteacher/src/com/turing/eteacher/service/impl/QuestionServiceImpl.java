@@ -54,7 +54,7 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 
 	@Autowired
 	private FileDAO fileDAO;
-
+	
 	@Override
 	public BaseDAO<Question> getDAO() {
 		return questionDAO;
@@ -532,5 +532,22 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 	public void deleteOption(String optionId) {
 		String sql = "DELETE FROM t_options WHERE t_options.OPTION_ID = ?";
 		int result = questionDAO.executeBySql(sql, optionId);
+	}
+
+	@Override
+	public List<Map> defaultQuestionType(String userId,String termId) {
+		String hql = "select c.courseName as courseName from Course c "
+				+ "where c.userId = ? and c.termId = ?";
+		List<Map> list = questionDAO.findMap(hql, userId , termId);
+		String sql = "INSERT INTO t_question_type (TYPE_ID,TYPE_NAME,USER_ID) VALUES (?,?,?)";
+		if(null != list && list.size()>0){
+			for (int i = 0; i < list.size(); i++) {
+				String id = CustomIdGenerator.generateShortUuid();
+				String typeName = (String) list.get(i).get("courseName");
+				questionDAO.executeBySql(sql, id,typeName,userId);
+			}
+		}
+		List<Map> result = getQuestionType(userId);
+		return result;
 	}
 }

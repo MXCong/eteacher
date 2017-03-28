@@ -523,4 +523,24 @@ public class QuestionRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
 		}
 	}
+	/**
+	 * 将用户本学期的课程名称作为问题分类
+	 * @time 2017年3月28日14:45:49
+	 * @author macong
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "question/defaultQuestionType", method = RequestMethod.POST)
+	public ReturnBody defaultQuestionType(HttpServletRequest request) {
+		try {
+			String userId = getCurrentUserId(request);
+			String termId = (String) getCurrentTerm(request).get("termId");
+			List<Map> result = questionServiceImpl.defaultQuestionType(userId,termId);
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE,
+					ReturnBody.ERROR_MSG);
+		}
+	}
 }
