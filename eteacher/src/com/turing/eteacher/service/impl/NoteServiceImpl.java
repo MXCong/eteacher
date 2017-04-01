@@ -2,7 +2,9 @@ package com.turing.eteacher.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -151,14 +153,17 @@ public class NoteServiceImpl extends BaseService<Note> implements INoteService {
 				+ "    (SELECT DISTINCT     (VOCABULARY_ID)    FROM     t_file     WHERE DATA_ID = ?)";		
 		List<Map> list=noteDAO.findBySql(sql, couserId);
 		
-		String sql2="SELECT	 VOCABULARY_ID,DATA_ID,FILE_NAME, CONCAT(?,SERVER_NAME) AS url   FROM  t_file  WHERE  t_file.VOCABULARY_ID=? AND IS_COURSE_FILE=1 AND DATA_ID=?";
-
+		String sql2="SELECT	 VOCABULARY_ID,DATA_ID,FILE_NAME, CONCAT(?,SERVER_NAME) AS url   FROM  t_file  WHERE  t_file.VOCABULARY_ID=? AND t_file.IS_COURSE_FILE=1 AND t_file.FILE_AUTH = '01' AND t_file.DATA_ID=?";
+		List<Map> result = new ArrayList<>();
 		for(int i=0;i<list.size();i++){
 			String VOCABULARY_ID=(String) list.get(i).get("DICTIONARY_ID");
 			List<Map> listFile=noteDAO.findBySql(sql2, fileUrl,VOCABULARY_ID,couserId);
-			list.get(i).put("listFile", listFile);
+			if(null != listFile && listFile.size() > 0){
+				list.get(i).put("listFile", listFile);
+				result.add(list.get(i));
+			}
 		}
-		return list;
+		return result;
 	}
 	
 	

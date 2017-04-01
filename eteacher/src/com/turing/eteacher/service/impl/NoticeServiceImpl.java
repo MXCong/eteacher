@@ -251,11 +251,18 @@ public class NoticeServiceImpl extends BaseService<Notice> implements INoticeSer
 		
 		List<Map> list = null;
 		
-		String sql = "SELECT DISTINCT n.NOTICE_ID AS noticeId, n.TITLE AS title,"
-				+ "SUBSTRING(n.CONTENT, 1, 30) AS content,  n.PUBLISH_TIME AS publishTime,  te.NAME AS author, '未读'  AS see "
-				+ "FROM t_notice n, t_course_class cc, t_work_class wc, t_student s,"
-				+ " t_teacher te WHERE s.CLASS_ID = cc.CLASS_ID  AND cc.COURSE_ID = wc.COURSE_ID "
-				+ " AND n.NOTICE_ID = wc.WORK_ID AND n.USER_ID = te.TEACHER_ID  AND s.STU_ID = ? "
+		String sql = "SELECT DISTINCT n.NOTICE_ID AS noticeId, " +
+				"n.TITLE AS title,"+ 
+				"SUBSTRING(n.CONTENT, 1, 30) AS content,  " +
+				"n.PUBLISH_TIME AS publishTime,  " +
+				"te.NAME AS author, " +
+				"'未读'  AS see "+ 
+				"FROM t_notice n, t_course_class cc, t_work_class wc, t_student s,"+ 
+				" t_teacher te " +
+				"WHERE s.CLASS_ID = cc.CLASS_ID  " +
+				"AND cc.COURSE_ID = wc.COURSE_ID "+ 
+				" AND n.NOTICE_ID = wc.WORK_ID " +
+				"AND n.USER_ID = te.TEACHER_ID  AND s.STU_ID = ? "
 				+ "AND n.PUBLISH_TIME > ? AND n.PUBLISH_TIME < ? AND n.STATUS = 1 "
 				+ "  AND n.NOTICE_ID NOT IN "
 				+ "  (SELECT 	t_log.NOTICE_ID  FROM	 t_log	WHERE t_log.STU_ID = ?	 AND t_log.TYPE = 1) "
@@ -264,7 +271,7 @@ public class NoticeServiceImpl extends BaseService<Notice> implements INoticeSer
 				+ "  te.NAME AS author , '已读'  AS see   FROM  t_notice n,  t_course_class cc, t_work_class wc,"
 				+ "  t_student s, t_teacher te, t_log l  WHERE s.CLASS_ID = cc.CLASS_ID "
 				+ "  AND cc.COURSE_ID = wc.COURSE_ID  AND n.NOTICE_ID = wc.WORK_ID "
-				+ " AND n.USER_ID = te.TEACHER_ID AND s.STU_ID = ? AND n.PUBLISH_TIME > ? "
+				+ " AND n.USER_ID = te.TEACHER_ID AND s.STU_ID = ? AND n.PUBLISH_TIME >= ? "
 				+ " AND n.PUBLISH_TIME < ? AND n.STATUS = 1  AND l.NOTICE_ID = n.NOTICE_ID "
 				+ "  AND l.STU_ID = ? AND l.TYPE = 1  ORDER BY publishTime DESC ";
 

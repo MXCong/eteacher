@@ -160,31 +160,39 @@ public class SignCodeRemote extends BaseRemote {
 		/**
 		 * 学生点击签到
 		 */
-		@RequestMapping(value="student/ClickSign",method=RequestMethod.POST)
-		public ReturnBody ClickSign(HttpServletRequest request){
+		@RequestMapping(value="student/clickSign",method=RequestMethod.POST)
+		public ReturnBody clickSign(HttpServletRequest request){
 			try {
 				String code = request.getParameter("code"); 
-				String userId = request.getParameter("userId");
-				Map m=SignCodeServiceImpl.selectSign(code,userId);
-				if(m.get("shu").equals("1")){
-					String 	scId=(String) m.get("scId");
-					String 	courseId=(String) m.get("courseId");
-				 boolean bn=SignCodeServiceImpl.selectOnly(scId,userId);
-				 if(bn==true){
-					 	SignIn si=new SignIn();                     
-					  	si.setCourseId(courseId);                 
-					  	si.setScId(scId);                           
-						si.setCreateTime(new Date());               
-						si.setStudentId(userId);                   
-						si.setStatus(1);                          
-						si.setSignId(CustomIdGenerator.generateShortUuid());
-						signInServiceImpl.save(si);
-						return new ReturnBody("签到成功！"); 
-				 }else{
-					 return new ReturnBody("已经签到"); 
-				 }	
-				}else {
-					return new ReturnBody("验证码有误为空或系统异常"); 
+				if(StringUtil.checkParams(code)){
+					String userId = request.getParameter("userId");
+					Map m=SignCodeServiceImpl.selectSign(code,userId);
+					if(null != m){
+						if(m.get("shu").equals("1")){
+							String 	scId=(String) m.get("scId");
+							String 	courseId=(String) m.get("courseId");
+							boolean bn=SignCodeServiceImpl.selectOnly(scId,userId);
+							if(bn==true){
+								SignIn si=new SignIn();                     
+								si.setCourseId(courseId);                 
+								si.setScId(scId);
+								si.setCreateTime(new Date());               
+								si.setStudentId(userId);                   
+								si.setStatus(1);                          
+								si.setSignId(CustomIdGenerator.generateShortUuid());
+								signInServiceImpl.save(si);
+								return new ReturnBody("签到成功！"); 
+							}else{
+								return new ReturnBody("已经签到"); 
+							}	
+						}else {
+							return new ReturnBody("验证码有误"); 
+						}
+					}else{
+						return new ReturnBody("验证码有误");
+					}
+				}else{
+					return ReturnBody.getParamError();
 				}
 			} catch (Exception e) {
 				System.out.println(e.getMessage());

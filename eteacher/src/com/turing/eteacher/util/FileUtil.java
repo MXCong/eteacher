@@ -56,8 +56,8 @@ public class FileUtil {
 		// //创建临时目录
 		// filesavePath.mkdir();
 		// }
-		//String savePath = "D://upload";
-		String savePath = "/usr/local/eteacherFile";
+		String savePath = "D://upload";
+		//String savePath = "/usr/local/eteacherFile";
 		File filesavePath = new File(savePath);
 		if (!filesavePath.exists()) {
 			filesavePath.mkdir();
@@ -89,7 +89,7 @@ public class FileUtil {
 		// 为防止文件覆盖的现象发生，要为上传文件产生一个唯一的文件名
 	 
 		String lastName=getSuffixes(filename);
-		return CustomIdGenerator.generateShortUuid() + "." + lastName;
+		return CustomIdGenerator.generateShortUuid() + lastName;
 	}
 
 	/**

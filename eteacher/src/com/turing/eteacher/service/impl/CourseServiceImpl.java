@@ -973,11 +973,12 @@ public class CourseServiceImpl extends BaseService<Course> implements
 				+ "cc.location as location , cc.classRoom as classRoom , "
 				+ "cc.weekDay as weekDay , ci.repeatType as repeatType , "
 				+ "ci.repeatNumber as repeatNumber , "
+			
 				+ "cc.startTime as startTime , cc.endTime as endTime "
 				+ "from Course c , CourseCell cc , CourseItem ci "
 				+ "where c.courseId = ci.courseId and ci.ciId = cc.ciId "
-				+ "and c.userId = ? and ci.startDay < ? and ci.endDay > ? "
-				+ "and cc.startTime < ? and cc.endTime > ? and c.termId = ? "
+				+ "and c.userId = ? and ci.startDay <= ? and ci.endDay >= ? "
+				+ "and cc.startTime <= ? and cc.endTime >= ? and c.termId = ? "
 				+ "and (cc.weekDay like ? or cc.weekDay = null )";
 		List<Map> course = courseDAO.findMap(hql, userId,currentDate,currentDate,currentTime,currentTime,termId,"%"+weekDay+"%");
 		if(null != course && course.size() > 0){

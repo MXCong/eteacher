@@ -64,14 +64,19 @@ public class SignCodeServiceImpl extends BaseService<SignCode> implements ISignC
         		 
         		 String sql3="SELECT CLASS_ID FROM t_student WHERE t_student.STU_ID=?";
         		 List<Map> list3 = signCodeDAO.findBySql(sql3,stuId);
-        		 String classId=(String) list2.get(0).get("CLASS_ID");
+        		
         		 String classId2=(String) list3.get(0).get("CLASS_ID");
-        		 if(classId.equals(classId2)){
-        			 String	scId= (String) list.get(i).get("SC_ID");
-        			 m.put("scId", scId);
-        			 m.put("courseId", courseId);
-        			 m.put("shu","1");//1验证码未错
+        		 for(int k=0;k<list2.size();k++){
+        			 String classId=(String) list2.get(k).get("CLASS_ID");
+        			 if(classId.equals(classId2)){
+            			 String	scId= (String) list.get(i).get("SC_ID");
+            			 m.put("scId", scId);
+            			 m.put("courseId", courseId);
+            			 m.put("shu","1");//1验证码未错
+            		 }
+        			 
         		 }
+        		 
         	 }
         }else{
 			 m.put("shu","2");//2验证码错误
