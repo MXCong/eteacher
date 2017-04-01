@@ -1,5 +1,7 @@
 package com.turing.eteacher.remote;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,19 +10,25 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turing.eteacher.base.BaseRemote;
 import com.turing.eteacher.component.ReturnBody;
 import com.turing.eteacher.model.AnswerRecord;
+import com.turing.eteacher.model.CustomFile;
+import com.turing.eteacher.model.Options;
 import com.turing.eteacher.model.Question;
 import com.turing.eteacher.model.QuestionRecord;
 import com.turing.eteacher.service.IAnswerRecordService;
 import com.turing.eteacher.service.ICourseClassService;
+import com.turing.eteacher.service.IFileService;
 import com.turing.eteacher.service.IQuestionRecordService;
 import com.turing.eteacher.service.IQuestionService;
 import com.turing.eteacher.util.FileUtil;
@@ -42,7 +50,8 @@ public class QuestionRemote extends BaseRemote {
 	private ICourseClassService courseClassServiceImpl;
 	@Autowired
 	private IAnswerRecordService answerRecordServiceImpl;
-
+	@Autowired
+	private IFileService fileServiceImpl;
 	@RequestMapping(value = "teacher/getAlternative", method = RequestMethod.POST)
 	public ReturnBody getAlternative(HttpServletRequest request) {
 		String courseId = request.getParameter("courseId");
@@ -388,6 +397,7 @@ public class QuestionRemote extends BaseRemote {
 	@RequestMapping(value = "question/add", method = RequestMethod.POST)
 	public ReturnBody addQuestion(HttpServletRequest request,Question question) {
 		try {
+			String questionId =null;
 			String userId = getCurrentUserId(request);
 			String knowledgeId = request.getParameter("knowledgeId");
 			String content = request.getParameter("content");
@@ -400,7 +410,7 @@ public class QuestionRemote extends BaseRemote {
 				question.setTypeId(typeId);
 				question.setUserId(userId);
 				question.setStatus("0");
-				String questionId = (String) questionServiceImpl.add(question);//存储问题实体
+			    questionId = (String) questionServiceImpl.add(question);//存储问题实体
 				questionServiceImpl.addOption(questionId,options,answer);
 			}
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, true);
@@ -409,6 +419,75 @@ public class QuestionRemote extends BaseRemote {
 			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
 		}
 	}
+	/**
+	 * 新增图片问题
+	 * 
+	 */
+	@RequestMapping(value = "question/addQuestionPic", method = RequestMethod.POST)
+	public ReturnBody addQuestionPic(HttpServletRequest request,Question question) {
+		try {
+			String shu=request.getParameter("num");
+			String userId = getCurrentUserId(request);
+			String knowledgeId = request.getParameter("knowledgeId");
+			String typeId = request.getParameter("typeId");
+				question.setKnowledgeId(knowledgeId);
+				question.setTypeId(typeId);
+				question.setUserId(userId);
+				question.setContent("图片信息");
+				question.setStatus("1");
+			 String questionId = (String) questionServiceImpl.add(question);//存储问题实体
+			 int i=Integer.parseInt(shu);
+			 String str[]=new String[]{"A","B","C","D"};
+ 			 for(int k=0;k<i;k++){
+ 				Options options=new Options();
+ 				options.setFlag(0);
+ 				options.setOptionType(str[k]);
+ 				options.setOptionValue("空");
+ 				options.setQuestionId(questionId);
+ 				questionServiceImpl.saveOption(options);
+			 }
+			//对附件的处理
+			if (request instanceof MultipartRequest) {
+				try {
+					List<MultipartFile> files = null;
+					MultipartRequest multipartRequest = (MultipartRequest) request;
+					files = multipartRequest.getFiles("file");
+					System.out.println("文件的个数："+files.size());
+					if (files != null) {
+						for (MultipartFile file : files) {
+							if (!file.isEmpty()) {
+								String serverName = FileUtil.makeFileName(file
+										.getOriginalFilename());
+								try {
+									FileUtils.copyInputStreamToFile(file.getInputStream(),
+											new File(FileUtil.getUploadPath(), serverName));
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+								CustomFile customFile = new CustomFile();
+								customFile.setDataId(questionId);
+								customFile.setFileName(file.getOriginalFilename());
+								customFile.setServerName(serverName);
+								customFile.setIsCourseFile(2);
+								customFile.setFileAuth("02");
+								fileServiceImpl.save(customFile);
+							}
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					return new ReturnBody(ReturnBody.RESULT_FAILURE,ReturnBody.ERROR_MSG);
+				}
+			}
+			return new ReturnBody(ReturnBody.RESULT_SUCCESS, true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
+		}
+	}
+	
+	
+	
 	/**
 	 * 更新问题
 	 * @param request
@@ -521,26 +600,6 @@ public class QuestionRemote extends BaseRemote {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ReturnBody(ReturnBody.RESULT_FAILURE , ReturnBody.ERROR_MSG);
-		}
-	}
-	/**
-	 * 将用户本学期的课程名称作为问题分类
-	 * @time 2017年3月28日14:45:49
-	 * @author macong
-	 * @param request
-	 * @return
-	 */
-	@RequestMapping(value = "question/defaultQuestionType", method = RequestMethod.POST)
-	public ReturnBody defaultQuestionType(HttpServletRequest request) {
-		try {
-			String userId = getCurrentUserId(request);
-			String termId = (String) getCurrentTerm(request).get("termId");
-			List<Map> result = questionServiceImpl.defaultQuestionType(userId,termId);
-			return new ReturnBody(ReturnBody.RESULT_SUCCESS, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ReturnBody(ReturnBody.RESULT_FAILURE,
-					ReturnBody.ERROR_MSG);
 		}
 	}
 }
