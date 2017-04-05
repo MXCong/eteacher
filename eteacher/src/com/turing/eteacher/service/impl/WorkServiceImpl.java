@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.druid.sql.visitor.functions.Substring;
 import com.turing.eteacher.base.BaseDAO;
 import com.turing.eteacher.base.BaseService;
 import com.turing.eteacher.component.ReturnBody;
@@ -173,13 +174,13 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 	@Override
 	public List<Map> getListWork(String userId, String status, String date, int page , String courseId) {
 		String hql = "select distinct w.workId as workId , c.courseId as courseId , "
-				+ "c.courseName as courseName , w.title as title , ";
+				+ "c.courseName as courseName , w.title as title , "
+				+ "w.content as content , ";
 		List<Map> list = null;
 		String now = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDDHHMM);
 		if ("0".equals(status)) {// 已过期作业
 			hql += "w.publishTime as publishTime , w.endTime as endTime , " 
-					+ "w.status as status , "
-					+ "w.content as content "
+					+ "w.status as status "
 					+ "from Work w , Course c "
 					+ "where w.courseId = c.courseId "
 					+ "and w.status = 1 and c.userId = ? "
@@ -188,8 +189,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 		}
 		if ("1".equals(status)) {// 已发布作业（已发布但未到期）
 			hql += "w.publishTime as publishTime," 
-					+ "w.endTime as endTime , w.status as status,"
-					+ "w.content as content "
+					+ "w.endTime as endTime , w.status as status "
 					+ "from Work w , Course c "
 					+ "where w.courseId = c.courseId and w.status=1 "
 					+ "and c.userId = ? "
@@ -198,7 +198,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 			list = workDAO.findMapByPage(hql, page * 20, 20, userId,now,now);
 		}
 		if ("2".equals(status)) {// 获取待发布作业
-			hql += "w.publishTime as publishTime , w.content as content , "
+			hql += "w.publishTime as publishTime , "
 					+ "w.status as status , w.endTime as endTime , w.title as title "
 					+ "from Work w , Course c "
 					+ "where w.courseId = c.courseId and ( w.status=1 "
@@ -217,7 +217,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 						+ "order by w.publishTime asc";
 				list = workDAO.findMapByPage(hql, page * 20, 20, userId , courseId);
 			}else if(null == courseId){
-				hql += "w.publishTime as publishTime , w.content as content , "
+				hql += "w.publishTime as publishTime , "
 						+ "w.status as status , w.endTime as endTime "
 						+ "from Work w , Course c "
 						+ "where w.courseId = c.courseId and ( w.status = 1 "
@@ -242,7 +242,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 			}
 		}
 		if ("3".equals(status)) {// 获取指定截止日期的作业
-			hql += "w.content as content from Work w, Course c "
+			hql += "c.userId as userId from Work w, Course c "
 					+ "where w.courseId = c.courseId "
 					+ "and c.userId = ? and  w.endTime like CONCAT(?,'%') "
 					+ "and w.status = 1 and w.publishTime < ? and w.publishTime is not null " 
@@ -276,6 +276,12 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 				List<Map> lm = workDAO.find(l, list.get(i).get("workId"));
 				if (null != lm && lm.size() > 0) {
 					list.get(i).put("fileIds", lm);
+				}
+				//截取作业标题的前15个字。
+				String title = (String) list.get(i).get("title");
+				//System.out.println("title---"+title);
+				if(title.length() > 15){
+					list.get(i).put("title", title.substring(0, 12)+"..");
 				}
 			}
 			return list;
