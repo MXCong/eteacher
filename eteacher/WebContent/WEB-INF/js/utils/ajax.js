@@ -22,8 +22,8 @@
 	 	params.timeStamp = myDate.getTime();
 	 	params.signature = hex_md5(token + params.timeStamp);
 	 	$.ajax({
-//	 		url : 'http://60.205.153.22:8080/eteacher/remote/' + url,
-	 		url : 'http://192.168.1.107:8080/eteacher/remote/' + url,
+	 		url : 'http://60.205.153.22:8080/eteacher/remote/' + url,
+	 		//url : 'http://192.168.1.107:8080/eteacher/remote/' + url,
 	 		type : 'POST',
 	 		dataType : 'json',
 	 		data : params,
@@ -91,8 +91,8 @@
 	 */
 	 h.postNormal = function(url, params, fnSuc) {
 	 	$.ajax({
-//	 		url : 'http://60.205.153.22:8080/eteacher/remote/' + url,
-	 		url : 'http://192.168.1.107:8080/eteacher/remote/' + url,
+	 		url : 'http://60.205.153.22:8080/eteacher/remote/' + url,
+	 		//url : 'http://192.168.1.107:8080/eteacher/remote/' + url,
 	 		type : 'POST',
 	 		dataType : 'json',
 	 		data : params,
@@ -154,7 +154,7 @@
 	*跳转到登录页
 	**/
 	h.goLogin = function(){
-		alert("222");
+		//alert("222");
 		localStorage.clear();
             //获取当前网址，如： http://localhost:8083/uimcardprj/share/meun.jsp
             var curWwwPath = window.document.location.href;
