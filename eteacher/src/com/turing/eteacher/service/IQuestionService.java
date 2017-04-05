@@ -7,6 +7,7 @@ import java.util.Map;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.turing.eteacher.base.IService;
+import com.turing.eteacher.model.Options;
 import com.turing.eteacher.model.Question;
 
 public interface IQuestionService extends IService<Question> {
@@ -153,4 +154,9 @@ public interface IQuestionService extends IService<Question> {
 	 * @return
 	 */
 	public List<Map> defaultQuestionType(String userId,String termId);
+	/**
+	 * 添加一个答案
+	 * @param options
+	 */
+	public void saveOption(Options options);
 }
