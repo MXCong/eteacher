@@ -550,4 +550,9 @@ public class QuestionServiceImpl extends BaseService<Question> implements IQuest
 		List<Map> result = getQuestionType(userId);
 		return result;
 	}
+
+	@Override
+	public void saveOption(Options options) {
+		optionsDAO.save(options);
+	}
 }
