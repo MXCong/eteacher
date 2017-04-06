@@ -1026,7 +1026,6 @@ public class CourseServiceImpl extends BaseService<Course> implements
 				}
 			}
 		}
-
 		for (int i = 0; i < list.size(); i++) {
 			System.out.println("map" + i + ":" + list.get(i).toString());
 		}
