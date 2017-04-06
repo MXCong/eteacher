@@ -68,4 +68,9 @@ public interface ISignInService extends IService<SignIn> {
 	 * @return
 	 */
 	public List<Map> getRegistDetail(String courseId,String status);
+	/**
+	 * 教师端功能：课程的签到次数增加一次
+	 * @param courseId
+	 */
+	public void addCourseNum(String courseId);
 }

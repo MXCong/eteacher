@@ -63,6 +63,8 @@ public class SignCodeRemote extends BaseRemote {
 					sc.setState(0);
 					sc.setCreateTime(new Date());
 					String bn = (String) SignCodeServiceImpl.add(sc);
+					//该课程的签到次数增加一次
+					signInServiceImpl.addCourseNum(courseId);
 					if (bn != null) {
 						startSign(courseId,bn);
 					    Map<String,Object> m=new HashMap<String,Object>();
