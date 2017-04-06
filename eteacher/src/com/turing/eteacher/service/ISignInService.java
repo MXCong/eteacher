@@ -57,10 +57,10 @@ public interface ISignInService extends IService<SignIn> {
 	public float getEntiretyRegistSituation(String courseId);
 	/**
 	 * 获取正在进行的课程的出勤情况、获取某课程的全部同学的出勤情况
-	 * @param courseId
+	 * @param scId
 	 * @return
 	 */
-	public float getCurrentRegistSituation(String courseId);
+	public float getCurrentRegistSituation(String scId , String courseId);
 	/**
 	 * 教师端功能：获取当前课程的出勤情况列表、获取课程的全体学生出勤详情
 	 * @author macong

@@ -20,28 +20,11 @@ public class SignCodeServiceImpl extends BaseService<SignCode> implements ISignC
 	
 	@Autowired
 	private SignCodeDAO signCodeDAO;
-	
-	
-	
 
 	@Override
 	public BaseDAO<SignCode> getDAO() {
 		return signCodeDAO;
 	}
-
-   
-
-	@Override
-	public boolean Add(SignCode sc) {
-		Serializable i=signCodeDAO.save(sc);
-		if(i!=null){
-            return true;			
-		}else{
-		    return false;
-		}
-	}
-
-
 
 	@Override
 	public SignCode selectOne(String id) {

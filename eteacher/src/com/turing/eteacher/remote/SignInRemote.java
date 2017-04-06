@@ -205,10 +205,11 @@ public class SignInRemote extends BaseRemote {
 	@RequestMapping(value = "course/currentAttendence", method = RequestMethod.POST)
 	public ReturnBody getCurrentRegistSituation(HttpServletRequest request) {
 		try {
+			String scId = request.getParameter("scId");
 			String courseId = request.getParameter("courseId");
 			float result = 0;
-			if (StringUtil.checkParams(courseId)) {
-				result = signInServiceImpl.getCurrentRegistSituation(courseId);
+			if (StringUtil.checkParams(scId)) {
+				result = signInServiceImpl.getCurrentRegistSituation(scId,courseId);
 			}
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS,result);
 		} catch (Exception e) {

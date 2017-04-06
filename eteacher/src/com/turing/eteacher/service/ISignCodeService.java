@@ -9,7 +9,6 @@ import com.turing.eteacher.model.SignIn;
 
 public interface ISignCodeService extends IService<SignCode>{
 
-	boolean Add(SignCode sc);
 
 	SignCode selectOne(String id);
     /**

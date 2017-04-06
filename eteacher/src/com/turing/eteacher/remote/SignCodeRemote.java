@@ -58,17 +58,15 @@ public class SignCodeRemote extends BaseRemote {
 					Random ra = new Random();
 					int code = ra.nextInt(8999) + 1000;
 					SignCode sc = new SignCode();
-					String id=CustomIdGenerator.generateShortUuid();
-					sc.setScId(id);
 					sc.setCode(code);
 					sc.setCourseId(courseId);
 					sc.setState(0);
 					sc.setCreateTime(new Date());
-					boolean bn = SignCodeServiceImpl.Add(sc);
-					if (bn = true) {
-						startSign(courseId,id);
+					String bn = (String) SignCodeServiceImpl.add(sc);
+					if (bn != null) {
+						startSign(courseId,bn);
 					    Map<String,Object> m=new HashMap<String,Object>();
-					    m.put("scId", id);
+					    m.put("scId", bn);
 					    m.put("code", String.valueOf(code));
 						return new ReturnBody(m);
 					} else {

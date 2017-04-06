@@ -289,16 +289,16 @@ public class SignInServiceImpl extends BaseService<SignIn> implements ISignInSer
 	}
 	//获取正在进行的课程的出勤率
 	@Override
-	public float getCurrentRegistSituation(String courseId) {
+	public float getCurrentRegistSituation(String scId , String courseId) {
 		//获取本堂课的签到人数
 		String hql = "SELECT COUNT(*) as cNum FROM SignIn si "
-				+ "where si.signTime = ? and si.courseId = ?";
+				+ "where si.scId = ?";
 		//查询语句：查看某门课程的授课人数
 		String hq = "SELECT COUNT(*) as studentNum "
 				+ "FROM Student s , CourseClasses ccl "
-				+  "WHERE s.classId = ccl.classId and ccl.courseId = ?";
+				+  "WHERE s.classId = ccl.classId AND ccl.courseId = ?";
 		String cd = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD);
-		Map a = signInDAO.findMap(hql, cd , courseId).get(0);
+		Map a = signInDAO.findMap(hql, scId).get(0);
 		Map b = signInDAO.findMap(hq, courseId).get(0);
 		float result = 0;
 		if(b.get("studentNum").toString().equals("0")){
