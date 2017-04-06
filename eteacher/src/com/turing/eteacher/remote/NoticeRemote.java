@@ -102,22 +102,10 @@ public class NoticeRemote extends BaseRemote {
 	public void dwloade(String filePath,String filename ,HttpServletResponse response) {
 		try {
 			String suffixes="";
-//		       FileUtil.getUploadPath()
 			if(StringUtil.isNotEmpty(filePath)){
 				 suffixes=filePath.substring(filePath.lastIndexOf("download")+8);
-				
 			}
-			
-			
-//			String suffixes = "";
-//			String fileName=filePath.replaceAll("/",".");
-//			if (StringUtil.isNotEmpty(fileName) && fileName.indexOf(".") != -1) {
-//				suffixes = fileName.substring(fileName.lastIndexOf("."));
-//			}
 			String path=FileUtil.getUploadPath()+suffixes;
-			
-		    //获取文件名  
-//		    String filename = path.substring(path.lastIndexOf("\\")+1);  
 		    response.setCharacterEncoding("UTF-8");  
 		    //将文件名进行URL编码  
 		    filename = URLEncoder.encode(filename,"utf-8");  
@@ -142,12 +130,6 @@ public class NoticeRemote extends BaseRemote {
 		}
 	}
 
-	
-	
-	
-	
-
-	// 教师端接口的实现
 	/**
 	 * 获取通知列表(已发布、待发布)
 	 * 

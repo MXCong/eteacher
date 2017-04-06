@@ -179,7 +179,6 @@ public class WorkRemote extends BaseRemote {
 	 * @param request
 	 * @return
 	 */
-
 	@RequestMapping(value = "teacher/work/getWorkList", method = RequestMethod.POST)
 	public ReturnBody getListWork(HttpServletRequest request) {
 		String status = (String) request.getParameter("status");

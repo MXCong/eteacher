@@ -204,7 +204,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 					+ "where w.courseId = c.courseId and ( w.status=1 "
 					+ "or w.status = 2 ) and c.userId = ? "
 					+ "and (w.publishTime > ? or w.publishTime is null ) "
-					+ "order by w.publishTime asc";
+					+ "order by w.publishTime desc";
 			list = workDAO.findMapByPage(hql, page * 20, 20, userId,now);
 		}
 		if ("4".equals(status)) {// 获取全部作业
@@ -214,7 +214,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 						+ "from Work w , Course c "
 						+ "where w.courseId = c.courseId and ( w.status = 1 "
 						+ "or w.status = 2 ) and c.userId = ? and w.courseId = ? "
-						+ "order by w.publishTime asc";
+						+ "order by w.publishTime desc";
 				list = workDAO.findMapByPage(hql, page * 20, 20, userId , courseId);
 			}else if(null == courseId){
 				hql += "w.publishTime as publishTime , "
@@ -222,7 +222,7 @@ public class WorkServiceImpl extends BaseService<Work> implements IWorkService {
 						+ "from Work w , Course c "
 						+ "where w.courseId = c.courseId and ( w.status = 1 "
 						+ "or w.status = 2 ) and c.userId = ? "
-						+ "order by w.publishTime asc";
+						+ "order by w.publishTime desc";
 				list = workDAO.findMapByPage(hql, page * 20, 20, userId);
 			}
 			String nowDate = DateUtil.getCurrentDateStr("yyyy-MM-dd");
