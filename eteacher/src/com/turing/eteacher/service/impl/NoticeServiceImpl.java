@@ -319,12 +319,15 @@ public class NoticeServiceImpl extends BaseService<Notice> implements INoticeSer
 	 */
 	@Override
 	public void addReadFlag(String noticeId, String userId) {
-		// TODO Auto-generated method stub
-		Log l = new Log();
-		l.setNoticeId(noticeId);
-		l.setStuId(userId);
-		l.setType(1);
-		noticeDAO.save(l);
+		String sql = "SELECT * FROM t_log WHERE STU_ID=? AND NOTICE_ID=?";
+		List<Map> list = noticeDAO.findBySql(sql,userId, noticeId);
+		if(list.size()==0){
+			Log l = new Log();
+			l.setNoticeId(noticeId);
+			l.setStuId(userId);
+			l.setType(1);
+			noticeDAO.save(l);
+		}
 	}
 
 	@Override

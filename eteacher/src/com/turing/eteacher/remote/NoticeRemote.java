@@ -404,7 +404,7 @@ public class NoticeRemote extends BaseRemote {
 	/**
 	 * 获取通知列表（未读通知列表和已读通知列表）
 	 * @author macong
-	 * @param status   "01":未读通知         "02":已读通知
+	 * @param status   "01":未读通知         "02":已读通知      
 	 */
 	@RequestMapping(value = "student/getNoticeList", method = RequestMethod.POST)
 	public ReturnBody getNoticeList_student(HttpServletRequest request) {
