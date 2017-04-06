@@ -207,21 +207,17 @@ public class SignInServiceImpl extends BaseService<SignIn> implements ISignInSer
 	 * @return
 	 */
 	@Override
-	public List<Map> getRegistDetail(String courseId,String status) {
-		// 1.获取当前正在进行的课程信息(course_Id)，并查询出该课程对应的班级列表（t_course_class）。
-		// 2.在t_student表中，根据class_Id,查询出学生列表。
-		// 3.t_sign_in表中，根据本次课程信息（courseId），查询出状态为“1”的学生列表
-		// 4.返回学生列表的studentNo,studentName，以及出勤人数和课程人数。
-		String cd = DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD);
+	public List<Map> getRegistDetail(String scId,String status,String courseId) {
 		//获取课程的签到人员
 		String hql = "select distinct s.stuName as studentName , "
-				+ "s.stuNo as studentNo , s.classId as classId , s.stuId as studentId "
+				+ "s.stuNo as studentNo , s.classId as classId , "
+				+ "s.stuId as studentId , si.signId as signId "
 				+ "from SignIn si , Student s "
 				+ "where si.courseId = ? and si.studentId = s.stuId "
 				+ "and si.status = 1 ";
 		//查询该课程的上课次数
 		String hql3 = "select s.courseNum as courseNum from SignIn s "
-				+ "where s.status = 0 and s.courseId = ? and s.studentId = null";
+				+ "where s.status = 0 and s.courseId = ? ";
 		//查询语句：查看某门课程的授课人数
 		String hql4 = "SELECT COUNT(*) as studentNum "
 				+ "FROM Student s , CourseClasses ccl "
@@ -232,8 +228,8 @@ public class SignInServiceImpl extends BaseService<SignIn> implements ISignInSer
 				+ "AND s.studentId = ?";
 		List<Map> regist = null;
 		if(status.equals("0")){
-			hql += "and si.signTime = ?";
-			regist = signInDAO.findMap(hql, courseId,cd);// 签到人员列表
+			hql += "and si.scId = ?";
+			regist = signInDAO.findMap(hql, courseId, scId);// 本次签到人员列表
 		}else if(status.equals("1")){
 			regist = signInDAO.findMap(hql, courseId);// 课程全部学生列表
 		}

@@ -161,11 +161,12 @@ public class SignInRemote extends BaseRemote {
 	@RequestMapping(value = "course/registDetail", method = RequestMethod.POST)
 	public ReturnBody getRegistDetail(HttpServletRequest request) {
 		try {
-			String courseId = request.getParameter("courseId");
+			String csId = request.getParameter("csId");
 			String status = request.getParameter("status");
+			String courseId = request.getParameter("courseId");
 			List<Map> student = null;
-			if (StringUtil.checkParams(courseId,status)) {
-				student = signInServiceImpl.getRegistDetail(courseId,status);
+			if (StringUtil.checkParams(csId,status)) {
+				student = signInServiceImpl.getRegistDetail(csId,status,courseId);
 			}
 			if (null != student && student.size() > 0) {
 				return new ReturnBody(ReturnBody.RESULT_SUCCESS, student);
