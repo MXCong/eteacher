@@ -99,7 +99,7 @@ public class NoteServiceImpl extends BaseService<Note> implements INoteService {
 			hql += "ORDER BY n.createTime DESC";
 			break;
 		case 1:// 重要程度
-			hql += "ORDER BY n.isKey DESC, n.createTime DESC";
+			hql += "ORDER BY n.isKey DESC , n.createTime DESC";
 			break;
 		default:
 			break;

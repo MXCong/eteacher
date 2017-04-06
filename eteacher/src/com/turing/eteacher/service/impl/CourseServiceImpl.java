@@ -1017,7 +1017,7 @@ public class CourseServiceImpl extends BaseService<Course> implements
 				if (null != list2 && list2.size() > 0) {
 					String className = "(";
 					for (int j = 0; j < list2.size(); j++) {
-						className += list2.get(j).get("className") + ",";
+						className += list2.get(j).get("className") + "，";
 					}
 					className = className.substring(0, className.length() - 1);
 					className += ")";

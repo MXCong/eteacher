@@ -80,5 +80,10 @@ public class Note extends BaseModel implements Serializable {
 		// TODO Auto-generated method stub
 		this.createTime = createTime;
 	}
+	@Override
+	public String toString() {
+		return "Note [noteId=" + noteId + ", courseId=" + courseId + ", title=" + title + ", isKey=" + isKey
+				+ ", content=" + content + ", userId=" + userId + ", createTime=" + createTime + "]";
+	}
 	
 }
