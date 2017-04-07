@@ -945,24 +945,43 @@ public class CourseServiceImpl extends BaseService<Course> implements
 		String hql = "select c.courseName as courseName , c.courseId as courseId , "
 				+ "cc.location as location , cc.classRoom as classRoom , "
 				+ "cc.weekDay as weekDay , ci.repeatType as repeatType , "
-				+ "ci.repeatNumber as repeatNumber , "
-				+ "cc.startTime as startTime , cc.endTime as endTime "
+				+ "ci.repeatNumber as repeatNumber , ci.startDay as startDay , "
+				+ "ci.endDay as endDay , cc.startTime as startTime , cc.endTime as endTime "
 				+ "from Course c , CourseCell cc , CourseItem ci "
 				+ "where c.courseId = ci.courseId and ci.ciId = cc.ciId "
 				+ "and c.userId = ? and ci.startDay <= ? and ci.endDay >= ? "
 				+ "and cc.startTime <= ? and cc.endTime >= ? and c.termId = ? "
 				+ "and (cc.weekDay like ? or cc.weekDay = null )";
 		List<Map> course = courseDAO.findMap(hql, userId,currentDate,currentDate,currentTime,currentTime,termId,"%"+weekDay+"%");
-		if(null != course && course.size() > 0){
-			String hql2 = "select sc.code as signInCode , sc.scId as scId from SignCode sc "
-					+ "where sc.courseId = ? and sc.state = 0";
-			List<Map> m = courseDAO.findMap(hql2, course.get(0).get("courseId"));
-			if(null != m && m.size()>0){
-				course.get(0).put("scId", m.get(0).get("scId"));
-				course.get(0).put("isSignIn", 1);
-				course.get(0).put("signInCode", m.get(0).get("signInCode"));
+		System.out.println(course.get(0).get("repeatNumber"));
+		//重复周期
+		if(course.size()==1 && course.get(0).get("repeatNumber").equals(1)){
+			if(null != course && course.size() > 0){
+				String hql2 = "select sc.code as signInCode , sc.scId as scId from SignCode sc "
+						+ "where sc.courseId = ? and sc.state = 0";
+				List<Map> m = courseDAO.findMap(hql2, course.get(0).get("courseId"));
+				if(null != m && m.size()>0){
+					course.get(0).put("scId", m.get(0).get("scId"));
+					course.get(0).put("isSignIn", 1);
+					course.get(0).put("signInCode", m.get(0).get("signInCode"));
+				}
+				return course;
 			}
-			return course;
+		}else if(course.size()==1){
+			String rt = (String) course.get(0).get("repeatType");
+			String rn = (String) course.get(0).get("repeatNumber");
+			String sd = (String) course.get(0).get("startDay");
+			String ed = (String) course.get(0).get("endDay");
+			int r = DateUtil.getDayBetween(sd, DateUtil.getCurrentDateStr(DateUtil.YYYYMMDD));
+			if(rt.equals("02")){//周重复
+				if (rn.equals(Integer.toString(r/7))) {
+					return course;
+				}
+			}else if(rt.equals("01")){
+				if(r%Integer.parseInt(rn) == 0){
+					return course;
+				}
+			}
 		}
 		return null;
 	}

@@ -105,7 +105,7 @@ public class NoticeServiceImpl extends BaseService<Notice> implements INoticeSer
 			hql+="from Notice n where n.userId=? and n.publishTime > ? and n.status=1 order by n.publishTime desc";
 			list=noticeDAO.findMapByPage(hql, page*20, 20, userId,now);
 		}else if("1".equals(status)){//已发布通知
-			hql+="from Notice n where n.userId=? and n.publishTime < ? and n.status=1 order by n.publishTime desc";
+			hql+="from Notice n where n.userId=? and n.publishTime <= ? and n.status=1 order by n.publishTime desc";
 			list=noticeDAO.findMapByPage(hql, page*20, 20, userId,now);
 			if (null != list) {
 				for (int i = 0; i < list.size(); i++) {

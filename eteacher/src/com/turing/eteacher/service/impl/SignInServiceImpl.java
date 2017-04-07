@@ -305,7 +305,6 @@ public class SignInServiceImpl extends BaseService<SignIn> implements ISignInSer
 		return result;
 	}
 
-
 	@Override
 	public void addCourseNum(String courseId) {
 		String ql = "select si.scId as scId "
