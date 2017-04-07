@@ -20,6 +20,19 @@
     function dateSubmit() {
 		var date = $('#startDate').val();
 		var days = $('#weekCount').val();
+		
+		var p = /[a-z]/i; 
+		var b = p.test(days);  
+		if(b==true){
+			alert("不能为字母");
+			$('#weekCount').val("");
+			return;
+		}
+		if(days<=0){
+			alert("必须大于0");
+			$('#weekCount').val("");
+			return;
+		}
         var arrDate, objDate;	
         arrDate = date.split('-');
         objDate = new Date(arrDate[1] + '/' + arrDate[2] + '/' + arrDate[0]);
