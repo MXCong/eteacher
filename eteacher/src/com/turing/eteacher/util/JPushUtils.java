@@ -27,8 +27,8 @@ import com.turing.eteacher.util.PushBody.SortType;
  */
 public class JPushUtils {
 	// 在极光注册上传应用的 appKey 和 masterSecret
-	private static final String stuAppKey = "b6ea7ba889557cfb16579e3c";// //必填，例如466f7032ac604e02fb7bda89
-	private static final String stuMasterSecret = "a8623d40b4007d8cb38c664b";// 必填，每个应用都对应一个masterSecret
+	private static final String stuAppKey = "24b6e20f8c16f6d81e000048";// //必填，例如466f7032ac604e02fb7bda89
+	private static final String stuMasterSecret = "6b3fe19e2a7fb05e4fe7ee5b";// 必填，每个应用都对应一个masterSecret
 	private static final String teachAppKey = "41f45a885410ecfe56138d5f";// //必填，例如466f7032ac604e02fb7bda89
 	private static final String teachMasterSecret = "3c3086fe4c212350b2419e38";// 必填，每个应用都对应一个masterSecret
 	private static JPushClient stuJpush = null;

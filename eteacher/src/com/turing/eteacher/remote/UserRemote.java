@@ -125,8 +125,10 @@ public class UserRemote extends BaseRemote {
 		try {
 			//TODO 清除登录记录
 			User user = getCurrentUser(request);
-			user.setToken("");
-			userServiceImpl.update(user);
+			if (null != user) {
+				user.setToken("");
+				userServiceImpl.update(user);
+			}
 			return new ReturnBody(ReturnBody.RESULT_SUCCESS, new HashMap());
 		} catch (Exception e) {
 			e.printStackTrace();
