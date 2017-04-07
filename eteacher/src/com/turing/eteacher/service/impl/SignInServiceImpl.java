@@ -308,16 +308,16 @@ public class SignInServiceImpl extends BaseService<SignIn> implements ISignInSer
 
 	@Override
 	public void addCourseNum(String courseId) {
-		String ql = "form SignIn si where si.courseId = ? and si.status = 0";
-		try {
-			Map m = signInDAO.findMap(ql, courseId).get(0);
+		String ql = "select si.scId as scId "
+				+ "from SignIn si where si.courseId = ? and si.status = 0";
+		List<Map> li = signInDAO.findMap(ql, courseId);
+		if (null != li && li.size() > 0) {
 			String sql = "UPDATE t_sign_in  si SET si.COURSE_NUM = si.COURSE_NUM + 1 "
 					+ "WHERE si.COURSE_ID = ? AND si.`STATUS` = '0'; ";
 			signInDAO.executeBySql(sql, courseId);
-		} catch (Exception e) {
+		}else{
 			String sql2 = "INSERT INTO t_sign_in (SIGN_ID,COURSE_ID,STATUS,COURSE_NUM) VALUES (?,?,?,?)";
 			signInDAO.executeBySql(sql2, CustomIdGenerator.generateShortUuid(),courseId,0,1);
 		}
-		
 	}
 }
