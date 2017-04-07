@@ -953,7 +953,7 @@ public class CourseServiceImpl extends BaseService<Course> implements
 				+ "and cc.startTime <= ? and cc.endTime >= ? and c.termId = ? "
 				+ "and (cc.weekDay like ? or cc.weekDay = null )";
 		List<Map> course = courseDAO.findMap(hql, userId,currentDate,currentDate,currentTime,currentTime,termId,"%"+weekDay+"%");
-		System.out.println(course.get(0).get("repeatNumber"));
+		//System.out.println(course.get(0).get("repeatNumber"));
 		//重复周期
 		if(course.size()==1 && course.get(0).get("repeatNumber").equals(1)){
 			if(null != course && course.size() > 0){
