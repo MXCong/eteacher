@@ -703,6 +703,28 @@ public class CourseServiceImpl extends BaseService<Course> implements
 					}
 				}
 			}
+		//排序	
+			for(int i=0 ;i<tcclist.size();i++){
+				//转换成数字比较大小
+				String startTime= (String) tcclist.get(i).get("startTime");
+				String[] startT= startTime.split(":");
+				int zzz=Integer.parseInt(startT[0])+Integer.parseInt(startT[1]);
+				for(int k=0;k+i+1<tcclist.size();k++){
+					String starTime2=(String) tcclist.get(k+1+i).get("startTime");
+					String[] startT2= starTime2.split(":");
+					int zzz2=Integer.parseInt(startT2[0])+Integer.parseInt(startT2[1]);					
+					if(zzz>zzz2){
+						Map m=tcclist.get(i);
+						tcclist.remove(i);
+						tcclist.add(i,tcclist.get(k+i)); 
+						tcclist.remove(k+1+i);
+						tcclist.add(k+1+i,m); 
+					}
+					
+				}
+				
+			}
+			
 			System.out.println("正确的数据："+tcclist.toString());
 			if(null != tcclist && tcclist.size() > 0){
 				for (int j = 0; j < tcclist.size(); j++) {
